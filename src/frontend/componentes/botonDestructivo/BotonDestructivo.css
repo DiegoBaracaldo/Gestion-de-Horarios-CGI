@@ -1,0 +1,14 @@
+#btnDestructivo{
+    background: #DC3545;
+    color: white;
+    border-radius: 12px;
+    border: none;
+    font-weight: bolder;
+    font-size: 32px;
+    letter-spacing: 9px; 
+    text-indent: 9px;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    text-transform: uppercase;
+}

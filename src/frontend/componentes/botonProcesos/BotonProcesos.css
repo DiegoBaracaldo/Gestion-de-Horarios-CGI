@@ -1,0 +1,14 @@
+#btnProcesos{
+    background: none;
+    color: #39A900;
+    border-radius: 12px;
+    border: 6px solid #39A900;
+    font-weight: bolder;
+    font-size: 32px;
+    letter-spacing: 9px; 
+    text-indent: 9px;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    text-transform: uppercase;
+}

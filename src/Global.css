@@ -1,0 +1,17 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+ol, ul{
+    list-style: none;
+}
+.btnOff{
+    opacity: 60%;
+}
+.btnOn{
+    opacity: 100%;
+}
+button{
+    overflow: hidden;
+}

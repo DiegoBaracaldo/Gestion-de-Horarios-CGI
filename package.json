@@ -2,6 +2,7 @@
   "name": "gestion_horario_cgi",
   "version": "0.1.0",
   "private": true,
+  "main": "src/electron.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -12,10 +13,18 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "electron": "electron .",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "build": {
+    "appId": "com.example.myapp",
+    "productName": "gestion_horario_cgi",
+    "directories": {
+      "output": "dist"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -34,5 +43,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-is-dev": "^3.0.1"
   }
 }

@@ -1,6 +1,5 @@
 //electron.js
 const {app, BrowserWindow} = require('electron');
-// import {app, BrowserWindow} from 'electron';
 const path = require('path');
 const isDev = import('electron-is-dev');
 

@@ -6,8 +6,12 @@
   justify-content: center;
   align-items: center;
 }
-.auxBotones{
-  width: 700px;
-  height: 50px;
+.auxListaAvanzada{
+  width: 93%;
+  /* Valor ajustado para que las 15 filas coincidan con el tamaño */
+  height: 438px;
+  overflow: auto;
+  border: 1px solid black;
+  /* border-radius: 12px; */
   /* background-color: yellow; */
 }

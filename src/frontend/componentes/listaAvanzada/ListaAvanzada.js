@@ -1,15 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './ListaAvanzada.css';
 
 
-const ListaAvanzada = ({ titulo, datosJson, subtitulos, clickFila }) => {
+const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
     const [seleccionHook, setSeleccionHook] = useState("");
-    const numFilas = datosJson ? datosJson.length : 0;
-    const numColumnas = datosJson ? Object.values(datosJson[0]).length : 0;
+    const [numFilas, setNumFilas] = useState(datosJson ? datosJson.length : 0);
+    const [numColumnas, setNumColumnas] = useState(datosJson ? Object.values(datosJson[0]).length : 0);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
+
+    useEffect(() => {
+        setNumColumnas(datosJson ? Object.values(datosJson[0]).length : 0);
+        setNumFilas(datosJson ? datosJson.length : 0);
+    }, [datosJson]);
+
+    useEffect(() => {
+        setSelecciones(Array(numFilas).fill(false));
+    }, [numFilas]);
 
     const ManejarChecks = (index) => {
         const nuevasSelecciones = [...selecciones];
@@ -31,7 +40,7 @@ const ListaAvanzada = ({ titulo, datosJson, subtitulos, clickFila }) => {
                     <td className='columnCheck'><input type='checkbox'
                         onChange={SeleccionarTodo}></input></td>
                     {
-                        subtitulos.map((element) => (
+                        Object.keys(datosJson[0]).map((element) => (
                             <td key={element}>{element}</td>
                         ))
                     }

@@ -7,7 +7,7 @@ import BotonProcesos from './frontend/componentes/botonProcesos/BotonProcesos';
 import BotonVolver from './frontend/componentes/botonVolver/BotonVolver';
 import ListaAvanzada from './frontend/componentes/listaAvanzada/ListaAvanzada';
 import './Global.css';
-import { datosJsonUno, tituloAux, subTitulosUno, subTitulosDos, datosJsonDos, datosJsonTres, subTitulosTres } from './frontend/mocks/mockTablaAvanzada';
+import { datosJsonUno, tituloAux, datosJsonDos, datosJsonTres } from './frontend/mocks/mockTablaAvanzada';
 
 function App() {
 
@@ -18,7 +18,7 @@ const Saludar = (nombre) => {
   return (
     <div className="App">
       <div className='auxListaAvanzada'>
-        <ListaAvanzada titulo={tituloAux} datosJson={datosJsonUno} subtitulos={subTitulosUno} 
+        <ListaAvanzada titulo={tituloAux} datosJson={datosJsonDos} 
         clickFila={Saludar}/>
 
       </div>

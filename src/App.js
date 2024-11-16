@@ -20,6 +20,7 @@ const Saludar = (nombre) => {
       <div className='auxListaAvanzada'>
         <ListaAvanzada titulo={tituloAux} datosJson={datosJsonUno} subtitulos={subTitulosUno} 
         clickFila={Saludar}/>
+
       </div>
     </div>
   );

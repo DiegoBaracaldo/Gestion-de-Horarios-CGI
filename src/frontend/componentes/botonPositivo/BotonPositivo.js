@@ -19,8 +19,12 @@ const BotonPositivo = ({ texto, onClick, disabledProp, hiddenProp}) => {
         if (hiddenProp !== null || hiddenProp !== undefined) setHiddenHook(hiddenProp);
     }, [hiddenProp]);
 
+    const PedirFuncionalidad = () => {
+        alert("Agregar funcionalidad a este componente por favor...");
+    }
+
     return (
-        <button id="btnPositivo" onClick={onClick} disabled={disabledHook} hidden={hiddenHook}
+        <button id="btnPositivo" onClick={onClick ? onClick : PedirFuncionalidad} disabled={disabledHook} hidden={hiddenHook}
             className={clasesHook}>
             {texto}
         </button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './ListaBasica.css';
+// import './ListaBasica.css';
 
 function ListaBasica({ nameList, apiUrl}) {
     const [data, setData] = useState(null);

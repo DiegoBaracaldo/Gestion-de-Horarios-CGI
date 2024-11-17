@@ -7,12 +7,12 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
     const [seleccionHook, setSeleccionHook] = useState("");
     const [numFilas, setNumFilas] = useState(datosJson ? datosJson.length : 0);
-    const [numColumnas, setNumColumnas] = useState(datosJson ? Object.values(datosJson[0]).length : 0);
+    const [numColumnas, setNumColumnas] = useState(datosJson ? Object.values(datosJson[0]).length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
 
     useEffect(() => {
-        setNumColumnas(datosJson ? Object.values(datosJson[0]).length : 0);
+        setNumColumnas(datosJson ? Object.values(datosJson[0]).length : 1);
         setNumFilas(datosJson ? datosJson.length : 0);
     }, [datosJson]);
 
@@ -30,6 +30,10 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
         setSelecciones(new Array(selecciones.length).fill(e.target.checked));
     }
 
+    const PedirFuncionalidad = () => {
+        alert("Agregar funcionalidad a este componente por favor...");
+    }
+
     return (
         <table id='listaAvanzada'>
             <thead>
@@ -40,14 +44,17 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
                     <td className='columnCheck'><input type='checkbox'
                         onChange={SeleccionarTodo}></input></td>
                     {
+                        datosJson ?
                         Object.keys(datosJson[0]).map((element) => (
                             <td key={element}>{element}</td>
                         ))
+                        : <td></td>
                     }
                 </tr>
             </thead>
             <tbody>
                 {
+                    datosJson ?
                     datosJson.map((element, index) => (
                         <tr className='filaDatos' key={index}>
                             <td className='columnCheck'><input type='checkbox'
@@ -55,11 +62,11 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
                                 ></input></td>
                             {
                                 Object.values(element).map((valor) => (
-                                    <td onClick={() => clickFila(element.nombre)}>{valor}</td>
+                                    <td onClick={clickFila ? () => clickFila(element.nombre) :  PedirFuncionalidad}>{valor}</td>
                                 ))
                             }
                         </tr>
-                    ))
+                    )) : null
                 }
                 {
                     /*Esta función mantiene un numero limitado de filas para que el tamaño

@@ -1,4 +1,4 @@
-table {
+  table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px; /* Espacio entre el título y la primera fila */
@@ -53,3 +53,4 @@ table {
   tbody{
     overflow: auto;
   }
+

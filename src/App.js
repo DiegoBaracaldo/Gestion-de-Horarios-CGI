@@ -8,20 +8,14 @@ import BotonVolver from './frontend/componentes/botonVolver/BotonVolver';
 import ListaAvanzada from './frontend/componentes/listaAvanzada/ListaAvanzada';
 import './Global.css';
 import { datosJsonUno, tituloAux, datosJsonDos, datosJsonTres } from './frontend/mocks/mockTablaAvanzada';
+import CrudAvanzado from './frontend/componentes/crudAvanzado/CrudAvanzado';
+import { listaMenuFiltro } from './frontend/mocks/mockCrudAvanzado';
+import { useEffect, useState } from 'react';
 
 function App() {
 
-const Saludar = (nombre) => {
-  alert("hola " + nombre )
-}
-
   return (
     <div className="App">
-      <div className='auxListaAvanzada'>
-        <ListaAvanzada titulo={tituloAux} datosJson={datosJsonDos} 
-        clickFila={Saludar}/>
-
-      </div>
     </div>
   );
 }

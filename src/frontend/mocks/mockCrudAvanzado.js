@@ -1,0 +1,1 @@
+export const listaMenuFiltro = ["nombre", "cédula", "especialidad"];

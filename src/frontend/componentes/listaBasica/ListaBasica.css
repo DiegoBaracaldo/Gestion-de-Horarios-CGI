@@ -1,4 +1,5 @@
-table {
+#listaBasica{
+  table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px; /* Espacio entre el título y la primera fila */
@@ -13,6 +14,9 @@ table {
   thead {
     background-color: #FBFBE2; /* Color de fondo del título */
    /*  height: 40px; Altura de casilla de título */
+   position: static;
+   top: 0;
+   z-index: 1;
   }
   
   th {
@@ -53,3 +57,4 @@ table {
   tbody{
     overflow: auto;
   }
+}

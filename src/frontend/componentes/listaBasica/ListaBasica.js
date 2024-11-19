@@ -1,50 +1,70 @@
 import React, { useEffect, useState } from 'react';
 import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl}) {
+function ListaBasica({ nameList, apiUrl, datosJson }) {
     const [data, setData] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
+    const numFilas = datosJson ? datosJson.length : 0;
+    const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
+
+    // Maneja el cambio del checkbox en el encabezado
     const handleChange = () => {
         setIsChecked(!isChecked);
+        const nuevasSelecciones = Array(numFilas).fill(!isChecked);
+        setSelecciones(nuevasSelecciones);
     };
 
-    //consumo de apis
- useEffect(()=> {
-    if(apiUrl) {
-        fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => setData(data))
-        .catch(error => console.error('Error consultar datos:', error));
-    }
- }, [apiUrl])
+    // Maneja el cambio de los checkboxes individuales
+    const ManejarChecks = (index) => {
+        const nuevasSelecciones = [...selecciones];
+        nuevasSelecciones[index] = !nuevasSelecciones[index];
+        setSelecciones(nuevasSelecciones);
+
+        // Verifica si todos los checkboxes están seleccionados o no
+        const allChecked = nuevasSelecciones.every(val => val === true);
+        setIsChecked(allChecked);
+    };
+
+    // Consumo de APIs
+    useEffect(() => {
+        if (apiUrl) {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => setData(data))
+                .catch(error => console.error('Error al consultar datos:', error));
+        }
+    }, [apiUrl]);
+
     return (
-        <div>
+        <div id='listaBasica'>
             <table>
                 <thead>
                     <tr>
-                        <th></th>
+                        <th>
+                            <input
+                                type='checkbox'
+                                checked={isChecked}
+                                onChange={handleChange}
+                            />
+                        </th>
                         <th>{nameList}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>
-                            <label>
+                    {datosJson && datosJson.map((element, index) => (
+                        <tr className='filaDatos' key={index}>
+                            <td className='columnCheck'>
                                 <input
                                     type='checkbox'
-                                    checked={isChecked}
-                                    onChange={handleChange}
+                                    onChange={() => ManejarChecks(index)}
+                                    checked={selecciones[index]}
                                 />
-                            </label>
-                        </td>
-                        <td>
-                        {data ? (
-                             <pre>{JSON.stringify(data, null, 2)}</pre>
-                                 ) : (
-                                     <p>Loading...</p>
-                                    )}
-                        </td>
-                    </tr>
+                            </td>
+                            <td>
+                                {element}
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>

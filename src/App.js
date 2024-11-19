@@ -8,7 +8,8 @@ import BotonVolver from './frontend/componentes/botonVolver/BotonVolver';
 import ListaAvanzada from './frontend/componentes/listaAvanzada/ListaAvanzada';
 import './Global.css';
 import { datosJsonUno, tituloAux, subTitulosUno, subTitulosDos, datosJsonDos, datosJsonTres, subTitulosTres } from './frontend/mocks/mockTablaAvanzada';
-
+import ListaBasica from './frontend/componentes/listaBasica/ListaBasica';
+import { mocksBasica, mocksBasica2} from './frontend/mocks/mocksTablaBasica';
 function App() {
 
 const Saludar = (nombre) => {
@@ -18,9 +19,8 @@ const Saludar = (nombre) => {
   return (
     <div className="App">
       <div className='auxListaAvanzada'>
-        <ListaAvanzada titulo={tituloAux} datosJson={datosJsonUno} subtitulos={subTitulosUno} 
-        clickFila={Saludar}/>
-
+       
+      <ListaBasica nameList={"instructor"} datosJson={mocksBasica}/>
       </div>
     </div>
   );

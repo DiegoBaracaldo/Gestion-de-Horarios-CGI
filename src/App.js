@@ -11,6 +11,7 @@ import { datosJsonUno, tituloAux, datosJsonDos, datosJsonTres } from './frontend
 import CrudAvanzado from './frontend/componentes/crudAvanzado/CrudAvanzado';
 import { listaMenuFiltro } from './frontend/mocks/mockCrudAvanzado';
 import { useEffect, useState } from 'react';
+import ModalGeneral from './frontend/componentes/modalGeneral/ModalGeneral';
 
 function App() {
 

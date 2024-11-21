@@ -71,7 +71,7 @@
             .contBtn{
                 width: 35%;
                 height: 67%;
-                background-color: aquamarine;
+                /* background-color: aquamarine; */
                 border-radius: 12px;
             }
         }

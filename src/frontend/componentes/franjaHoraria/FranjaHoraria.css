@@ -1,0 +1,119 @@
+#franjaHoraria {
+    /* background-color: aquamarine; */
+    width: 100%;
+    height: 100%;
+    display: flex;
+
+    .franja {
+        height: 100%;
+        width: 67%;
+        /* background-color: antiquewhite; */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .contTabla {
+            width: 94%;
+            height: 90%;
+            overflow: auto;
+            border: 2px solid black;
+
+            table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                background-color: white;
+                table-layout: auto;
+                text-transform: capitalize;
+                text-align: center;
+
+                thead {
+                    background-color: #FBFBE2;
+                    position: sticky;
+                    top: 0;
+                }
+
+                td {
+                    font-size: 14px;
+                    border: 1px solid black;
+                    font-weight: bold;
+                }
+                .celdaFranja{
+                }
+                .celdaFranja:hover{
+                    /* background-color: lightblue; */
+                }
+
+                th {
+                    border: 1px solid black;
+                    height: 24px;
+                    vertical-align: middle;
+                }
+                tr{
+                    /* Para que no se seleccionen las filas a medida que se arrastra */
+                    user-select: none;
+                }
+                /* pintar eje Y  */
+                tr:hover td:not(.celdaFranja){
+                    background-color: lightblue ;
+                }
+                .celdaHora{
+                    width: 15%;
+                }
+                /* dar anchos iguales a las columnas de los días de la semana */
+                .celdaTitulo{
+                    width: calc(85% / 7);
+                }
+                .celdaFranjaPintada{
+                    background-color: #FFCE40 ;
+                }
+                /* franja ocupada debe mantenerse debajo de celdaFranjaPintada para sobreponer
+                la inhabilidad y el color rojo */
+                .franjaOcupada{
+                    pointer-events: none;
+                    background-color: #DC3545 !important;
+                }
+            }
+        }
+
+    }
+
+    .botones {
+        height: 100%;
+        width: 33%;
+        /* background-color: lightblue; */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+
+        .contBtn {
+            /* background-color: lightcoral; */
+            width: 90%;
+            height: 10%;
+            border-radius: 12px;
+        }
+    }
+    .muestraColor{
+         width: 50px;
+        height: 20px;
+        border: 2px solid black;
+        margin-right: 10px;
+    }
+    .muestraColorVerde{
+        background-color: #FFCE40;
+    }
+    .muestraColorRojo{
+        background-color: #DC3545;
+    }
+    .muestraColorBlanco{
+        background-color: white;
+    }
+    .contMapaColores{
+        width: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        font-size: 18px;
+    }
+}

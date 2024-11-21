@@ -18,7 +18,28 @@ export const mocksBasica = [
 'Alberto Herrera',
 'Verónica Romero',
 'Raúl Castro',
+'Marta Sánchez',
+'Ana Gómez',
+'Carlos Pérez',
+'María López',
+'Luis Rodríguez',
+'Pedro Martínez',
+'Elena García',
+'Javier Sánchez',
+'Raquel Fernández',
+'David Jiménez',
+'Sofia Ruiz',
+'José Torres',
+'Carmen Díaz', 
+'Andrés Morales', 
+'Patricia Alonso',
+'Ricardo Navarro',
+'Lucía Vázquez',
+'Alberto Herrera',
+'Verónica Romero',
+'Raúl Castro',
 'Marta Sánchez'
+
 ];
 
 export const mocksBasica2 = [

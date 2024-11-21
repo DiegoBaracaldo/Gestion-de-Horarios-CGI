@@ -10,6 +10,7 @@ import './Global.css';
 import { datosJsonUno, tituloAux, subTitulosUno, subTitulosDos, datosJsonDos, datosJsonTres, subTitulosTres } from './frontend/mocks/mockTablaAvanzada';
 import ListaBasica from './frontend/componentes/listaBasica/ListaBasica';
 import { mocksBasica, mocksBasica2} from './frontend/mocks/mocksTablaBasica';
+import CrudBasico from './frontend/componentes/crudBasico/CrudBasico';
 function App() {
 
 const Saludar = (nombre) => {
@@ -17,12 +18,7 @@ const Saludar = (nombre) => {
 }
 
   return (
-    <div className="App">
-      <div className='auxListaAvanzada'>
-       
-      <ListaBasica nameList={"instructor"} datosJson={mocksBasica}/>
-      </div>
-    </div>
+  <CrudBasico/>      
   );
 }
 

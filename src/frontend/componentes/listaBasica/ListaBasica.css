@@ -1,4 +1,4 @@
-#listaBasica{
+#listaBasica {
   table {
     width: 100%;
     border-collapse: collapse;
@@ -13,10 +13,9 @@
   
   thead {
     background-color: #FBFBE2; /* Color de fondo del título */
-   /*  height: 40px; Altura de casilla de título */
-   position: static;
-   top: 0;
-   z-index: 1;
+    position: sticky;
+    top: 0;
+    z-index: 2;
   }
   
   th {
@@ -24,8 +23,6 @@
     font-weight: bold; /* Negrita */
     height: 40px; 
   }
-  
- 
   
   tbody tr:nth-child(odd) {
     background-color: white; /* Fondo blanco para filas impares */
@@ -40,21 +37,13 @@
     height: 20px; /* Alto de checks */
   }
 
-  tbody tr  {
+  tbody tr {
     height: 30px; /* Altura de filas */
     font-size: 24px; /* Fuente de filas */
     font-weight: normal; /* Regular */
-    
   }
 
-  tbody{
-    tr:hover{
-      background-color: lightblue !important;
-    
-    }
-  }
-
-  tbody{
-    overflow: auto;
+  tbody tr:hover {
+    background-color: lightblue !important;
   }
 }

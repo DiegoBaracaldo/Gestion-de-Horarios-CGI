@@ -1,3 +1,4 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
 import BotonAtrasExclusivo from './frontend/componentes/botonAtrasExclusivo/BotonAtrasExclusivo';
 import BotonDestructivo from './frontend/componentes/botonDestructivo/BotonDestructivo';
@@ -7,21 +8,19 @@ import BotonProcesos from './frontend/componentes/botonProcesos/BotonProcesos';
 import BotonVolver from './frontend/componentes/botonVolver/BotonVolver';
 import ListaAvanzada from './frontend/componentes/listaAvanzada/ListaAvanzada';
 import './Global.css';
+import Principal from './frontend/paginas/principal/Principal';
+import GestionInformacion from './frontend/paginas/gestionInformacion/GestionInformacion';
 
 function App() {
 
   return (
     <div className="App">
-      <div id='contLogoPrincipal'>
-        espacio para el logo
-      </div>
-      <h1 id='tituloPagPrincipal'>gestión de horario CGI</h1>
-      <div id='contBtnGestInf' className='contBtnPrincipal' >
-        <BotonProcesos texto="gestión de información"/>
-      </div>
-      <div id='contBtnGestHorario' className='contBtnPrincipal'>
-        <BotonProcesos texto="gestión de horarios"/>
-      </div>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Principal/>} />
+          <Route path="/gestionInfo" element={<GestionInformacion isOpen={true}/>} />
+        </Routes>
+      </Router>
     </div>
   );
 }

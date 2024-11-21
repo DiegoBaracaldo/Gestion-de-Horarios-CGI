@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import './BotonProcesos.css';
+import { useNavigate } from 'react-router-dom';
 
 const BotonProcesos = ({ texto, ruta, disabledProp, hiddenProp}) => {
 
     const [disabledHook, setDisabledHook] = useState(false);
     const [hiddenHook, setHiddenHook] = useState(false);
     const [clasesHook, setClasesHook] = useState("btnOn");
+    const navegar = useNavigate();
 
     useEffect(() => {
         if (disabledProp !== null || disabledProp !== undefined){
@@ -21,8 +23,7 @@ const BotonProcesos = ({ texto, ruta, disabledProp, hiddenProp}) => {
 
     const manejarOnClick = () => {
         if(ruta){
-            //Ir a la ruta asignada con prop "ruta"
-            return;
+            navegar(ruta);
         }else{
             alert("Este componente necesita una ruta...");
         }

@@ -1,9 +1,5 @@
 export const tituloAux = "instructores";
 
-export const subTitulosUno = ["nombre", "cedula", "especialidad", "jornada"];
-export const subTitulosDos = ["nombre", "cedula"];
-export const subTitulosTres = ["nombre", "cedula"];
-
 export const datosJsonUno = [
   {
     "nombre": "Ana Pérez",

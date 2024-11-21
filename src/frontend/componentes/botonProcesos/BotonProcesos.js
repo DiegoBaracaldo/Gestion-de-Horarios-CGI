@@ -20,8 +20,12 @@ const BotonProcesos = ({ texto, ruta, disabledProp, hiddenProp}) => {
     }, [hiddenProp]);
 
     const manejarOnClick = () => {
-        //Ir a la ruta asignada con prop "ruta"
-        return;
+        if(ruta){
+            //Ir a la ruta asignada con prop "ruta"
+            return;
+        }else{
+            alert("Este componente necesita una ruta...");
+        }
     }
 
     return (

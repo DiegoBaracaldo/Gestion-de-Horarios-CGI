@@ -14,6 +14,7 @@ import { datosJsonUno, tituloAux, subTitulosUno, subTitulosDos, datosJsonDos, da
 import ListaBasica from './frontend/componentes/listaBasica/ListaBasica';
 import { mocksBasica, mocksBasica2} from './frontend/mocks/mocksTablaBasica';
 import CrudBasico from './frontend/componentes/crudBasico/CrudBasico';
+import CrudTorres from './frontend/paginas/crudTorres/CrudTorres';
 function App() {
 
   return (
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Principal/>} />
           <Route path="/gestionInfo" element={<GestionInformacion isOpen={true}/>} />
+          <Route path='/crudTorres' element={<CrudTorres/>}/>
         </Routes>
       </Router>
     </div>

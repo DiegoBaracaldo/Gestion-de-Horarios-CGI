@@ -7,7 +7,7 @@ import BotonVolver from '../botonVolver/BotonVolver';
 
 import './CrudBasico.css';
 
-function CrudBasico() {
+function CrudBasico({onClickPositivo,onClickDestructivo, entidad}) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Estado para el dropdown
   const [selectedOption, setSelectedOption] = useState(''); // Opción seleccionada
 
@@ -16,7 +16,7 @@ function CrudBasico() {
   const handleOptionClick = (option) => {
     setSelectedOption(option); // Actualiza la opción seleccionada
     setIsDropdownOpen(false); // Cierra el dropdown
-    console.log(`Opción seleccionada: ${option}`);
+    
   };
 
   return (
@@ -24,18 +24,18 @@ function CrudBasico() {
       {/* Espacio izquierdo de tabla */}
       <div className='izquierda'>
         <div className='tabla'>
-          <ListaBasica nameList={'programas'} datosJson={mocksBasica} />
+          <ListaBasica nameList={entidad} datosJson={mocksBasica} />
         </div>
       </div>
 
       {/* Espacio derecho botones y búsqueda */}
       <div className='derecha'>
         <div className='filtros'>
-            <h3>Nueva entidad:</h3>
+            <h3>Nueva {entidad}:</h3>
           <input type='text' placeholder='agregar...' />
 
           <div className='agregar'>
-          <BotonPositivo texto={'agregar'} />
+          <BotonPositivo texto={'agregar'} onClick={onClickPositivo} />
         </div>
 
 
@@ -75,7 +75,7 @@ function CrudBasico() {
 
 
         <div className='botones'>
-          <BotonDestructivo texto={'eliminar'} />
+          <BotonDestructivo texto={'eliminar'} onClick={onClickDestructivo} />
           <br />
           <BotonVolver/>
         </div>

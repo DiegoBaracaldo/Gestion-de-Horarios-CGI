@@ -11,7 +11,7 @@ const GestionInformacion = ({ isOpen, onClose }) => {
             <div className='contRutas'>
                 <div className='izq contAux'>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="torrres"/>
+                        <BotonProcesos texto="torres" ruta={"/crudTorres"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="jornadas"/>

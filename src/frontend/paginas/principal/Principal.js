@@ -1,11 +1,12 @@
 import BotonProcesos from "../../componentes/botonProcesos/BotonProcesos";
+import Logo from "../../componentes/logo/Logo";
 
 
 const Principal = () => {
     return (
         <div id="contPrincipal">
             <div id='contLogoPrincipal'>
-                espacio para el logo
+                <Logo/>
             </div>
             <h1 id='tituloPagPrincipal'>gestión de horario CGI</h1>
             <div id='contBtnGestInf' className='contBtnPrincipal' >

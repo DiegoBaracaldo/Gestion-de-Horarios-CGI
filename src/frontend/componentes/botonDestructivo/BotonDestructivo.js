@@ -19,8 +19,12 @@ const BotonDestructivo = ({ texto, onClick, disabledProp, hiddenProp}) => {
         if (hiddenProp !== null || hiddenProp !== undefined) setHiddenHook(hiddenProp);
     }, [hiddenProp]);
 
+    const PedirFuncionalidad = () => {
+        alert("Agregar funcionalidad a este componente por favor...");
+    }
+
     return (
-        <button id="btnDestructivo" onClick={onClick} disabled={disabledHook} hidden={hiddenHook}
+        <button id="btnDestructivo" onClick={onClick ? onClick : PedirFuncionalidad} disabled={disabledHook} hidden={hiddenHook}
             className={clasesHook}>
             {texto}
         </button>

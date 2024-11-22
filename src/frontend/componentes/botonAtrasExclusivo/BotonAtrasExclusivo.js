@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import './BotonAtrasExclusivo.css';
+import { useNavigate } from 'react-router-dom';
 
 const BotonAtrasExclusivo = () => {
 
-    const manejarOnClick = () => {
-        //Ir a "home" 
-        return;
-    }
+    const navegar = useNavigate();
 
+    const manejarOnClick = () => {
+        navegar(-1);
+    }
     return (
-        <button id="btnAtrasExclusivo">
+        <button id="btnAtrasExclusivo" onClick={manejarOnClick}>
             Atrás
         </button>
     );

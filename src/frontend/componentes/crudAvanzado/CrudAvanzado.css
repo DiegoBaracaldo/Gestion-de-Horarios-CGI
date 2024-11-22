@@ -1,0 +1,87 @@
+#crudAvanzado{
+    /* background-color: antiquewhite; */
+    height: 100%;
+    width: 100%;
+    .upCrudAvanzado{
+        height: 23svh;
+        width: 100%;
+        /* background-color:  yellow; */
+        .seccBusqueda{
+            width: 100%; 
+            height: 50%;
+            display: flex;
+            /* background-color: antiquewhite; */
+            .ladoIzq{
+                height: 100%;
+                width: 26%;
+                /* background-color: aquamarine; */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: end;
+                label{
+                    font-size: 20px;
+                    width: 70%;
+                    font-weight: bold;
+                }
+                select{
+                    font-size: 24px;
+                    width: 70%;
+                    text-align: center;
+                    border-radius: 6px;
+                    height: 40px;
+                    text-transform: capitalize;
+                }
+            }
+            .ladoDer{
+                height: 100%;
+                width: 74%;
+                /* background-color: azure; */
+                display: flex;
+                align-items: end;
+                input{
+                    font-size: 24px;
+                    width: 95%;
+                    border-radius: 6px;
+                    height: 40px;
+                    padding-left: 10px;
+                }
+            }
+        }
+        .seccFiltroExtra{
+            width: 100%;
+            height: 50%;
+            /* background-color: burlywood; */
+        }
+    }
+    .centerCrudAvanzado{
+        height: 65svh;
+        width: 100%;
+        /* background-color:  blue; */
+        .seccListaAvanzada{
+            height: 100%;
+            width: 93%;
+            /* background-color: brown; */
+            margin: 0 auto;
+            overflow: auto;
+            border: 2px solid black;
+        }
+    }
+    .seccBotones{
+        height: 12svh;
+        width: 100%;
+        /* background-color:  red; */
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-evenly;
+        .boton{
+            width: 30%;
+            height: 45%;
+            /* background-color: yellowgreen; */
+        }
+        .contBtnPositivo{
+            height: 56%;
+        }
+    }
+}

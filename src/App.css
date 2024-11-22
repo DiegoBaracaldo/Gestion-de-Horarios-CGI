@@ -1,11 +1,47 @@
-.App{
-  background-color: #dcdcdc;
+#contPrincipal{
+  background-color: white;
   width: 100vw;
   height: 100svh;
   display:flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-evenly;
   align-items: center;
 }
+#contLogoPrincipal{
+  height: 150px;
+  aspect-ratio: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contBtnPrincipal{
+  /* background-color: antiquewhite; */
+  width: 50%;
+  height: 120px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+#tituloPagPrincipal{
+  text-transform: uppercase;
+  font-weight: normal;
+  font-size: 45px;
+  letter-spacing: 7px;
+  margin-top: -60px;
+  border: 2px solid black;
+  border-end-start-radius: 12px;
+  border-start-end-radius: 12px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+#contBtnGestInf{
+}
+
+
+
+
 .auxListaAvanzada{
   width: 93%;
   /* Valor ajustado para que las 15 filas coincidan con el tamaño */

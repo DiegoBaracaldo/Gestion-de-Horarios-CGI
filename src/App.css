@@ -10,10 +10,12 @@
 #contLogoPrincipal{
   height: 150px;
   aspect-ratio: 1;
-  background-color: yellowgreen;
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .contBtnPrincipal{
   /* background-color: antiquewhite; */

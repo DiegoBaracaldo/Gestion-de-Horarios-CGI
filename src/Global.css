@@ -16,7 +16,7 @@ ol, ul{
 button{
     overflow: hidden;
 }
-input[type=checkbox] {
+input[type=checkbox], input[type=radio] {
     height: 20px;
     width: 20px;
     cursor: pointer;

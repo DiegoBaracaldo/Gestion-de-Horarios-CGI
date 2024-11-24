@@ -5,6 +5,7 @@ import Principal from './frontend/paginas/principal/Principal';
 import GestionInformacion from './frontend/paginas/gestionInformacion/GestionInformacion';
 import CrudInstructores from './frontend/paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from './frontend/paginas/crudAmbientes/CrudAmbientes';
+import CrudGrupos from './frontend/paginas/crudGrupos/CrudGrupos';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
           <Route path="/gestionInfo" element={<GestionInformacion/>} />
           <Route path="/crudInstructores" element={<CrudInstructores/>} />
           <Route path="/crudAmbientes" element={<CrudAmbientes/>} />
+          <Route path="/crudGrupos" element={<CrudGrupos/>} />
         </Routes>
       </Router>
     </div>

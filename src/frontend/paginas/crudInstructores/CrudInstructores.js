@@ -13,6 +13,10 @@ const CrudInstructores = () => {
     const [seleccMenuFiltro, setSeleccMenuFiltro] = useState('');
     const [textoBusqueda, setTextoBusqueda] = useState('');
 
+    // useEffect(() => {
+    //     console.log(seleccMenuFiltro);
+    // }, [seleccMenuFiltro]);
+
     useEffect(() => {
         setListaVacia(listaSelecciones.length === 0);
     }, [listaSelecciones]);

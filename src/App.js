@@ -6,6 +6,7 @@ import GestionInformacion from './frontend/paginas/gestionInformacion/GestionInf
 import CrudInstructores from './frontend/paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from './frontend/paginas/crudAmbientes/CrudAmbientes';
 import CrudGrupos from './frontend/paginas/crudGrupos/CrudGrupos';
+import CrudCompetencias from './frontend/paginas/crudCompetencias/CrudCompetencias';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/crudInstructores" element={<CrudInstructores/>} />
           <Route path="/crudAmbientes" element={<CrudAmbientes/>} />
           <Route path="/crudGrupos" element={<CrudGrupos/>} />
+          <Route path="/crudCompetencias" element={<CrudCompetencias/>} />
         </Routes>
       </Router>
     </div>

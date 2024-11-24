@@ -10,7 +10,8 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
 }) => {
 
     const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
-    const [seleccFiltroTexto, setSeleccFiltroTexto] = useState(listaMenu ? listaMenu[0] : '');
+    const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
+    const [seleccFiltroTexto, setseleccFiltroTexto] = useState(listaMenu ? listaMenu[0].texto : '');
 
     useEffect(() => {
         //se pasa la lista recibida al padre a  través de una función
@@ -18,13 +19,15 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
     }, [listaSeleccRecibida]);
 
     const ManejarSelecFiltro = (e) => {
-        const auxTexto = e.target.value;
-        setSeleccFiltroTexto(auxTexto);
+        const auxValor = e.target.value;
+        const auxTexto = e.target.options[e.target.selectedIndex].text;
+        setseleccFiltroValor(auxValor);
+        setseleccFiltroTexto(auxTexto);
     }
     //Una vez se ha seleccionado una opción, incluso el primer valor al crear el hook
     useEffect(() => {
-        filtrarPor && seleccFiltroTexto !== '' ? filtrarPor(seleccFiltroTexto) : PedirFuncionalidad();
-    }, [seleccFiltroTexto]);
+        filtrarPor && seleccFiltroValor !== '' ? filtrarPor(seleccFiltroValor) : PedirFuncionalidad();
+    }, [seleccFiltroValor]);
 
     const ManejarTextoBusqueda = (texto) => {
         buscarPor && buscarPor(texto.target.value);
@@ -44,8 +47,8 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                         <select name='filtroCrudAvanzado' onChange={listaMenu && ManejarSelecFiltro}>
                             {
                                 listaMenu ?
-                                    listaMenu.map((texto, index) => (
-                                        <option>{texto}</option>
+                                    listaMenu.map((element, index) => (
+                                        <option value={element.valor}>{element.texto}</option>
                                     ))
                                     : <option>seleccionar...</option>
                             }

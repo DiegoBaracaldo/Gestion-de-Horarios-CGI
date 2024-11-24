@@ -64,8 +64,8 @@ const CrudGrupos = () => {
         <div id='contCrudGrupos'>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
-                listaMenu={listaMenuGrupos}  filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)}/>
+                listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
+                buscarPor={(texto) => setTextoBusqueda(texto)} />
         </div>
     );
 }

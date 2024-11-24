@@ -8,6 +8,7 @@ ol, ul{
 }
 .btnOff{
     opacity: 60%;
+    pointer-events: none;
 }
 .btnOn{
     opacity: 100%;

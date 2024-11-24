@@ -2,10 +2,8 @@ import BotonAtrasExclusivo from '../../componentes/botonAtrasExclusivo/BotonAtra
 import BotonProcesos from '../../componentes/botonProcesos/BotonProcesos';
 import './GestionInformacion.css';
 
-const GestionInformacion = ({ isOpen, onClose }) => {
+const GestionInformacion = () => {
 
-
-    if (!isOpen) return null;
     return (
         <div id='contGestionInfo'>
             <div className='contRutas'>
@@ -20,7 +18,7 @@ const GestionInformacion = ({ isOpen, onClose }) => {
                         <BotonProcesos texto="programas"/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="instructores"/>
+                        <BotonProcesos texto="instructores" ruta="/crudInstructores"/>
                     </div>
                 </div>
                 <div className='der contAux'>

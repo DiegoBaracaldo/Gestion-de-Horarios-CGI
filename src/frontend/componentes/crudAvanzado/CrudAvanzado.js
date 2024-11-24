@@ -3,20 +3,25 @@ import './CrudAvanzado.css';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonVolver from '../botonVolver/BotonVolver';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const CrudAvanzado = ({seccLibre,listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
-    onClicPositivo, onCLicDestructivo, textoPostivo, textoDestructivo, disabledPositivo,
-    disabledDestructivo, hiddenPositivo, hiddenDestructivo
+const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
+    onClicPositivo, onCLicDestructivo, disabledDestructivo, listaSeleccionada
 }) => {
+
+    const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
+    useEffect(() => {
+        //se pasa la lista recibida al padre a  través de una función
+        listaSeleccionada && listaSeleccionada(listaSeleccRecibida);
+    }, [listaSeleccRecibida]);
 
     const ManejarSelecFiltro = (e) => {
         const auxIndex = e.target.value;
-        filtrarPor(auxIndex);
+        filtrarPor && filtrarPor(auxIndex);
     }
 
     const ManejarTextoBusqueda = (texto) => {
-        buscarPor(texto.target.value);
+        buscarPor && buscarPor(texto.target.value);
     }
 
     const PedirFuncionalidad = () => {
@@ -32,11 +37,11 @@ const CrudAvanzado = ({seccLibre,listaMenu, filtrarPor, buscarPor, datosJson, ti
                         <label htmlFor='filtroCrudAvanzado' >Filtrar por:</label>
                         <select name='filtroCrudAvanzado' onChange={listaMenu && (filtrarPor ? ManejarSelecFiltro : PedirFuncionalidad)}>
                             {
-                                listaMenu ? 
-                                listaMenu.map((texto, index) => (
-                                    <option>{texto}</option>
-                                ))
-                                : <option>seleccionar...</option>
+                                listaMenu ?
+                                    listaMenu.map((texto, index) => (
+                                        <option>{texto}</option>
+                                    ))
+                                    : <option>seleccionar...</option>
                             }
                         </select>
                     </div>
@@ -51,21 +56,21 @@ const CrudAvanzado = ({seccLibre,listaMenu, filtrarPor, buscarPor, datosJson, ti
 
             <section className='centerCrudAvanzado'>
                 <article className='seccListaAvanzada'>
-                    <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}/>
+                    <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila} 
+                    listaSeleccProp={(lista) => setListaSeleccRecibida(lista)}/>
                 </article>
             </section>
 
             <section className='seccBotones'>
                 <article className='contBtnPositivo boton'>
-                    <BotonPositivo texto={textoPostivo} onClick={onClicPositivo}
-                    hiddenProp={hiddenPositivo} disabledProp={disabledPositivo}/>
+                    <BotonPositivo texto="Agregar" onClick={onClicPositivo} />
                 </article>
                 <article className='contBtnDestructivo boton'>
-                    <BotonDestructivo texto={textoDestructivo} onClick={onCLicDestructivo}
-                    hiddenProp={hiddenDestructivo} disabledProp={disabledDestructivo}/>
+                    <BotonDestructivo texto="Eliminar" onClick={onCLicDestructivo}
+                        disabledProp={disabledDestructivo} />
                 </article>
                 <article className='contBtnVolver boton'>
-                    <BotonVolver/>
+                    <BotonVolver />
                 </article>
             </section>
         </div>

@@ -10,6 +10,7 @@ import ListaAvanzada from './frontend/componentes/listaAvanzada/ListaAvanzada';
 import './Global.css';
 import Principal from './frontend/paginas/principal/Principal';
 import GestionInformacion from './frontend/paginas/gestionInformacion/GestionInformacion';
+import CrudInstructores from './frontend/paginas/crudInstructores/CrudInstructores';
 
 function App() {
 
@@ -18,7 +19,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Principal/>} />
-          <Route path="/gestionInfo" element={<GestionInformacion isOpen={true}/>} />
+          <Route path="/gestionInfo" element={<GestionInformacion/>} />
+          <Route path="/crudInstructores" element={<CrudInstructores/>} />
         </Routes>
       </Router>
     </div>

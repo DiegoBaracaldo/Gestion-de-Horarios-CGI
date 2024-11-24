@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
 import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
-import './CrudInstructores.css';
+import './CrudAmbientes.css';
 
-const CrudInstructores = () => {
+const CrudAmbientes = () => {
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
@@ -13,10 +13,10 @@ const CrudInstructores = () => {
     }, [listaSelecciones]);
 
     return(
-        <div id='contCrudInstruc'>
+        <div id='contCrudAmbientes'>
             <CrudAvanzado  listaSeleccionada={(lista) => setListaSelecciones(lista)}
-                disabledDestructivo={listaVacia} titulo="Instructores"/>
+                disabledDestructivo={listaVacia} titulo="Ambientes"/>
         </div>
     );
 }
-export default CrudInstructores;
+export default CrudAmbientes;

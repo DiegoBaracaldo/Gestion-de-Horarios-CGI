@@ -23,7 +23,7 @@ const GestionInformacion = () => {
                 </div>
                 <div className='der contAux'>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="ambientes"/>
+                        <BotonProcesos texto="ambientes" ruta="/crudAmbientes"/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="grupos"/>

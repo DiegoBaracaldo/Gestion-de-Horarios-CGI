@@ -1,0 +1,20 @@
+#contCrudGrupos{
+    height: 100svh;
+    width: 100vw;
+    #contFiltroExtraGrupos{
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        width: 93%;
+        height: 70%;
+        gap: 30px;
+        border: 1px solid black;
+        border-radius: 12px;
+        padding-left: 20px;
+        background-color: #FBFBE2 ;
+        text-transform: capitalize;
+        .opciones{
+            cursor: pointer;
+        }
+    }
+}

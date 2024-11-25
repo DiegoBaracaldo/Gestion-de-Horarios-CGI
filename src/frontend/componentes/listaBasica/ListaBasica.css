@@ -1,53 +1,56 @@
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px; /* Espacio entre el título y la primera fila */
-    text-align: center; /* Centrar texto horizontalmente */
-  }
+  #listaBasica{
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px; /* Espacio entre el título y la primera fila */
+      text-align: center; /* Centrar texto horizontalmente */
+    }
+    
+    th, td {
+      border: 1px solid black; /* Borde de tabla y celdas */
+      vertical-align: middle; /* Centrar texto verticalmente */
+    }
+    
+    thead {
+      background-color: #FBFBE2; /* Color de fondo del título */
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    
+    th {
+      font-size: 36px; /* Fuente de título */
+      font-weight: bold; /* Negrita */
+      height: 40px; 
+    }
+    
+    tbody tr:nth-child(odd) {
+      background-color: white; /* Fondo blanco para filas impares */
+    }
+    
+    tbody tr:nth-child(even) {
+      background-color: #DCDCDC; /* Fondo para filas pares */
+    }
+    
+    input[type="checkbox"] {
+      width: 20px; /* Ancho de checks */
+      height: 20px; /* Alto de checks */
+    }
   
-  th, td {
-    border: 1px solid black; /* Borde de tabla y celdas */
-    vertical-align: middle; /* Centrar texto verticalmente */
-  }
+    tbody tr {
+      height: 30px; /* Altura de filas */
+      font-size: 24px; /* Fuente de filas */
+      font-weight: normal; /* Regular */
+    }
   
-  thead {
-    background-color: #FBFBE2; /* Color de fondo del título */
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
+    tbody tr:hover {
+      background-color: lightblue !important;
+    }
   
-  th {
-    font-size: 36px; /* Fuente de título */
-    font-weight: bold; /* Negrita */
-    height: 40px; 
-  }
   
-  tbody tr:nth-child(odd) {
-    background-color: white; /* Fondo blanco para filas impares */
+    tbody{
+      overflow: auto;
+    }
   }
-  
-  tbody tr:nth-child(even) {
-    background-color: #DCDCDC; /* Fondo para filas pares */
-  }
-  
-  input[type="checkbox"] {
-    width: 20px; /* Ancho de checks */
-    height: 20px; /* Alto de checks */
-  }
-
-  tbody tr {
-    height: 30px; /* Altura de filas */
-    font-size: 24px; /* Fuente de filas */
-    font-weight: normal; /* Regular */
-  }
-
-  tbody tr:hover {
-    background-color: lightblue !important;
-  }
-
-
-  tbody{
-    overflow: auto;
-  }
+ 
 

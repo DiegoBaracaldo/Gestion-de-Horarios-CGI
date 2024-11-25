@@ -26,3 +26,6 @@ input[type=checkbox], input[type=radio] {
 tr{
     cursor: pointer;
 }
+button{
+    cursor: pointer;
+}

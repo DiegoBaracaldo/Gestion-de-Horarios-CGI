@@ -6,12 +6,25 @@ import BotonVolver from '../botonVolver/BotonVolver';
 import { useEffect, useState } from 'react';
 
 const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
-    onClicPositivo, onCLicDestructivo, disabledDestructivo, listaSeleccionada
+    onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo, listaSeleccionada,
+    esconderBusqueda
 }) => {
 
     const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
     const [seleccFiltroTexto, setseleccFiltroTexto] = useState(listaMenu ? listaMenu[0].texto : '');
+    //para esconder la sección de búsqueda en caso de ser necesario
+    const [esconderFiltro, setEsconderFiltro] = useState(esconderBusqueda);
+    const [classSeccBusqueda, setClassSeccBusqueda] = useState(
+        esconderFiltro ? 'seccBusqueda esconderBusqueda' : 'seccBusqueda');
+
+    useEffect(() => {
+        setEsconderFiltro(esconderBusqueda);
+    }, [esconderBusqueda]);
+
+    useEffect(() => {
+        setClassSeccBusqueda(esconderFiltro ? 'seccBusqueda esconderBusqueda' : 'seccBusqueda');
+    }, [esconderFiltro]);
 
     useEffect(() => {
         //se pasa la lista recibida al padre a  través de una función
@@ -41,7 +54,7 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
         <div id='crudAvanzado'>
 
             <section className='upCrudAvanzado'>
-                <article className='seccBusqueda'>
+                <article className={classSeccBusqueda}>
                     <div className='ladoIzq'>
                         <label htmlFor='filtroCrudAvanzado' >Filtrar por:</label>
                         <select name='filtroCrudAvanzado' onChange={listaMenu && ManejarSelecFiltro}>
@@ -65,14 +78,14 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
 
             <section className='centerCrudAvanzado'>
                 <article className='seccListaAvanzada'>
-                    <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila} 
-                    listaSeleccProp={(lista) => setListaSeleccRecibida(lista)}/>
+                    <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}
+                        listaSeleccProp={(lista) => setListaSeleccRecibida(lista)} />
                 </article>
             </section>
 
             <section className='seccBotones'>
                 <article className='contBtnPositivo boton'>
-                    <BotonPositivo texto="Agregar" onClick={onClicPositivo} />
+                    <BotonPositivo texto="Agregar" onClick={onClicPositivo} disabledProp={disabledPositivo} />
                 </article>
                 <article className='contBtnDestructivo boton'>
                     <BotonDestructivo texto="Eliminar" onClick={onCLicDestructivo}

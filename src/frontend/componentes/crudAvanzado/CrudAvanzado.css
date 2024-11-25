@@ -87,4 +87,7 @@
             height: 56%;
         }
     }
+    .esconderBusqueda{
+        display: none !important;
+    }
 }

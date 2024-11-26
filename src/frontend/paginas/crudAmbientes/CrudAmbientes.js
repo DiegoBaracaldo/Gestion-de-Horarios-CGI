@@ -26,7 +26,7 @@ const CrudAmbientes = () => {
             <CrudAvanzado  listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Ambientes"
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)}/>
+                buscarPor={(texto) => setTextoBusqueda(texto)} />
         </div>
     );
 }

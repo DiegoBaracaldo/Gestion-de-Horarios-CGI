@@ -41,7 +41,7 @@ const CrudCompetencias = () => {
                 disabledDestructivo={listaVacia} titulo="Competencias"
                 listaMenu={listaMenuCompetencias} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} esconderBusqueda={esconderBusqueda}
-                seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} />
+                seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff}  />
         </div>
     );
 }

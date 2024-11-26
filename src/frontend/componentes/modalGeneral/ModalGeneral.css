@@ -1,10 +1,14 @@
 #modalGeneralFondo{
-    height: 100%;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100svh;
+    width: 100vw;
+    background-color: rgba(0 , 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
     #modalGeneral{
         background-color: #CED4DA;
         width: 84%;

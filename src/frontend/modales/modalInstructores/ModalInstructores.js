@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
-import './ModalInstructores.css';
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
@@ -12,17 +11,19 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     if (!abrirRegistro && !abrirConsulta) return null;
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
-        isOpenConsulta={abrirConsulta}
-        bloquearInputs={(valor) => setInputsOff(valor)}
-        edicionActivada={(valor) => setSeActivoEdicion(valor)}>
+            isOpenConsulta={abrirConsulta}
+            bloquearInputs={(valor) => setInputsOff(valor)}
+            edicionActivada={(valor) => setSeActivoEdicion(valor)}>
             <div className='seccCajitasModal'>
                 <section>
                     <label>cédula: </label>
-                    <input maxLength={15} max={15} disabled={inputsOff} />
+                    <input maxLength={15} max={15} disabled={inputsOff}
+                        title='Sólo números, sin signos especiales' />
                 </section>
                 <section>
                     <label>nombre: </label>
-                    <input maxLength={45} disabled={inputsOff} />
+                    <input maxLength={45} disabled={inputsOff} 
+                    title='Nombre completo'/>
                 </section>
                 <section>
                     <label>correo: </label>
@@ -38,14 +39,15 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>tope de horas: </label>
-                    <input maxLength={2} disabled={inputsOff} />
+                    <input maxLength={2} disabled={inputsOff} 
+                    title='número de dos dígitos máximo'/>
                 </section>
                 <section>
                     <label>horario: </label>
                     {/* Si no es disponibilidad, es horario, si no es consulta, es resgistro,
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
-                    <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta} 
-                    edicionActivada={seActivoEdicion}/>
+                    <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
+                        edicionActivada={seActivoEdicion} />
                 </section>
             </div>
         </ModalGeneral>

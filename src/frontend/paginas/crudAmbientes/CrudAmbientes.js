@@ -33,12 +33,18 @@ const CrudAmbientes = () => {
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
-        setAbrirRegistro(true);
+        VerificarTorres() ? setAbrirRegistro(true) : 
+        alert("Debes registrar al menos una torre para poder proceder");
     }
 
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+    }
+
+    function VerificarTorres(){
+        //aquí va el código para verificar que existan registros de torres
+        return true;
     }
 
     return (

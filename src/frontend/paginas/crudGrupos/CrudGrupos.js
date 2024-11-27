@@ -56,12 +56,45 @@ const CrudGrupos = () => {
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
-        setAbrirRegistro(true);
+        if(!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico, " + 
+                "un instructor y una jornada para proceder");
+        }else if(!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico y " + 
+                "un instructor para proceder");
+        }else if(!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico y " + 
+                "una jornada para proceder");
+        }else if(!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico para proceder");
+        }else if(VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un instructor y " + 
+                "una jornada para proceder");
+        }else if(VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un instructor para proceder");
+        }else if(VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos una jornada para proceder");
+        }else{
+            setAbrirRegistro(true);
+        }
     }
 
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+    }
+
+    function VerificarProgramas(){
+        //código para verificar que exista al menos un programa académico en la BD
+        return true;
+    }
+    function VerificarResponsables(){
+        //código para verificar que exista al menos un instructor en la BD
+        return true;
+    }
+    function VerificarJornadas(){
+        //código para verificar que exista al menos una jornada académico en la BD
+        return true;
     }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>

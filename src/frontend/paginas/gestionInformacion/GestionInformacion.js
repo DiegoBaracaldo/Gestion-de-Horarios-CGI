@@ -9,7 +9,7 @@ const GestionInformacion = () => {
             <div className='contRutas'>
                 <div className='izq contAux'>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="torrres"/>
+                        <BotonProcesos texto="torres"/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="jornadas"/>

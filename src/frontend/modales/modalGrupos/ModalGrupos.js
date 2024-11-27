@@ -16,6 +16,10 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             edicionActivada={(valor) => setSeActivoEdicion(valor)}>
             <div className='seccCajitasModal'>
                 <section>
+                    <label>programa: </label>
+                    <button disabled={inputsOff} >Seleccionar...</button>
+                </section>
+                <section>
                     <label>ficha: </label>
                     <input maxLength={20} disabled={inputsOff} />
                 </section>

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './ListaAvanzada.css';
 
 
-const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
+const ListaAvanzada = ({ titulo, datosJson, clickFila, listaSeleccProp }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
     const [seleccionHook, setSeleccionHook] = useState("");
@@ -25,6 +25,15 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila }) => {
         nuevasSelecciones[index] = !nuevasSelecciones[index];
         setSelecciones(nuevasSelecciones);
     }
+    //almacenar la información de los index seleccionados en la lista para eliminarlos
+    useEffect(() => {
+        const arraySelecciones = [];
+        selecciones.forEach((element, index )=> {
+            element && arraySelecciones.push(index);
+        });
+        //le paso la lista a una prop que puede recibirse en un setState en el padre
+        listaSeleccProp && listaSeleccProp(arraySelecciones);
+    }, [selecciones]);
 
     const SeleccionarTodo = (e) => {
         setSelecciones(new Array(selecciones.length).fill(e.target.checked));

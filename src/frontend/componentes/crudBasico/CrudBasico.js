@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ListaBasica from '../listaBasica/ListaBasica';
 import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
@@ -7,10 +7,20 @@ import BotonVolver from '../botonVolver/BotonVolver';
 import './CrudBasico.css';
 
 
-function CrudBasico({ onClickPositivo, onClickDestructivo, entidad, propiedadTabla, nameFiltro, opciones }) {
+function CrudBasico({ onClickPositivo,
+  onClickDestructivo,
+  entidad, 
+  propiedadTabla, 
+  nameFiltro,
+  opciones,
+  esconderBusqueda,
+  esconderOpciones,
+  esconderGeneral,
+  busqueda
+ }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Estado para el dropdown
   const [selectedOption, setSelectedOption] = useState(''); // Opción seleccionada
-
+  const [esconderFiltro, setEsconderFiltro] = useState(esconderBusqueda);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const handleOptionClick = (opcion) => {
@@ -38,36 +48,44 @@ function CrudBasico({ onClickPositivo, onClickDestructivo, entidad, propiedadTab
             </div>
           </div>
 
-
-<section className='contenedorVariable'>
+{
+  esconderGeneral ? null :
+  <section className='filtros'>
     {
       esconderBusqueda ? null :
-      <div className="filtros">
+      <div>
       <h3>{nameFiltro}</h3>
-      <input type="text" placeholder="Buscar..." />
+      <input type="text" 
+      placeholder="Buscar..." 
+      value={busqueda}/>
 
       {/* Botón desplegable */}
+    </div>
+    }
+    {
+      esconderOpciones ? null :
       <div className="dropdown-container">
-        <button className="dropdown-button" onClick={toggleDropdown}>
-          {selectedOption || 'Opciones'}
-        </button>
-        {isDropdownOpen && (
-          <div className="dropdown-menu">
-            {opciones.map((opcion, index) => (
-              <div
-                key={index}
-                className="dropdown-item"
-                onClick={() => handleOptionClick(opcion)}
-              >
-                {opcion}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <button className="dropdown-button" onClick={toggleDropdown}>
+        {selectedOption || 'Opciones'}
+      </button>
+      {isDropdownOpen && (
+        <div className="dropdown-menu">
+          {opciones.map((opcion, index) => (
+            <div
+              key={index}
+              className="dropdown-item"
+              onClick={() => handleOptionClick(opcion)}
+            >
+              {opcion}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
     }
 </section>
+}
+
          
 
           <div className="botones">

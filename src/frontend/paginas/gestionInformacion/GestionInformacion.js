@@ -2,10 +2,8 @@ import BotonAtrasExclusivo from '../../componentes/botonAtrasExclusivo/BotonAtra
 import BotonProcesos from '../../componentes/botonProcesos/BotonProcesos';
 import './GestionInformacion.css';
 
-const GestionInformacion = ({ isOpen, onClose }) => {
+const GestionInformacion = () => {
 
-
-    if (!isOpen) return null;
     return (
         <div id='contGestionInfo'>
             <div className='contRutas'>
@@ -14,24 +12,24 @@ const GestionInformacion = ({ isOpen, onClose }) => {
                         <BotonProcesos texto="torres" ruta={"/crudTorres"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="jornadas"/>
+                        <BotonProcesos texto="jornadas" ruta={"/crudJornada"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="programas"/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="instructores"/>
+                        <BotonProcesos texto="instructores" ruta="/crudInstructores"/>
                     </div>
                 </div>
                 <div className='der contAux'>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="ambientes"/>
+                        <BotonProcesos texto="ambientes" ruta="/crudAmbientes"/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="grupos"/>
+                        <BotonProcesos texto="grupos" ruta="/crudGrupos"/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="competencias"/>
+                        <BotonProcesos texto="competencias" ruta="/crudCompetencias"/>
                     </div>
                     <div className='contBtnRutaInfo'>
                     </div>

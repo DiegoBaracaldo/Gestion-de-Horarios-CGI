@@ -49,6 +49,7 @@
     display: flex; /* Usar flexbox para organizar elementos */
     flex-direction: column; /* Alinear elementos en columna */
     gap: 10px; /* Separación entre los elementos */
+    text-align: center;
   }
   
   .filtros input {
@@ -129,6 +130,9 @@
     width: 100%;
   }
   .esconderBusqueda{
+    display: none !important;
+  }
+  .esconderOpciones{
     display: none !important;
   }
 }

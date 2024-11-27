@@ -3,6 +3,7 @@ import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
 import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
 import './CrudGrupos.css';
 import { listaMenuGrupos } from '../ListasMenuFiltro';
+import ModalGrupos from '../../modales/modalGrupos/ModalGrupos';
 
 const CrudGrupos = () => {
 
@@ -43,6 +44,58 @@ const CrudGrupos = () => {
     useEffect(() => {
         setListaVacia(listaSelecciones.length === 0);
     }, [listaSelecciones]);
+    
+    ///////// SECCIÓN DE CONSULTA ///////////////
+    const [abrirConsulta, setAbrirConsulta] = useState(false);
+
+    const AbrirConsulta = () => {
+        setAbrirConsulta(true);
+    }
+
+    ///////// SECCIÓN DE REGISTRO ///////////////
+    const [abrirRegistro, setAbrirRegistro] = useState(false);
+
+    const AbrirRegistro = () => {
+        if(!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico, " + 
+                "un instructor y una jornada para proceder");
+        }else if(!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico y " + 
+                "un instructor para proceder");
+        }else if(!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico y " + 
+                "una jornada para proceder");
+        }else if(!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un programa académico para proceder");
+        }else if(VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos un instructor y " + 
+                "una jornada para proceder");
+        }else if(VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
+            alert("Debes registrar al menos un instructor para proceder");
+        }else if(VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
+            alert("Debes registrar al menos una jornada para proceder");
+        }else{
+            setAbrirRegistro(true);
+        }
+    }
+
+    const CerrarModal = () => {
+        setAbrirRegistro(false);
+        setAbrirConsulta(false);
+    }
+
+    function VerificarProgramas(){
+        //código para verificar que exista al menos un programa académico en la BD
+        return true;
+    }
+    function VerificarResponsables(){
+        //código para verificar que exista al menos un instructor en la BD
+        return true;
+    }
+    function VerificarJornadas(){
+        //código para verificar que exista al menos una jornada académico en la BD
+        return true;
+    }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>
         <label htmlFor='esCadenaFormacion'>es cadena de formación: </label>
@@ -65,7 +118,10 @@ const CrudGrupos = () => {
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)} />
+                buscarPor={(texto) => setTextoBusqueda(texto)}  onClicPositivo={AbrirRegistro}
+                clicFila={AbrirConsulta} />
+                <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
+                onCloseProp={() => CerrarModal()}/>
         </div>
     );
 }

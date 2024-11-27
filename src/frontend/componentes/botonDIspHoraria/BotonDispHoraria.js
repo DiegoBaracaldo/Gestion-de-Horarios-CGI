@@ -1,25 +1,63 @@
 import { useEffect, useState } from 'react';
 import './BotonDispHoraria.css';
 
-const BotonDispHoraria = ({ disabledProp, hiddenProp}) => {
+const BotonDispHoraria = ({ disabledProp, hiddenProp, esDisponibilidad, esConsulta,
+    edicionActivada
+}) => {
 
-    const [disabledHook, setDisabledHook] = useState(false);
-    const [hiddenHook, setHiddenHook] = useState(false);
+    const [disabledHook, setDisabledHook] = useState(disabledProp);
+    const [hiddenHook, setHiddenHook] = useState(hiddenProp);
     const [clasesHook, setClasesHook] = useState("btnOn");
-
     useEffect(() => {
-        if (disabledProp !== null || disabledProp !== undefined){
-            if(disabledProp) setClasesHook("btnOff");
-            else setClasesHook("btnOn");
-            setDisabledHook(disabledProp);
-        }
+        setDisabledHook(disabledProp);
     }, [disabledProp]);
 
     useEffect(() => {
-        if (hiddenProp !== null || hiddenProp !== undefined) setHiddenHook(hiddenProp);
+        setHiddenHook(hiddenProp);
     }, [hiddenProp]);
 
-    const manejarClick  = () => {
+    const [textoBtn, setTextoBtn] = useState('');
+
+
+    useEffect(() => {
+        //SI ES CONSULTA
+        if (esConsulta) {
+            //si se activó la edición
+            if (edicionActivada) {
+                //si la entidad maneja disponibilidad
+                if (esDisponibilidad) {
+                    setTextoBtn("definir disponibilidad");
+                }
+                //si la entidad maneja horario
+                if (!esDisponibilidad) {
+                    setTextoBtn("definir horario");
+                }
+            } else {
+                //si la entidad maneja disponibilidad
+                if (esDisponibilidad) {
+                    setTextoBtn("ver disponibilidad");
+                }
+                //si la entidad maneja horario
+                if (!esDisponibilidad) {
+                    setTextoBtn("ver horario");
+                }
+            }
+        }
+        //SI ES REGISTRO
+        else {
+            //si la entidad maneja disponibilidad
+            if (esDisponibilidad) {
+                setTextoBtn("definir disponibilidad");
+            }
+            //si la entidad maneja horario
+            if (!esDisponibilidad) {
+                setTextoBtn("definir horario");
+            }
+        }
+    }, [esConsulta, edicionActivada]);
+
+
+    const manejarClick = () => {
         //Función para abrir modal de disponibilidad horaria
         return;
     }
@@ -27,7 +65,7 @@ const BotonDispHoraria = ({ disabledProp, hiddenProp}) => {
     return (
         <button id="btnDispHoraria" onClick={manejarClick} disabled={disabledHook} hidden={hiddenHook}
             className={clasesHook}>
-            disponibilidad horaria
+            {textoBtn}
         </button>
     );
 }

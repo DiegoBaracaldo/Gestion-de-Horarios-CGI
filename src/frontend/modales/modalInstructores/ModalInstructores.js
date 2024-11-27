@@ -17,7 +17,7 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             <div className='seccCajitasModal'>
                 <section>
                     <label>cédula: </label>
-                    <input maxLength={15} max={15} disabled={inputsOff}
+                    <input maxLength={15} disabled={inputsOff}
                         title='Sólo números, sin signos especiales' />
                 </section>
                 <section>

@@ -46,7 +46,7 @@ const CrudAmbientes = () => {
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Ambientes"
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)} datosJson={datosJsonUno}
+                buscarPor={(texto) => setTextoBusqueda(texto)}
                 clicFila={AbrirConsulta} onClicPositivo={AbrirRegistro} />
             <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
                 onCloseProp={() => CerrarModal()} />

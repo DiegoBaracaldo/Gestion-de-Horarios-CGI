@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
-import './ModalGrupos.css';
 
 const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
 
@@ -33,18 +32,20 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                     <button disabled={inputsOff} >Seleccionar...</button>
                 </section>
                 <section>
-                    <label id='etNumAprendicesModalGrupos'>número de aprendices: </label>
+                    <label >número de aprendices: </label>
                     <input maxLength={2} disabled={inputsOff}
                         title='cantidad de estudiantes en el grupo (número de dos dígitos)' />
                 </section>
                 <section>
-                    <label id='etEsCadenaFormacionModal'>es cadena de formación: </label>
-                    <label className='checkLabelEsCadenaFormacionModal'>
-                        si <input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' />
+                    <label >es cadena de formación: </label>
+                    <div className='contRadios'>
+                    <label>
+                        si<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' />
                     </label>
-                    <label className='checkLabelEsCadenaFormacionModal'>
-                        no <input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' />
+                    <label>
+                        no<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' />
                     </label>
+                    </div>
                 </section>
             </div>
         </ModalGeneral>

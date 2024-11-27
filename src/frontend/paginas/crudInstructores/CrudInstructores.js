@@ -46,7 +46,7 @@ const CrudInstructores = () => {
                 disabledDestructivo={listaVacia} titulo="Instructores"
                 listaMenu={listaMenuIntruct} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={datosJsonUno} />
+                clicFila={AbrirConsulta}/>
             <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
             onCloseProp={() => CerrarModal()}/>
         </div>

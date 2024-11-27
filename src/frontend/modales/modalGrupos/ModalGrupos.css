@@ -1,0 +1,14 @@
+#etEsCadenaFormacionModal{
+    /* background-color: yellow; */
+    width: 50%;
+}
+.checkLabelEsCadenaFormacionModal{
+    /* background-color: aliceblue; */
+    width: 20%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+#etNumAprendicesModalGrupos{
+    width: 60%;
+}

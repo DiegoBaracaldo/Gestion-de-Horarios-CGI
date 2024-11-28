@@ -6,6 +6,7 @@
     border-collapse: separate;
     border-spacing: 0;
     /* border-collapse: collapse; */
+    table-layout: fixed;
 
     .tituloTabla {
         font-size: 26px;
@@ -36,6 +37,7 @@
 
     tbody {
         width: 100%;
+
         tr:nth-child(n+1):nth-child(odd) {
             background-color: white;
         }
@@ -53,7 +55,7 @@
 
     tr,
     td,
-    th{
+    th {
         border: 1px solid black;
         border-left: none;
         text-align: center;
@@ -65,10 +67,17 @@
         border-top: none;
         border-bottom: none;
     }
-    thead{
+
+    thead {
         position: sticky;
         top: 0;
         z-index: 1;
         /* border-bottom: 2px solid black; */
+    }
+    td{
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 5px;
     }
 }

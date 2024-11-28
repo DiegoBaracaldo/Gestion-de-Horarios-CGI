@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
-import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
 import './CrudInstructores.css';
 import { listaMenuIntruct } from '../ListasMenuFiltro';
-import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
-import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 import ModalInstructores from '../../modales/modalInstructores/ModalInstructores';
+import { mockInstructoresTres } from '../../mocks/MocksInstructores';
 
 const CrudInstructores = () => {
+
+    const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
@@ -46,9 +46,14 @@ const CrudInstructores = () => {
                 disabledDestructivo={listaVacia} titulo="Instructores"
                 listaMenu={listaMenuIntruct} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta}/>
-            <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-            onCloseProp={() => CerrarModal()}/>
+                clicFila={AbrirConsulta}  datosJson={mockInstructoresTres}
+                subtitulos={subs}/>
+            {
+                abrirConsulta || abrirRegistro ?
+                    <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
+                        onCloseProp={() => CerrarModal()} /> :
+                    null
+            }
         </div>
     );
 }

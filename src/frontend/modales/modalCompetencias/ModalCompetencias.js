@@ -8,7 +8,6 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    if (!abrirRegistro && !abrirConsulta) return null;
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
             isOpenConsulta={abrirConsulta}

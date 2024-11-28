@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
-import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
+import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/MockCrudAvanzado';
 import './CrudCompetencias.css';
 import { listaMenuAmbientes, listaMenuCompetencias } from '../ListasMenuFiltro';
 import ModalCompetencias from '../../modales/modalCompetencias/ModalCompetencias';
+import { mockCompetenciasTres } from '../../mocks/MocksCompetencias';
 
 const CrudCompetencias = () => {
+
+    const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
@@ -62,9 +65,14 @@ const CrudCompetencias = () => {
                 listaMenu={listaMenuCompetencias} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} esconderBusqueda={esconderBusqueda}
                 seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta}/>
-                <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                onCloseProp={() => CerrarModal()}/>
+                clicFila={AbrirConsulta} datosJson={esconderBusqueda ? null : mockCompetenciasTres} 
+                subtitulos={subs}/>
+            {
+                abrirRegistro || abrirConsulta ?
+                    <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
+                        onCloseProp={() => CerrarModal()} /> :
+                    null
+            }
         </div>
     );
 }

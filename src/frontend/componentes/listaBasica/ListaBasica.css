@@ -1,13 +1,15 @@
-  #listaBasica{
+  #listaBasicaContInterno{
     table {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px; /* Espacio entre el título y la primera fila */
+      border-collapse: separate;
+      border-spacing: 0cap;
       text-align: center; /* Centrar texto horizontalmente */
     }
     
     th, td {
-      border: 1px solid black; /* Borde de tabla y celdas */
+      border-left:1px solid black ; /* Borde de tabla y celdas */
+      border-right: 1px solid black;
+      border-top: 1px solid black;
       vertical-align: middle; /* Centrar texto verticalmente */
     }
     
@@ -15,6 +17,7 @@
       background-color: #FBFBE2; /* Color de fondo del título */
       position: sticky;
       top: 0;
+      
       z-index: 2;
     }
     
@@ -22,6 +25,7 @@
       font-size: 36px; /* Fuente de título */
       font-weight: bold; /* Negrita */
       height: 40px; 
+      border-bottom: 1px solid black;
     }
     
     tbody tr:nth-child(odd) {
@@ -51,6 +55,13 @@
     tbody{
       overflow: auto;
     }
+  }
+
+  #listaBasicaContInterno{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+
   }
  
 

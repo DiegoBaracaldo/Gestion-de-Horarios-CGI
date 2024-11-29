@@ -40,7 +40,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
     }, [apiUrl]);
 
     return (
-        <div id='listaBasica'>
+        <div id='listaBasicaContInterno'>
             <table>
                 <thead>
                     <tr>

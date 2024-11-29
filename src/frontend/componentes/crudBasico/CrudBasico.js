@@ -49,14 +49,15 @@ function CrudBasico({
             {esconderEntidad ? null : (
               <>
                 <h3>Nueva {entidad}:</h3>
-                <input type="text" placeholder="Agregar..." />
+                <input type="text" placeholder="Agregar..." maxLength={20}/>
               </>
             )}
-
+ 
             {/* Condicional para Botón */}
             {esconderBoton ? null : (
               <div className="agregar">
-                <BotonPositivo texto="Agregar" onClick={onClickPositivo} />
+                <BotonPositivo texto="Agregar" 
+                onClick={onClickPositivo && onClickPositivo()} />
               </div>
             )}
           </div>
@@ -72,7 +73,7 @@ function CrudBasico({
                     type="text"
                     placeholder="Buscar..."
                     value={busqueda || ''} // Asegura que busqueda nunca sea undefined
-                  />
+                    maxLength={20}/>
                 </div>
               )}
 

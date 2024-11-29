@@ -1,4 +1,7 @@
 #crudBasico{
+  height: 100svh;
+  width: 100vw;
+  
   .container {
     display: flex;
     flex-direction: row;
@@ -21,8 +24,7 @@
   .tabla {
     width: 90%;
     height: 90%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    border: 1px solid black;
     background-color: white;
     overflow-y: auto;
   }

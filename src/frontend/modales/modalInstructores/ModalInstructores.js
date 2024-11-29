@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral'
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
+import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
+import { ocupanciaUno } from '../../mocks/MockFranjaHoraria';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
 
@@ -8,7 +10,9 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    if (!abrirRegistro && !abrirConsulta) return null;
+    //Manejar modal de horario
+    const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
+
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
             isOpenConsulta={abrirConsulta}
@@ -22,8 +26,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>nombre: </label>
-                    <input maxLength={45} disabled={inputsOff} 
-                    title='Nombre completo'/>
+                    <input maxLength={45} disabled={inputsOff}
+                        title='Nombre completo' />
                 </section>
                 <section>
                     <label>correo: </label>
@@ -39,17 +43,24 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>tope de horas: </label>
-                    <input maxLength={2} disabled={inputsOff} 
-                    title='número de dos dígitos máximo'/>
+                    <input maxLength={2} disabled={inputsOff}
+                        title='número de dos dígitos máximo' />
                 </section>
                 <section>
                     <label>horario: </label>
                     {/* Si no es disponibilidad, es horario, si no es consulta, es resgistro,
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
                     <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
-                        edicionActivada={seActivoEdicion} />
+                        edicionActivada={seActivoEdicion}
+                        onClicHorario={() => setIsOpenFranjaHoraria(true)} />
                 </section>
             </div>
+            {
+                !isOpenFranjaHoraria ? null :
+                    <FranjaHoraria isOpen={isOpenFranjaHoraria}
+                        onClickDestructivo={() => setIsOpenFranjaHoraria(false)} 
+                        esConsulta={inputsOff} franjasOcupadasProp={ocupanciaUno}/>
+            }
         </ModalGeneral>
     );
 }

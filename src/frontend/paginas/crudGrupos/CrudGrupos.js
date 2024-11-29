@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
-import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
 import './CrudGrupos.css';
 import { listaMenuGrupos } from '../ListasMenuFiltro';
 import ModalGrupos from '../../modales/modalGrupos/ModalGrupos';
+import { mockGruposTres } from '../../mocks/MocksGrupos';
 
 const CrudGrupos = () => {
+
+    const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
@@ -44,7 +46,7 @@ const CrudGrupos = () => {
     useEffect(() => {
         setListaVacia(listaSelecciones.length === 0);
     }, [listaSelecciones]);
-    
+
     ///////// SECCIÓN DE CONSULTA ///////////////
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
@@ -56,25 +58,25 @@ const CrudGrupos = () => {
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
-        if(!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
-            alert("Debes registrar al menos un programa académico, " + 
+        if (!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
+            alert("Debes registrar al menos un programa académico, " +
                 "un instructor y una jornada para proceder");
-        }else if(!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
-            alert("Debes registrar al menos un programa académico y " + 
+        } else if (!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
+            alert("Debes registrar al menos un programa académico y " +
                 "un instructor para proceder");
-        }else if(!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
-            alert("Debes registrar al menos un programa académico y " + 
+        } else if (!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
+            alert("Debes registrar al menos un programa académico y " +
                 "una jornada para proceder");
-        }else if(!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()){
+        } else if (!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()) {
             alert("Debes registrar al menos un programa académico para proceder");
-        }else if(VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()){
-            alert("Debes registrar al menos un instructor y " + 
+        } else if (VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
+            alert("Debes registrar al menos un instructor y " +
                 "una jornada para proceder");
-        }else if(VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()){
+        } else if (VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
             alert("Debes registrar al menos un instructor para proceder");
-        }else if(VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()){
+        } else if (VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
             alert("Debes registrar al menos una jornada para proceder");
-        }else{
+        } else {
             setAbrirRegistro(true);
         }
     }
@@ -84,15 +86,15 @@ const CrudGrupos = () => {
         setAbrirConsulta(false);
     }
 
-    function VerificarProgramas(){
+    function VerificarProgramas() {
         //código para verificar que exista al menos un programa académico en la BD
         return true;
     }
-    function VerificarResponsables(){
+    function VerificarResponsables() {
         //código para verificar que exista al menos un instructor en la BD
         return true;
     }
-    function VerificarJornadas(){
+    function VerificarJornadas() {
         //código para verificar que exista al menos una jornada académico en la BD
         return true;
     }
@@ -118,10 +120,14 @@ const CrudGrupos = () => {
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)}  onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} />
-                <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                onCloseProp={() => CerrarModal()}/>
+                buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
+                clicFila={AbrirConsulta} datosJson={mockGruposTres} subtitulos={subs}/>
+            {
+                abrirConsulta || abrirRegistro ?
+                    <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
+                        onCloseProp={() => CerrarModal()} /> :
+                    null
+            }
         </div>
     );
 }

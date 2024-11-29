@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
-import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/mockCrudAvanzado';
 import './CrudAmbientes.css';
 import { listaMenuAmbientes } from '../ListasMenuFiltro';
 import ModalAmbientes from '../../modales/modalAmbientes/ModalAmbientes';
+import { mockAmbientesTres } from '../../mocks/MocksAmbientes';
 
 const CrudAmbientes = () => {
+
+    const subs = ['Ambiente', 'Torre', 'Capacidad de Estudiantes'];
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
@@ -33,8 +35,8 @@ const CrudAmbientes = () => {
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
-        VerificarTorres() ? setAbrirRegistro(true) : 
-        alert("Debes registrar al menos una torre para poder proceder");
+        VerificarTorres() ? setAbrirRegistro(true) :
+            alert("Debes registrar al menos una torre para poder proceder");
     }
 
     const CerrarModal = () => {
@@ -42,7 +44,7 @@ const CrudAmbientes = () => {
         setAbrirConsulta(false);
     }
 
-    function VerificarTorres(){
+    function VerificarTorres() {
         //aquí va el código para verificar que existan registros de torres
         return true;
     }
@@ -53,9 +55,14 @@ const CrudAmbientes = () => {
                 disabledDestructivo={listaVacia} titulo="Ambientes"
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)}
-                clicFila={AbrirConsulta} onClicPositivo={AbrirRegistro} />
-            <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                onCloseProp={() => CerrarModal()} />
+                clicFila={AbrirConsulta} onClicPositivo={AbrirRegistro} 
+                datosJson={mockAmbientesTres} subtitulos={subs}/>
+            {
+                abrirConsulta || abrirRegistro ?
+                    <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
+                        onCloseProp={() => CerrarModal()} /> :
+                    null
+            }
         </div>
     );
 }

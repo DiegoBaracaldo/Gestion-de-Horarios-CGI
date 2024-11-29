@@ -2,17 +2,16 @@ import { useEffect, useState } from 'react';
 import './ListaAvanzada.css';
 
 
-const ListaAvanzada = ({ titulo, datosJson, clickFila, listaSeleccProp }) => {
+const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccProp }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
     const [seleccionHook, setSeleccionHook] = useState("");
     const [numFilas, setNumFilas] = useState(datosJson ? datosJson.length : 0);
-    const [numColumnas, setNumColumnas] = useState(datosJson ? Object.values(datosJson[0]).length : 1);
+    const [numColumnas, setNumColumnas] = useState(subtitulos ? subtitulos.length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
 
     useEffect(() => {
-        setNumColumnas(datosJson ? Object.values(datosJson[0]).length : 1);
         setNumFilas(datosJson ? datosJson.length : 0);
     }, [datosJson]);
 
@@ -28,7 +27,7 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila, listaSeleccProp }) => {
     //almacenar la información de los index seleccionados en la lista para eliminarlos
     useEffect(() => {
         const arraySelecciones = [];
-        selecciones.forEach((element, index )=> {
+        selecciones.forEach((element, index) => {
             element && arraySelecciones.push(index);
         });
         //le paso la lista a una prop que puede recibirse en un setState en el padre
@@ -45,57 +44,61 @@ const ListaAvanzada = ({ titulo, datosJson, clickFila, listaSeleccProp }) => {
 
     return (
         <table id='listaAvanzada'>
-            <thead>
-                <tr className='tituloTabla'>
-                    <th colSpan={numColumnas + 1}>{titulo}</th>
-                </tr>
-                <tr className='subtituloTabla'>
-                    <td className='columnCheck'><input type='checkbox'
-                        onChange={SeleccionarTodo}></input></td>
-                    {
-                        datosJson ?
-                        Object.keys(datosJson[0]).map((element) => (
-                            <td key={element}>{element}</td>
-                        ))
-                        : <td></td>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    datosJson ?
-                    datosJson.map((element, index) => (
-                        <tr className='filaDatos' key={index}>
+            <colgroup>
+            <col style={{width: 40}}>
+            </col>
+            </colgroup>
+                    <thead>
+                        <tr className='tituloTabla'>
+                            <th colSpan={`${numColumnas + 1}`}>{titulo}</th>
+                        </tr>
+                        <tr className='subtituloTabla'>
                             <td className='columnCheck'><input type='checkbox'
-                                onChange={() => ManejarChecks(index)} checked={selecciones[index]}
-                                ></input></td>
+                                onChange={SeleccionarTodo}></input></td>
                             {
-                                Object.values(element).map((valor) => (
-                                    <td onClick={clickFila ? () => clickFila(element.nombre) :  PedirFuncionalidad}>{valor}</td>
-                                ))
+                                subtitulos ?
+                                    subtitulos.map((element) => (
+                                        <td key={element}>{element}</td>
+                                    ))
+                                    : <td>Se necesita lista subtítulos</td>
                             }
                         </tr>
-                    )) : null
-                }
-                {
-                    /*Esta función mantiene un numero limitado de filas para que el tamaño
-                de la tabla no varíe. Se calcula sabiendo que el alto de la tabla será 450px,
-                el título tienen 40px, el subtítulo 36px y las filas 24px, por lo tanto
-                (450-40-36)/24 da igual a 15.58 fila, que se redonde a 15 */
-                    numFilas <= 15 ?
-                        [...Array(15 - numFilas)].map(() => (
-                            <tr className='filaDatos'>
-                                <td></td>
-                                {
-                                    [...Array(numColumnas)].map(() => (
+                    </thead>
+                    <tbody>
+                        {
+                            datosJson ?
+                                datosJson.map((element, index) => (
+                                    <tr className='filaDatos' key={index}>
+                                        <td className='columnCheck'><input type='checkbox'
+                                            onChange={() => ManejarChecks(index)} checked={selecciones[index]}
+                                        ></input></td>
+                                        {
+                                            Object.values(element).map((valor) => (
+                                                <td onClick={clickFila ? () => clickFila(element.nombre) : PedirFuncionalidad}>{valor}</td>
+                                            ))
+                                        }
+                                    </tr>
+                                )) : null
+                        }
+                        {
+                            /*Esta función mantiene un numero limitado de filas para que el tamaño
+                        de la tabla no varíe. Se calcula sabiendo que el alto de la tabla será 450px,
+                        el título tienen 40px, el subtítulo 36px y las filas 24px, por lo tanto
+                        (450-40-36)/24 da igual a 15.58 fila, que se redonde a 15 */
+                            numFilas <= 15 ?
+                                [...Array(15 - numFilas)].map(() => (
+                                    <tr className='filaDatos'>
                                         <td></td>
-                                    ))
-                                }
-                            </tr>
-                        )) : null
-                }
-            </tbody>
-        </table>
-    );
+                                        {
+                                            [...Array(numColumnas)].map(() => (
+                                                <td></td>
+                                            ))
+                                        }
+                                    </tr>
+                                )) : null
+                        }
+                    </tbody>
+                </table>
+                );
 }
-export default ListaAvanzada;
+                export default ListaAvanzada;

@@ -3,10 +3,10 @@ import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './FranjaHoraria.css';
 
-const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franjasOcupadasProp }) => {
+const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franjasOcupadasProp, esConsulta
+}) => {
 
     const [matrizCeldasFranja, setMatrizCeldasFranja] = useState(ValorInicialMatriz());
-    const [classCeldasMatriz, setClassCeldasMatriz] = useState('celdaFranja');
     const [classCeldaHora, setClassCeldaHora] = useState('celdaHora');
     const [classCeldaTitulo, setClassCeldaTitulo] = useState('celdaTitulo');
     /* Hook para recolección de franjas horarias */
@@ -46,12 +46,15 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     }
 
     const ClicCeldaMatriz = (fila, e) => {
-        const colum = e.target.cellIndex - 1;
-        setArrastrando(true); //inciar arrastre
-        setInicioArrastrePintado(matrizCeldasFranja[fila][colum].pintadoVerde);
-        setEjeX(fila);
-        setEjeY(colum);
-        PintadoCelda(fila, e);
+        //Solo funciona  si no es consulta
+        if(!esConsulta){
+            const colum = e.target.cellIndex - 1;
+            setArrastrando(true); //inciar arrastre
+            setInicioArrastrePintado(matrizCeldasFranja[fila][colum].pintadoVerde);
+            setEjeX(fila);
+            setEjeY(colum);
+            PintadoCelda(fila, e);
+        }
     }
     const ManejarArrastre = (fila, e) => {
         const auxX = fila;
@@ -126,7 +129,7 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
             });
         }
         //Si la celda que inicia el arrastre está pintada
-        else{
+        else {
             setMatrizCeldasFranja(matrizCeldasFranja => {
                 const nuevaMatriz = matrizCeldasFranja.map((element, i) => {
                     if (i === fila) {
@@ -161,7 +164,7 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
 
     //Se pasa la selección de franjas mediante prop al padre
     useEffect(() => {
-        if (franjaProp) franjaProp(franjas);
+        franjaProp && franjaProp(franjas);
     }, [franjas]);
 
     //Para testear las franjas que se agregan al array
@@ -225,7 +228,9 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
         <div id='franjaHoraria'>
             <div className='franja'>
                 <div className='contTabla'>
-                    <table>
+                    {/* se usa "TerminarArrastre" aquí para evitar error al salir de la tabla
+                    mientras se mantiene clic presionado */}
+                    <table onMouseLeave={TerminarArrastre}>
                         <thead>
                             <tr>
                                 <th className={classCeldaHora} >hora</th>
@@ -253,15 +258,26 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                     <div className='muestraColor muestraColorBlanco'></div>
                     <label> : Franja disponible</label>
                 </div>
-                <div className='contMapaColores'>
-                    <div className='muestraColor muestraColorVerde'></div>
-                    <label> : Franja seleccionada</label>
-                </div>
+                {
+                    esConsulta ? null :
+                    <div className='contMapaColores'>
+                        <div className='muestraColor muestraColorVerde'></div>
+                        <label> : Franja seleccionada</label>
+                    </div>
+                }
                 <div className='contBtnPositivo contBtn'>
-                    <BotonPositivo texto="Registrar" onClick={onClickPositivo} />
+                    {
+                        esConsulta ? null :
+                            <BotonPositivo texto="Registrar"
+                                onClick={onClickPositivo ? () => onClickPositivo() :
+                                    () => alert("debes poner funcionalidad al botón positivo!")
+                                } />
+                    }
                 </div>
                 <div className='contBtnDestructivo contBtn'>
-                    <BotonDestructivo texto="Cancelar" onClick={onClickDestructivo} />
+                    <BotonDestructivo texto="Cancelar"
+                        onClick={onClickDestructivo ? () => onClickDestructivo() :
+                            () => alert("debes poner funcionalidad al botón destructivo!")} />
                 </div>
             </div>
         </div>

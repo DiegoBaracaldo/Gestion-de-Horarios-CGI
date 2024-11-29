@@ -57,7 +57,7 @@ function CrudBasico({
             {esconderBoton ? null : (
               <div className="agregar">
                 <BotonPositivo texto="Agregar" 
-                onClick={onClickPositivo && onClickPositivo()} />
+                onClick={onClickPositivo && onClickPositivo} />
               </div>
             )}
           </div>

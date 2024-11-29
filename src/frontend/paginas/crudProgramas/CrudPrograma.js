@@ -33,9 +33,14 @@ function CrudPrograma() {
            
           
             />
+            {
+              abrirConsulta || abrirRegistro ? 
+              <ModalProgramas abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} 
+              cerrarModal={()=>CerrarModal()}/>
+              : null
+            }
 
-            <ModalProgramas abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} 
-            cerrarModal={CerrarModal}/>
+           
             
     </div>
   )

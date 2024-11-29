@@ -4,7 +4,7 @@ import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
 function ModalProgramas({abrirRegistro, abrirConsulta, cerrarModal}) {
   const [inputsOff,setInputsOff]= useState(false); 
 
-  if(!abrirRegistro && ! abrirConsulta) return null;
+ 
     
   return (
     <div>

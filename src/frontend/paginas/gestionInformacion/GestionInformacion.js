@@ -9,13 +9,13 @@ const GestionInformacion = () => {
             <div className='contRutas'>
                 <div className='izq contAux'>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="torres"/>
+                        <BotonProcesos texto="torres" ruta={"/crudTorres"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="jornadas"/>
+                        <BotonProcesos texto="jornadas" ruta={"/crudJornada"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="programas"/>
+                        <BotonProcesos texto="programas" ruta={"/crudProgramas"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="instructores" ruta="/crudInstructores"/>

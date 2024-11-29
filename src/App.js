@@ -3,14 +3,22 @@ import './App.css';
 import './Global.css';
 import Principal from './frontend/paginas/principal/Principal';
 import GestionInformacion from './frontend/paginas/gestionInformacion/GestionInformacion';
+//import { datosJsonUno, tituloAux, subTitulosUno, subTitulosDos, datosJsonDos, datosJsonTres, subTitulosTres } from './frontend/mocks/mockTablaAvanzada';
+import ListaBasica from './frontend/componentes/listaBasica/ListaBasica';
+import { mocksBasica, mocksBasica2} from './frontend/mocks/mocksTablaBasica';
+import CrudBasico from './frontend/componentes/crudBasico/CrudBasico';
+import CrudTorres from './frontend/paginas/crudTorres/CrudTorres';
 import CrudInstructores from './frontend/paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from './frontend/paginas/crudAmbientes/CrudAmbientes';
 import CrudGrupos from './frontend/paginas/crudGrupos/CrudGrupos';
 import CrudCompetencias from './frontend/paginas/crudCompetencias/CrudCompetencias';
+import CrudJornadas from './frontend/paginas/crudJornadas/CrudJornadas';
+import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
 
 function App() {
 
   return (
+
     <div className="App">
       <Router>
         <Routes>
@@ -20,6 +28,9 @@ function App() {
           <Route path="/crudAmbientes" element={<CrudAmbientes/>} />
           <Route path="/crudGrupos" element={<CrudGrupos/>} />
           <Route path="/crudCompetencias" element={<CrudCompetencias/>} />
+          <Route path="/crudTorres" element={<CrudTorres/>} />
+          <Route path="/crudJornada" element={<CrudJornadas/>} />
+          <Route path="/crudProgramas" element={<CrudPrograma/>} />
         </Routes>
       </Router>
     </div>

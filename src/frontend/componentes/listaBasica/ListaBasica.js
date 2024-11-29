@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-// import './ListaBasica.css';
+import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl, datosJson }) {
+function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
     const [data, setData] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
     const numFilas = datosJson ? datosJson.length : 0;
@@ -25,6 +25,10 @@ function ListaBasica({ nameList, apiUrl, datosJson }) {
         setIsChecked(allChecked);
     };
 
+    const ClickFila =() =>{
+      clic && clic();
+    }
+
     // Consumo de APIs
     useEffect(() => {
         if (apiUrl) {
@@ -36,7 +40,7 @@ function ListaBasica({ nameList, apiUrl, datosJson }) {
     }, [apiUrl]);
 
     return (
-        <div id='listaBasica'>
+        <div id='listaBasicaContInterno'>
             <table>
                 <thead>
                     <tr>
@@ -52,7 +56,7 @@ function ListaBasica({ nameList, apiUrl, datosJson }) {
                 </thead>
                 <tbody>
                     {datosJson && datosJson.map((element, index) => (
-                        <tr className='filaDatos' key={index}>
+                        <tr className='filaDatos' key={index} onClick={ClickFila}>
                             <td className='columnCheck'>
                                 <input
                                     type='checkbox'

@@ -15,7 +15,7 @@ const GestionInformacion = () => {
                         <BotonProcesos texto="jornadas" ruta={"/crudJornada"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
-                        <BotonProcesos texto="programas"/>
+                        <BotonProcesos texto="programas" ruta={"/crudProgramas"}/>
                     </div>
                     <div className='contBtnRutaInfo'>
                         <BotonProcesos texto="instructores" ruta="/crudInstructores"/>

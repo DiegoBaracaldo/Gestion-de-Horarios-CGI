@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
+import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral'
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {

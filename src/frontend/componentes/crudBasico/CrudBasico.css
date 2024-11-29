@@ -43,8 +43,8 @@
   .filtros {
     width: 90%;
     margin-bottom: 10px;
-    border: 4px solid black;
-    border-radius: 5px;
+    border: 1px solid black;
+    border-radius: 12px;
     padding: 10px; /* Para agregar espacio interno */
     display: flex; /* Usar flexbox para organizar elementos */
     flex-direction: column; /* Alinear elementos en columna */
@@ -58,6 +58,7 @@
     margin-bottom: 10px;
     border: 2px solid black;
     border-radius: 5px;
+    font-size: 24px;
   }
   
   /* Dropdown */
@@ -102,18 +103,18 @@
   }
   
   /* Botones */
-  .agregar, .botones {
-    width: 90%;
+  .agregar,.botones {
+    width: 98%;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
   
-  .agregar button, .botones button {
+   button, .botones button {
     width: 100%;
     padding: 10px;
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: bold;
     border: none;
     border-radius: 5px;
@@ -122,7 +123,7 @@
   
   /* Títulos y secciones */
   h3 {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: bold;
     color: #333;
     margin-bottom: 5px;

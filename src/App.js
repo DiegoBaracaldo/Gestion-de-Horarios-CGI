@@ -13,6 +13,7 @@ import CrudAmbientes from './frontend/paginas/crudAmbientes/CrudAmbientes';
 import CrudGrupos from './frontend/paginas/crudGrupos/CrudGrupos';
 import CrudCompetencias from './frontend/paginas/crudCompetencias/CrudCompetencias';
 import CrudJornadas from './frontend/paginas/crudJornadas/CrudJornadas';
+import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
           <Route path="/crudCompetencias" element={<CrudCompetencias/>} />
           <Route path="/crudTorres" element={<CrudTorres/>} />
           <Route path="/crudJornada" element={<CrudJornadas/>} />
+          <Route path="/crudProgramas" element={<CrudPrograma/>} />
         </Routes>
       </Router>
     </div>

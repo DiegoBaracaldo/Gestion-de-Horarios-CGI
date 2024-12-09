@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral'
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
-import { ocupanciaUno } from '../../mocks/mockFranjaHoraria';
+import { ocupanciaUno } from '../../mocks/MockFranjaHoraria';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
 

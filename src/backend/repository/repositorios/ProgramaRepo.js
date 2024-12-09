@@ -28,14 +28,15 @@ class ProgramaRepo{
             this.SaveNew(programa);
         }else{
             //actualizar
-            return null;
+            let programaIndex = programasAcademicos.findIndex(e => e.id === idViejo);
+            programasAcademicos[programaIndex] = programa;
         }
     }
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray){
         idArray.forEach((id) => {
-            this.programasListaMock.filter(producto => producto.id !== id);
+            programasAcademicos.filter(producto => producto.id !== id);
         });
     }
 }

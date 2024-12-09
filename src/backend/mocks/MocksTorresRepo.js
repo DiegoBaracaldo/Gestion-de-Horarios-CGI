@@ -1,4 +1,4 @@
-export const tores = [
+export const torres = [
     {
       id: "101",
       nombre: "Edificio Central",
@@ -53,7 +53,7 @@ export const tores = [
   
   
   //para conseguirla de nuevo en caso de borrar todos los datos de la original
-  const toresCopia = [
+  const torresCopia = [
     {
       id: "101",
       nombre: "Edificio Central",

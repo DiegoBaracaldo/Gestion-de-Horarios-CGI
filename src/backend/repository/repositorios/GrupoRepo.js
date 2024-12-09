@@ -1,0 +1,43 @@
+import { grupos } from "../../mocks/MocksGruposRepo";
+
+class GrupoRepo{
+
+    constructor(){
+
+    }
+
+    GetAll(){
+        return grupos;
+    }
+
+    GetById(id){
+        let grupoAux = null;
+        grupos.forEach((grupo) => {
+            if(grupo.id === id) grupoAux = grupo;
+        });
+        return grupoAux;
+    }
+
+    SaveNew(grupo){
+        grupos.push(grupo);
+    }
+
+    Save(idViejo, grupo){
+        let grupoViejo = this.GetById(idViejo);
+        if(grupoViejo === null){
+            this.SaveNew(grupo);
+        }else{
+            //actualizar
+            let grupoIndex = grupos.findIndex(e => e.id === idViejo);
+            grupos[grupoIndex] = programa;
+        }
+    }
+
+    //Se trabaja con array de ids a eliminar.
+    Remove(idArray){
+        idArray.forEach((id) => {
+            grupos.filter(grupo => grupo.id !== id);
+        });
+    }
+}
+export default GrupoRepo;

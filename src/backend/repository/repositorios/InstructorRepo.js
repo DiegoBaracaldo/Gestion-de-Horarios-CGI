@@ -1,4 +1,4 @@
-import { Instructores } from "../../mocks/MocksInstructoresRepo";
+import { instructores } from "../../mocks/MockInstructoresRepo";
 
 class InstructorRepo{
 
@@ -7,19 +7,19 @@ class InstructorRepo{
     }
 
     GetAll(){
-        return Instructores;
+        return instructores;
     }
 
     GetById(id){
         let InstructorAux = null;
-        Instructores.forEach((Instructor) => {
+        instructores.forEach((Instructor) => {
             if(Instructor.id === id) InstructorAux = Instructor;
         });
         return InstructorAux;
     }
 
     SaveNew(Instructor){
-        Instructores.push(Instructor);
+        instructores.push(Instructor);
     }
 
     Save(idViejo, Instructor){
@@ -28,15 +28,15 @@ class InstructorRepo{
             this.SaveNew(Instructor);
         }else{
             //actualizar
-            let InstructorIndex = Instructores.findIndex(e => e.id === idViejo);
-            Instructores[InstructorIndex] = programa;
+            let InstructorIndex = instructores.findIndex(e => e.id === idViejo);
+            instructores[InstructorIndex] = Instructor;
         }
     }
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray){
         idArray.forEach((id) => {
-            Instructores.filter(Instructor => Instructor.id !== id);
+            instructores.filter(Instructor => Instructor.id !== id);
         });
     }
 }

@@ -1,8 +1,8 @@
 class Grupo{
-    constructor(idFicha, idPrograma, idResponsable, codigoGrupo, idJornada,
+    constructor(id, idPrograma, idResponsable, codigoGrupo, idJornada,
         cantidadAprendices, esCadenaFormacion, fechaRegistro
     ){
-        this.idFicha = idFicha;
+        this.idFicha = id;
         this.idPrograma = idPrograma;
         this.idResponsable = idResponsable;
         this.codigoGrupo = codigoGrupo;

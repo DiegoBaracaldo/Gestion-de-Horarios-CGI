@@ -8,7 +8,7 @@ class TorreServicio {
 
     CargarLista() {
         const repo = new TorreRepo();
-        if (repo.GetAll) return repo.GetAll;
+        if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
 }

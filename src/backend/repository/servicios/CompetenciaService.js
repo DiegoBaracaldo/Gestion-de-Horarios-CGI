@@ -8,7 +8,7 @@ class CompetenciaServicio {
 
     CargarLista() {
         const repo = new CompetenciaRepo();
-        if (repo.GetAll) return repo.GetAll;
+        if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
 }

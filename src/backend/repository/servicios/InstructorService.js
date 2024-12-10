@@ -8,7 +8,7 @@ class InstructorServicio {
 
     CargarLista() {
         const repo = new InstructorRepo();
-        if (repo.GetAll) return repo.GetAll;
+        if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
 }

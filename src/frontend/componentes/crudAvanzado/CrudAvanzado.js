@@ -13,6 +13,7 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
     const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
     const [seleccFiltroTexto, setseleccFiltroTexto] = useState(listaMenu ? listaMenu[0].texto : '');
+    const [textoInput, setTextoInput] = useState("");
 
     useEffect(() => {
         //se pasa la lista recibida al padre a  través de una función
@@ -30,8 +31,12 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
         filtrarPor && seleccFiltroValor !== '' ? filtrarPor(seleccFiltroValor) : PedirFuncionalidad();
     }, [seleccFiltroValor]);
 
-    const ManejarTextoBusqueda = (texto) => {
-        buscarPor && buscarPor(texto.target.value);
+    useEffect(() => {
+        ManejarTextoBusqueda();
+    }, [textoInput]);
+
+    const ManejarTextoBusqueda = () => {
+        buscarPor && buscarPor(textoInput);
     }
 
     const PedirFuncionalidad = () => {
@@ -51,14 +56,16 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                                     {
                                         listaMenu ?
                                             listaMenu.map((element, index) => (
-                                                <option value={element.valor}>{element.texto}</option>
+                                                <option key={index} value={element.valor}>{element.texto}</option>
                                             ))
                                             : <option>seleccionar...</option>
                                     }
                                 </select>
                             </div>
                             <div className='ladoDer'>
-                                <input placeholder={`Escribe ${seleccFiltroTexto} aquí...`} maxLength={50} onChange={ManejarTextoBusqueda}></input>
+                                <input placeholder={`Escribe ${seleccFiltroTexto} aquí...`} 
+                                maxLength={50} onChange={e => setTextoInput(e.target.value)} 
+                                value={textoInput}></input>
                             </div>
                         </article>
                 }

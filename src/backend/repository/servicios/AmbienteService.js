@@ -8,7 +8,7 @@ class AmbienteServicio {
 
     CargarLista() {
         const repo = new AmbienteRepo();
-        if (repo.GetAll) return repo.GetAll;
+        if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
 }

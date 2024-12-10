@@ -1,16 +1,16 @@
 import ProgramaRepo from "../repositorios/ProgramaRepo"
 
-class ProgramaServicio{
+class ProgramaServicio {
 
-    constructor(){
+    constructor() {
 
+    }
+
+    CargarLista() {
+        const repo = new ProgramaRepo();
+        return repo.GetAll();
     }
 }
 
-CargarLista(){
-    const repo = new ProgramaRepo();
-    if(repo.GetAll) return repo.GetAll;
-    else return null;
-}
 
 export default ProgramaServicio;

@@ -4,13 +4,37 @@ import './CrudGrupos.css';
 import { listaMenuGrupos } from '../ListasMenuFiltro';
 import ModalGrupos from '../../modales/modalGrupos/ModalGrupos';
 import { mockGruposTres } from '../../mocks/MocksGrupos';
+import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
+import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
 const CrudGrupos = () => {
 
     const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
+    const CargarLista = () => {
+        return new GrupoServicio().CargarLista();
+    }
+
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
+    const [listaObjetos, setListaObjetos] = useState(CargarLista);
+    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaAdaptada, setListaAdaptada] = useState([]);
+
+    //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
+    useEffect(() => {
+        const listaAux = [];
+        listaFiltrada &&
+            listaFiltrada.map((element) => {
+                let objetoAux = {};
+                objetoAux.id = element.id;
+                objetoAux.codigoGrupo = element.codigoGrupo;
+                objetoAux.nombrePrograma = element.nombrePrograma;
+                objetoAux.jornada = element.jornada;
+                listaAux.push(objetoAux);
+            });
+        setListaAdaptada(listaAux);
+    }, [listaFiltrada]);
 
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
@@ -46,6 +70,16 @@ const CrudGrupos = () => {
     useEffect(() => {
         setListaVacia(listaSelecciones.length === 0);
     }, [listaSelecciones]);
+
+    /////////// SECCIÓN DE FILTRO Y BÚSQUEDA /////////////
+    const Filtrar = () => {
+        setListaFiltrada(FiltroGeneral(seleccMenuFiltro, textoBusqueda, listaObjetos));
+    }
+    //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
+    useEffect(() => {
+        setTimeout(Filtrar, "50");
+    }, [textoBusqueda]);
+    /////////////////////////////////////////////////////
 
     ///////// SECCIÓN DE CONSULTA ///////////////
     const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -121,7 +155,7 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={mockGruposTres} subtitulos={subs}/>
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

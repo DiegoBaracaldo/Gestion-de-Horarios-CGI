@@ -1,4 +1,4 @@
-import { torres } from "../../mocks/MocksTorresRepo";
+import { torres } from "../../mocks/MockTorresRepo";
 
 class TorreRepo{
 
@@ -29,7 +29,7 @@ class TorreRepo{
         }else{
             //actualizar
             let torreIndex = torres.findIndex(e => e.id === idViejo);
-            torres[torreIndex] = programa;
+            torres[torreIndex] = torre;
         }
     }
 

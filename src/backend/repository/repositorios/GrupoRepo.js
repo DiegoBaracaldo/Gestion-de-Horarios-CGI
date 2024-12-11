@@ -1,4 +1,4 @@
-import { grupos } from "../../mocks/MocksGruposRepo";
+import { grupos } from "../../mocks/MockGruposRepo";
 
 class GrupoRepo{
 
@@ -29,7 +29,7 @@ class GrupoRepo{
         }else{
             //actualizar
             let grupoIndex = grupos.findIndex(e => e.id === idViejo);
-            grupos[grupoIndex] = programa;
+            grupos[grupoIndex] = grupo;
         }
     }
 

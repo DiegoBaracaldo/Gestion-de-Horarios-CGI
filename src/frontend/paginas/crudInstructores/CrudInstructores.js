@@ -4,8 +4,8 @@ import './CrudInstructores.css';
 import { listaMenuIntruct } from '../ListasMenuFiltro';
 import ModalInstructores from '../../modales/modalInstructores/ModalInstructores';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
-import { mockInstructoresTres } from '../../mocks/MocksInstructores';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
+import { mockInstructoresTres } from '../../mocks/MocksInstructores';
 
 const CrudInstructores = () => {
 
@@ -14,7 +14,7 @@ const CrudInstructores = () => {
     const CargarLista = () => {
         return new InstructorServicio().CargarLista();
     }
-    
+
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
     const [listaObjetos, setListaObjetos] = useState(CargarLista);
@@ -27,14 +27,14 @@ const CrudInstructores = () => {
     useEffect(() => {
         const listaAux = [];
         listaFiltrada &&
-        listaFiltrada.map((element) => {
-            let objetoAux = {};
-            objetoAux.id = element.id;
-            objetoAux.nombre = element.nombre;
-            objetoAux.especialidad = element.especialidad;
-            objetoAux.topeHoras = element.topeHoras;
-            listaAux.push(objetoAux);
-        });
+            listaFiltrada.map((element) => {
+                let objetoAux = {};
+                objetoAux.id = element.id;
+                objetoAux.nombre = element.nombre;
+                objetoAux.especialidad = element.especialidad;
+                objetoAux.topeHoras = element.topeHoras;
+                listaAux.push(objetoAux);
+            });
         setListaAdaptada(listaAux);
     }, [listaFiltrada]);
 
@@ -50,7 +50,7 @@ const CrudInstructores = () => {
     const Filtrar = () => {
         setListaFiltrada(FiltroGeneral(seleccMenuFiltro, textoBusqueda, listaObjetos));
     }
-        //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
+    //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
         setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
@@ -84,8 +84,8 @@ const CrudInstructores = () => {
                 disabledDestructivo={listaVacia} titulo="Instructores"
                 listaMenu={listaMenuIntruct} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta}  datosJson={listaAdaptada}
-                subtitulos={subs}/>
+                clicFila={AbrirConsulta} datosJson={listaAdaptada}
+                subtitulos={subs} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

@@ -28,7 +28,7 @@ class JornadaRepo{
         }else{
             //actualizar
             let jornadaIndex = jornadas.findIndex(e => e.id === idViejo);
-            jornadas[jornadaIndex] = programa;
+            jornadas[jornadaIndex] = jornada;
         }
     }
 

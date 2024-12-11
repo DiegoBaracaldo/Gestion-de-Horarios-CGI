@@ -13,11 +13,11 @@ export const listaMenuAmbientes = [
 export const listaMenuGrupos = [
     { texto: 'ficha', valor: 'id' },
     { texto: 'código de grupo', valor: 'codigoGrupo' },
-    { texto: 'programa', valor: 'programa' },
-    { texto: 'id de responsable', valor: 'responsable' },
+    { texto: 'programa', valor: 'nombrePrograma' },
+    { texto: 'responsable', valor: 'nombreResponsable' },
     { texto: 'jornada', valor: 'jornada' }
 ];
 export const listaMenuCompetencias = [
     {texto: 'código', valor: 'id'},
-    {texto: 'palabra clave', valor: 'palabraClave'}
+    {texto: 'descripcion', valor: 'descripcion'}
 ];

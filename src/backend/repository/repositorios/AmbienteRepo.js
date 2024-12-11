@@ -1,4 +1,4 @@
-import { ambientes } from "../../mocks/MocksAmbientesRepo";
+import { ambientes } from "../../mocks/MockAmbientesRepo";
 
 class AmbienteRepo{
 
@@ -29,7 +29,7 @@ class AmbienteRepo{
         }else{
             //actualizar
             let ambienteIndex = ambientes.findIndex(e => e.id === idViejo);
-            ambientes[ambienteIndex] = programa;
+            ambientes[ambienteIndex] = ambiente;
         }
     }
 

@@ -18,15 +18,19 @@ function CrudBasico({
   esconderGeneral,
   esconderEntidad,
   esconderBoton,
+  listaSeleccionada,
   busqueda,
-  clic,
+  disabledDestructivo,
+  clic
 }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Estado para el dropdown
   const [selectedOption, setSelectedOption] = useState(''); // Opción seleccionada
-
+  const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-  const handleOptionClick = (opcion) => {
+  const handleOptionClick = (e) => {
+    const opcion = e.target.value;
+    console.log(opcion);
     setSelectedOption(opcion); // Actualiza la opción seleccionada
     setIsDropdownOpen(false); // Cierra el menú desplegable
   };
@@ -37,7 +41,8 @@ function CrudBasico({
         {/* Espacio izquierdo de tabla */}
         <div className="izquierda">
           <div className="tabla">
-            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic} />
+            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic} 
+            listaSeleccProp={(lista) =>listaSeleccionada(lista)}/>
           </div>
         </div>
 
@@ -80,22 +85,18 @@ function CrudBasico({
               {/* Dropdown de opciones */}
               {esconderOpciones ? null : (
                 <div className="dropdown-container">
-                  <button className="dropdown-button" onClick={toggleDropdown}>
-                    {selectedOption || 'Opciones'}
-                  </button>
-                  {isDropdownOpen && (
-                    <div className="dropdown-menu">
-                      {(opciones || []).map((opcion, index) => (
-                        <div
-                          key={index}
-                          className="dropdown-item"
-                          onClick={() => handleOptionClick(opcion)}
-                        >
-                          {opcion}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <select className='dropdown-button' onChange={handleOptionClick}>
+                    <option value={"cursoCorto"} className='dropdown-item'>
+                      Curso corto
+                    </option>
+                    <option value={"tecnico"} className='dropdown-item'>
+                      Técnico
+                    </option>
+                    <option value={"tecnologo"} className='dropdown-item'>
+                    Tecnólogo
+                    </option>
+                    
+                  </select>
                 </div>
               )}
             </section>
@@ -103,7 +104,11 @@ function CrudBasico({
 
           {/* Botones de acción */}
           <div className="botones">
-            <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo} />
+            {
+              
+            }
+            <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo } 
+            disabledProp={disabledDestructivo} />
             <br />
             <BotonVolver />
           </div>

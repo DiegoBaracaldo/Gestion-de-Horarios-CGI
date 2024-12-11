@@ -16,7 +16,7 @@ function ModalProgramas({abrirRegistro, abrirConsulta, cerrarModal}) {
           <div className='seccCajitasModal'>
           <section>
                 <label>
-                    Còdigo: 
+                  Código: 
                 </label>
                 <input disabled={inputsOff} />
             </section>
@@ -35,10 +35,10 @@ function ModalProgramas({abrirRegistro, abrirConsulta, cerrarModal}) {
                     Curso corto
                   </option>
                   <option value={"tecnico"}>
-                    Tècnico
+                     Técnico
                   </option>
                   <option value={"tecnologo"}>
-                    Tecnòlogo
+                      Tecnólogo
                   </option>
                 </select>
             </section>

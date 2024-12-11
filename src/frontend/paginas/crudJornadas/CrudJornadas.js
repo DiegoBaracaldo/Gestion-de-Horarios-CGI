@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import './CrudJornadas.css'
 import CrudBasico from '../../componentes/crudBasico/CrudBasico'
 import { mocksBasica2 } from '../../mocks/mocksTablaBasica'
@@ -14,6 +14,12 @@ function CrudJornadas() {
    setAbrirRegistro(false);
    setAbrirConsulta(false);
  }
+ const [listaVacia, setListaVacia] = useState(true);
+ const [listaSelecciones, setListaSelecciones] = useState([]);
+
+ useEffect(() => {
+  setListaVacia(listaSelecciones.length === 0);
+}, [listaSelecciones]);
 
   return (
     <div id='contCrudJornadas'>
@@ -23,7 +29,9 @@ function CrudJornadas() {
             esconderGeneral={true}
             onClickPositivo={()=> setAbrirHorario(true)}
             clic={()=> setAbrirConsulta(true)}
-        />
+            disabledDestructivo={listaVacia}
+            listaSeleccionada={(lista) => setListaSelecciones(lista)} 
+                />
 
         {
           abrirConsulta || abrirRegistro ? <ModalJornadas cerrarModal={()=> CerrarModal()}

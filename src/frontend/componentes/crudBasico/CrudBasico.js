@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ListaBasica from '../listaBasica/ListaBasica';
 import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
@@ -21,18 +21,20 @@ function CrudBasico({
   listaSeleccionada,
   busqueda,
   disabledDestructivo,
-  clic
+  clic,
+  seleccFiltro
 }) {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Estado para el dropdown
-  const [selectedOption, setSelectedOption] = useState(''); // Opción seleccionada
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const [textoBuscar, setTextoBuscar] = useState('');
+
+useEffect(() => {
+  busqueda && busqueda(textoBuscar);
+}, [textoBuscar]);
 
   const handleOptionClick = (e) => {
     const opcion = e.target.value;
     console.log(opcion);
-    setSelectedOption(opcion); // Actualiza la opción seleccionada
-    setIsDropdownOpen(false); // Cierra el menú desplegable
+    seleccFiltro && seleccFiltro(opcion); // Actualiza la opción seleccionada
   };
 
   return (
@@ -77,7 +79,8 @@ function CrudBasico({
                   <input
                     type="text"
                     placeholder="Buscar..."
-                    value={busqueda || ''} // Asegura que busqueda nunca sea undefined
+                    value={textoBuscar} // Asegura que busqueda nunca sea undefined
+                    onChange={e => setTextoBuscar(e.target.value)}
                     maxLength={20}/>
                 </div>
               )}
@@ -86,6 +89,9 @@ function CrudBasico({
               {esconderOpciones ? null : (
                 <div className="dropdown-container">
                   <select className='dropdown-button' onChange={handleOptionClick}>
+                    <option value={"todos"} className='dropdown-item'>
+                      Todos
+                    </option>
                     <option value={"cursoCorto"} className='dropdown-item'>
                       Curso corto
                     </option>

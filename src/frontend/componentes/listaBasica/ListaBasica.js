@@ -4,8 +4,16 @@ import './ListaBasica.css';
 function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
     const [data, setData] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
-    const numFilas = datosJson ? datosJson.length : 0;
-    const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
+    const [numFilas, setNumFilas] = useState(0);
+    const [selecciones, setSelecciones] = useState([]);
+
+    useEffect(() => {
+        setNumFilas(datosJson ? datosJson.length : 0);
+    }, [datosJson]);
+    
+    useEffect(() => {
+        setSelecciones(Array(numFilas).fill(false));
+    }, [numFilas]);
 
     // Maneja el cambio del checkbox en el encabezado
     const handleChange = () => {
@@ -65,11 +73,11 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
                 <tbody>
                     {datosJson && datosJson.map((element, index) => (
                         <tr className='filaDatos' key={index} onClick={ClickFila}>
-                            <td className='columnCheck'>
+                            <td className='columnCheck'
+                                    onClick={(event) => event.stopPropagation()} >
                                 <input
                                     type='checkbox'
                                     onChange={() => ManejarChecks(index)}
-                                    onClick={(event) => event.stopPropagation()} 
                                     checked={selecciones[index]}
                                 />
                             </td>

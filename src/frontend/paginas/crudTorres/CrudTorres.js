@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './CrudTorres.css';
 import CrudBasico from '../../componentes/crudBasico/CrudBasico';
 import { mocksBasica } from '../../mocks/mocksTablaBasica';
@@ -6,7 +6,12 @@ import ModalTorres from '../../modales/modalTorres/ModalTorres';
 
 function CrudTorres() {
   const [abrirEdicion,setAbrirEdicion]= useState(false); 
-
+  const [listaVacia, setListaVacia] = useState(true);
+  const [listaSelecciones, setListaSelecciones] = useState([]);
+ 
+  useEffect(() => {
+   setListaVacia(listaSelecciones.length === 0);
+ }, [listaSelecciones]);
   return (
     <div id='contCrudTorres'>
         <CrudBasico 
@@ -16,7 +21,8 @@ function CrudTorres() {
         esconderOpciones={true}
         // busqueda={} espacio libre para busqueda por medio de variables
         clic={()=> setAbrirEdicion(true)}
-        
+        disabledDestructivo={listaVacia}
+        listaSeleccionada={(lista) => setListaSelecciones(lista)}
          />
         
         {

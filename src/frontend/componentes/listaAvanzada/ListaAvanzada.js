@@ -5,7 +5,6 @@ import './ListaAvanzada.css';
 const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccProp }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
-    const [seleccionHook, setSeleccionHook] = useState("");
     const [numFilas, setNumFilas] = useState(datosJson ? datosJson.length : 0);
     const [numColumnas, setNumColumnas] = useState(subtitulos ? subtitulos.length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
@@ -54,7 +53,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                         </tr>
                         <tr className='subtituloTabla'>
                             <td className='columnCheck'><input type='checkbox'
-                                onChange={SeleccionarTodo}></input></td>
+                                onChange={SeleccionarTodo}/></td>
                             {
                                 subtitulos ?
                                     subtitulos.map((element) => (
@@ -71,10 +70,11 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                                     <tr className='filaDatos' key={index}>
                                         <td className='columnCheck'><input type='checkbox'
                                             onChange={() => ManejarChecks(index)} checked={selecciones[index]}
-                                        ></input></td>
+                                        key={index} /></td>
                                         {
-                                            Object.values(element).map((valor) => (
-                                                <td onClick={clickFila ? () => clickFila(element.nombre) : PedirFuncionalidad}>{valor}</td>
+                                            Object.values(element).map((valor, index) => (
+                                                <td onClick={clickFila ? () => clickFila(element.nombre) : PedirFuncionalidad}
+                                                key={index}>{valor}</td>
                                             ))
                                         }
                                     </tr>
@@ -86,12 +86,12 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                         el título tienen 40px, el subtítulo 36px y las filas 24px, por lo tanto
                         (450-40-36)/24 da igual a 15.58 fila, que se redonde a 15 */
                             numFilas <= 15 ?
-                                [...Array(15 - numFilas)].map(() => (
-                                    <tr className='filaDatos'>
+                                [...Array(15 - numFilas)].map((element, index) => (
+                                    <tr className='filaDatos' key={index}>
                                         <td></td>
                                         {
-                                            [...Array(numColumnas)].map(() => (
-                                                <td></td>
+                                            [...Array(numColumnas)].map((element, index) => (
+                                                <td key={index}></td>
                                             ))
                                         }
                                     </tr>

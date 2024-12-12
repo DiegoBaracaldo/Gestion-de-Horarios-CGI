@@ -4,17 +4,54 @@ import './CrudGrupos.css';
 import { listaMenuGrupos } from '../ListasMenuFiltro';
 import ModalGrupos from '../../modales/modalGrupos/ModalGrupos';
 import { mockGruposTres } from '../../mocks/MocksGrupos';
+import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
+import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
 const CrudGrupos = () => {
 
     const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
+    const CargarLista = () => {
+        return new GrupoServicio().CargarLista();
+    }
+
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-
+    const [listaObjetos, setListaObjetos] = useState(CargarLista);
+    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaFiltradaCadena, setListaFiltradaCadena] = useState([]);
+    const [listaFiltradaNoCadena, setListaFiltradaNoCadena] = useState([]);
+    const [listaAdaptada, setListaAdaptada] = useState([]);
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
     const [opcionCadena, setOpcionCadena] = useState("ambos");
+
+    //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
+    useEffect(() => {
+        //se actualizan las listas de cadena y no cadena cada que cambia la lista filtrada
+        FiltrarCadenaFormacion();
+    }, [listaFiltrada]);
+
+    useEffect(() => {
+        if(opcionCadena === "ambos") AdaptarLista(listaFiltrada);
+        if(opcionCadena === "si") AdaptarLista(listaFiltradaCadena);
+        if(opcionCadena === "no") AdaptarLista(listaFiltradaNoCadena);
+    }, [listaFiltradaNoCadena]); //se elige esta variable ya que es la última en cambiar al FiltrarCadenaFormacion()
+
+    const AdaptarLista = (listaRecibida) => {
+        const listaAux = [];
+        listaRecibida &&
+            listaRecibida.map((element) => {
+                let objetoAux = {};
+                objetoAux.id = element.id;
+                objetoAux.codigoGrupo = element.codigoGrupo;
+                objetoAux.nombrePrograma = element.nombrePrograma;
+                objetoAux.jornada = element.jornada;
+                listaAux.push(objetoAux);
+            });
+        setListaAdaptada(listaAux);
+    }
+
 
     //captura de palabras para filtro y búsqueda
     const [seleccMenuFiltro, setSeleccMenuFiltro] = useState('');
@@ -26,7 +63,7 @@ const CrudGrupos = () => {
         setOpcionCadena(texto);
     }
 
-    //Función para definir checks en vista en función de la opción elegida
+    //Función para definir checks en vista en función de la opción elegida y filtrar por Cadena Formacion
     useEffect(() => {
         let auxLista = [];
         if (opcionCadena === "si") {
@@ -41,20 +78,43 @@ const CrudGrupos = () => {
             auxLista = [false, false, true];
             setCheckOpciones(auxLista);
         }
+        FiltrarCadenaFormacion();
     }, [opcionCadena]);
 
     useEffect(() => {
         setListaVacia(listaSelecciones.length === 0);
     }, [listaSelecciones]);
 
-    ///////// SECCIÓN DE CONSULTA ///////////////
+    /********* SECCIÓN DE FILTRO Y BÚSQUEDA *************/
+    const Filtrar = () => {
+        setListaFiltrada(FiltroGeneral(seleccMenuFiltro, textoBusqueda, listaObjetos));
+    }
+    //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
+    useEffect(() => {
+        setTimeout(Filtrar, "50");
+    }, [textoBusqueda]);
+
+    const FiltrarCadenaFormacion = () => {
+        const listaAuxCadena = [];
+        const listaAuxNoCadena = []
+        listaFiltrada.forEach((element) => {
+            if (element.esCadenaFormación) listaAuxCadena.push(element);
+            else listaAuxNoCadena.push(element);
+        });
+        setListaFiltradaCadena(listaAuxCadena);
+        setListaFiltradaNoCadena(listaAuxNoCadena);
+    }
+    /////////////////////////////////////////////////////
+
+    /****************** SECCIÓN DE CONSULTA *************************/
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
     const AbrirConsulta = () => {
         setAbrirConsulta(true);
     }
+    /////////////////////////////////////////////////////
 
-    ///////// SECCIÓN DE REGISTRO ///////////////
+    /************  SECCIÓN DE REGISTRO ***************************/
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
@@ -80,6 +140,7 @@ const CrudGrupos = () => {
             setAbrirRegistro(true);
         }
     }
+    /////////////////////////////////////////////////////
 
     const CerrarModal = () => {
         setAbrirRegistro(false);
@@ -121,7 +182,7 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={mockGruposTres} subtitulos={subs}/>
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

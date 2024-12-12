@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
+function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
     const [data, setData] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
     const numFilas = datosJson ? datosJson.length : 0;
@@ -20,7 +20,6 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
         nuevasSelecciones[index] = !nuevasSelecciones[index];
         setSelecciones(nuevasSelecciones);
 
-        // Verifica si todos los checkboxes están seleccionados o no
         const allChecked = nuevasSelecciones.every(val => val === true);
         setIsChecked(allChecked);
     };
@@ -39,6 +38,15 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
         }
     }, [apiUrl]);
 
+    //selecciones
+    useEffect(() => {
+        const arraySelecciones = [];
+        selecciones.forEach((element, index) => {
+            element && arraySelecciones.push(index);
+        });
+        //le paso la lista a una prop que puede recibirse en un setState en el padre
+        listaSeleccProp && listaSeleccProp(arraySelecciones);
+    }, [selecciones]);
     return (
         <div id='listaBasicaContInterno'>
             <table>
@@ -61,6 +69,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic }) {
                                 <input
                                     type='checkbox'
                                     onChange={() => ManejarChecks(index)}
+                                    onClick={(event) => event.stopPropagation()} 
                                     checked={selecciones[index]}
                                 />
                             </td>

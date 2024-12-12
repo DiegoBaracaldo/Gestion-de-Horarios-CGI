@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import CrudBasico from '../../componentes/crudBasico/CrudBasico'
 import { mocksBasica } from '../../mocks/mocksTablaBasica'
 import ModalProgramas from '../../modales/modalProgramas/ModalProgramas.js';
@@ -18,7 +18,17 @@ function CrudPrograma() {
       setAbrirConsulta(false);
       setAbrirRegistro(false);
 
-    }    
+    }   
+    
+    //constantes de opciones
+    const opciones = ['Curso corto', 'Técnico', 'Tecnólogo'];
+    const [listaVacia, setListaVacia] = useState(true);
+    const [listaSelecciones, setListaSelecciones] = useState([]);
+    const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
+
+    useEffect(() => {
+      setListaVacia(listaSelecciones.length === 0);
+    }, [listaSelecciones]);
    
   return (
     <div id='contCrudJornadas'>
@@ -30,8 +40,9 @@ function CrudPrograma() {
             propiedadTabla={mocksBasica}
             onClickPositivo={AbrirRegistro}
             clic={AbrirConsulta}
-           
-          
+            opciones={opciones}
+            disabledDestructivo={listaVacia}
+            listaSeleccionada={(lista) => setListaSelecciones(lista)}
             />
             {
               abrirConsulta || abrirRegistro ? 

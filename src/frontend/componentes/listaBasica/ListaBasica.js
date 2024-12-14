@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
+function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoSeleccion }) {
     const [data, setData] = useState(null);
     const [isChecked, setIsChecked] = useState(false);
     const [numFilas, setNumFilas] = useState(0);
@@ -10,7 +10,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
     }, [datosJson]);
-    
+
     useEffect(() => {
         setSelecciones(Array(numFilas).fill(false));
     }, [numFilas]);
@@ -32,8 +32,8 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
         setIsChecked(allChecked);
     };
 
-    const ClickFila =() =>{
-      clic && clic();
+    const ClickFila = (e) => {
+        clic && clic(e);
     }
 
     // Consumo de APIs
@@ -61,28 +61,32 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp }) {
                 <thead>
                     <tr>
                         <th>
-                            <input
-                                type='checkbox'
-                                checked={isChecked}
-                                onChange={handleChange}
-                            />
+                            {
+                                !modoSeleccion && <input
+                                    type='checkbox'
+                                    checked={isChecked}
+                                    onChange={handleChange}
+                                />
+                            }
                         </th>
                         <th>{nameList}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {datosJson && datosJson.map((element, index) => (
-                        <tr className='filaDatos' key={index} onClick={ClickFila}>
+                        <tr className='filaDatos' key={index} onClick={() => ClickFila(element)}>
                             <td className='columnCheck'
-                                    onClick={(event) => event.stopPropagation()} >
-                                <input
-                                    type='checkbox'
-                                    onChange={() => ManejarChecks(index)}
-                                    checked={selecciones[index]}
-                                />
+                                onClick={(event) => event.stopPropagation()} >
+                                {
+                                    !modoSeleccion && <input
+                                        type='checkbox'
+                                        onChange={() => ManejarChecks(index)}
+                                        checked={selecciones[index]}
+                                    />
+                                }
                             </td>
                             <td>
-                                {element}
+                                {element.nombre || element.tipo}
                             </td>
                         </tr>
                     ))}

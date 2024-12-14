@@ -22,14 +22,15 @@ function CrudBasico({
   busqueda,
   disabledDestructivo,
   clic,
-  seleccFiltro
+  seleccFiltro,
+  modoSeleccion
 }) {
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
 
-useEffect(() => {
-  busqueda && busqueda(textoBuscar);
-}, [textoBuscar]);
+  useEffect(() => {
+    busqueda && busqueda(textoBuscar);
+  }, [textoBuscar]);
 
   const handleOptionClick = (e) => {
     const opcion = e.target.value;
@@ -43,8 +44,9 @@ useEffect(() => {
         {/* Espacio izquierdo de tabla */}
         <div className="izquierda">
           <div className="tabla">
-            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic} 
-            listaSeleccProp={(lista) =>listaSeleccionada(lista)}/>
+            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic}
+              listaSeleccProp={(lista) => listaSeleccionada(lista)}
+              modoSeleccion={modoSeleccion} />
           </div>
         </div>
 
@@ -53,18 +55,21 @@ useEffect(() => {
           {/* Bloque condicional para Nueva Entidad y Botón en el mismo div */}
           <div className="filtros">
             {/* Condicional para Nueva Entidad */}
-            {esconderEntidad ? null : (
+            {modoSeleccion ? null : (
               <>
                 <h3>Nueva {entidad}:</h3>
-                <input type="text" placeholder="Agregar..." maxLength={20}/>
+                {
+                  esconderEntidad ? null :
+                    <input type="text" placeholder="Agregar..." maxLength={20} />
+                }
               </>
             )}
- 
+
             {/* Condicional para Botón */}
-            {esconderBoton ? null : (
+            {modoSeleccion ? null : (
               <div className="agregar">
-                <BotonPositivo texto="Agregar" 
-                onClick={onClickPositivo && onClickPositivo} />
+                <BotonPositivo texto="Agregar"
+                  onClick={onClickPositivo && onClickPositivo} />
               </div>
             )}
           </div>
@@ -81,7 +86,7 @@ useEffect(() => {
                     placeholder="Buscar..."
                     value={textoBuscar} // Asegura que busqueda nunca sea undefined
                     onChange={e => setTextoBuscar(e.target.value)}
-                    maxLength={20}/>
+                    maxLength={20} />
                 </div>
               )}
 
@@ -99,9 +104,9 @@ useEffect(() => {
                       Técnico
                     </option>
                     <option value={"tecnologo"} className='dropdown-item'>
-                    Tecnólogo
+                      Tecnólogo
                     </option>
-                    
+
                   </select>
                 </div>
               )}
@@ -111,12 +116,15 @@ useEffect(() => {
           {/* Botones de acción */}
           <div className="botones">
             {
-              
+              modoSeleccion ? <BotonDestructivo texto="Cancelar" onClick={onClickDestructivo} />
+                :
+                <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo}
+                  disabledProp={disabledDestructivo} />
             }
-            <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo } 
-            disabledProp={disabledDestructivo} />
             <br />
-            <BotonVolver />
+            {
+              modoSeleccion ? null : <BotonVolver />
+            }
           </div>
         </div>
       </div>

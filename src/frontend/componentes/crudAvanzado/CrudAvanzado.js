@@ -7,13 +7,14 @@ import { useEffect, useState } from 'react';
 
 const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
     onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo, listaSeleccionada,
-    esconderBusqueda, subtitulos
+    esconderBusqueda, subtitulos, modoSeleccion
 }) => {
 
     const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
     const [seleccFiltroTexto, setseleccFiltroTexto] = useState(listaMenu ? listaMenu[0].texto : '');
     const [textoInput, setTextoInput] = useState("");
+    //Hook para que el CRUD se ponga en modo "selección"
 
     useEffect(() => {
         //se pasa la lista recibida al padre a  través de una función
@@ -63,9 +64,9 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                                 </select>
                             </div>
                             <div className='ladoDer'>
-                                <input placeholder={`Escribe ${seleccFiltroTexto} aquí...`} 
-                                maxLength={50} onChange={e => setTextoInput(e.target.value)} 
-                                value={textoInput}></input>
+                                <input placeholder={`Escribe ${seleccFiltroTexto} aquí...`}
+                                    maxLength={50} onChange={e => setTextoInput(e.target.value)}
+                                    value={textoInput}></input>
                             </div>
                         </article>
                 }
@@ -78,22 +79,38 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
             <section className='centerCrudAvanzado'>
                 <article className='seccListaAvanzada'>
                     <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}
-                        listaSeleccProp={(lista) => setListaSeleccRecibida(lista)} 
-                        subtitulos={subtitulos}/>
+                        listaSeleccProp={(lista) => setListaSeleccRecibida(lista)}
+                        subtitulos={subtitulos} modoSeleccion={modoSeleccion} />
                 </article>
             </section>
 
             <section className='seccBotones'>
-                <article className='contBtnPositivo boton'>
-                    <BotonPositivo texto="Agregar" onClick={onClicPositivo} disabledProp={disabledPositivo} />
-                </article>
-                <article className='contBtnDestructivo boton'>
-                    <BotonDestructivo texto="Eliminar" onClick={onCLicDestructivo}
-                        disabledProp={disabledDestructivo} />
-                </article>
-                <article className='contBtnVolver boton'>
-                    <BotonVolver />
-                </article>
+                {
+                    modoSeleccion ? null :
+                        <article className='contBtnPositivo boton'>
+                            <BotonPositivo texto="Agregar" onClick={onClicPositivo} disabledProp={disabledPositivo} />
+                        </article>
+                }
+                {
+                    modoSeleccion ?
+                        <article className='contBtnDestructivo boton'>
+                            <BotonDestructivo texto="Cancelar" onClick={onCLicDestructivo}/>
+                        </article>
+                        :
+                        <article className='contBtnDestructivo boton'>
+                            <BotonDestructivo texto="Eliminar" onClick={onCLicDestructivo}
+                                disabledProp={disabledDestructivo} />
+                        </article>
+                }
+
+                {
+                    modoSeleccion ? null :
+                        <article className='contBtnVolver boton'>
+                            <BotonVolver />
+                        </article>
+                }
+
+
             </section>
         </div>
     );

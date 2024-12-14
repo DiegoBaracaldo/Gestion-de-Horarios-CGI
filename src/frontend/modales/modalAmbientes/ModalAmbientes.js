@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
+import CrudTorres from '../../paginas/crudTorres/CrudTorres';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
 
@@ -10,6 +11,12 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
+    const [seleccTorre, setSeleccTorre] = useState(false);
+    const [torre, setTorre] = useState(null);
+
+    useEffect(() => {
+        torre && console.log(torre.nombre);
+    }, [torre]);
 
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
@@ -24,7 +31,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>torre: </label>
-                    <button disabled={inputsOff} >seleccionar...</button>
+                    <button disabled={inputsOff} onClick={() => setSeleccTorre(true)}
+                        >seleccionar...</button>
                 </section>
                 <section>
                     <label>capacidad: </label>
@@ -43,6 +51,12 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 isOpenFranjaHoraria ? 
                 <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                 esConsulta={inputsOff}/> 
+                : null
+            }
+            {
+                seleccTorre ? 
+                <CrudTorres modoSeleccion={true} onClose={() => setSeleccTorre(false)}
+                torreSeleccionada={(e) => setTorre(e)}/> 
                 : null
             }
         </ModalGeneral>

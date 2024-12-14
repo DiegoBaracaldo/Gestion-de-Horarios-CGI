@@ -7,7 +7,7 @@ import ModalJornadas from '../../modales/modalJornadas/ModalJornadas'
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
-function CrudJornadas() {
+function CrudJornadas({modoSeleccion, onClose, jornadaSeleccionada}) {
   const [abrirHorario, setAbrirHorario] = useState(false);
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -25,7 +25,12 @@ function CrudJornadas() {
     const listaAux = [];
     listaFiltrada &&
       listaFiltrada.map((element) => {
-        listaAux.push(element.tipo);
+        const objAux = {};
+        objAux.id = element.id;
+        objAux.tipo = element.tipo;
+        objAux.franjaDisponibilidad = element.franjaDisponibilidad;
+        objAux.fechaRegistro = element.fechaRegistro;
+        listaAux.push(element);
       });
     setListaAdaptada(listaAux);
   }, [listaFiltrada]);
@@ -41,16 +46,35 @@ function CrudJornadas() {
     setListaVacia(listaSelecciones.length === 0);
   }, [listaSelecciones]);
 
+  const OnClickDestructivo = () => {
+    if(modoSeleccion){
+      onClose && onClose();
+    }else{
+      return null;
+    }
+  } 
+
+  const ManejarClickFila = (e) => {
+    if(modoSeleccion){
+      jornadaSeleccionada && jornadaSeleccionada(e);
+      onClose();
+    }else{
+      setAbrirConsulta(true);
+    }
+  }
+
   return (
-    <div id='contCrudJornadas'>
+    <div id='contCrudJornadas' style={modoSeleccion && {zIndex: 10}}>
       <CrudBasico
         entidad={"Jornadas"}
         propiedadTabla={listaAdaptada}
         esconderGeneral={true}
         onClickPositivo={() => setAbrirHorario(true)}
-        clic={() => setAbrirConsulta(true)}
+        clic={(e) => ManejarClickFila(e)}
         disabledDestructivo={listaVacia}
         listaSeleccionada={(lista) => setListaSelecciones(lista)}
+        modoSeleccion={modoSeleccion}
+        onClickDestructivo={OnClickDestructivo}
       />
 
       {

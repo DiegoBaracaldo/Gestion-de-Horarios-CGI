@@ -4,7 +4,7 @@ export function FormatearNombre(texto) {
     let textoFormateado = texto.trim().replace(/\s+/g, ' ');
 
     // Convertir la primera letra de cada palabra en mayúscula
-    textoFormateado = textoFormateado.replace(/\b\w/g, letra => letra.toUpperCase());
+    textoFormateado = textoFormateado.replace(/(?:^|\s)[a-zñÑáéíóúÁÉÍÓÚüÜA-Z]/g, letra => letra.toUpperCase());
 
     return textoFormateado;
 }

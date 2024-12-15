@@ -11,6 +11,11 @@ class TorreServicio {
         if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
+
+    GuardarTorre(torre){
+        const repo = new TorreRepo();
+        repo.SaveNew(torre);
+    }
 }
 
 

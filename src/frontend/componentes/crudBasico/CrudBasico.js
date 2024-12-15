@@ -24,11 +24,16 @@ function CrudBasico({
   clic,
   seleccFiltro,
   modoSeleccion,
-  agregar
+  agregar,
+  reiniciarTextoAgregar
 }) {
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
   const [textoAgregar, setTextoAgregar] = useState('');
+
+  useEffect(() => {
+    reiniciarTextoAgregar && setTextoAgregar('');
+  }, [reiniciarTextoAgregar]);
 
   useEffect(() => {
     busqueda && busqueda(textoBuscar);
@@ -43,6 +48,11 @@ function CrudBasico({
     console.log(opcion);
     seleccFiltro && seleccFiltro(opcion); // Actualiza la opción seleccionada
   };
+
+  //Para agregar la torre al presionar enter
+  const ManejarEnterAgregar = (e) => {
+    if(e.key === 'Enter') onClickPositivo && onClickPositivo();
+  }
 
   return (
     <div id="crudBasico">
@@ -67,7 +77,8 @@ function CrudBasico({
                 {
                   esconderEntidad ? null :
                     <input type="text" placeholder="Agregar..." maxLength={100} 
-                    value={textoAgregar} onChange={(e) => setTextoAgregar(e.target.value)}/>
+                    value={textoAgregar} onChange={(e) => setTextoAgregar(e.target.value)}
+                    onKeyUp={ManejarEnterAgregar}/>
                 }
               </>
             )}

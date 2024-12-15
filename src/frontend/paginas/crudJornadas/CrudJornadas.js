@@ -5,9 +5,11 @@ import { mocksBasica2 } from '../../mocks/mocksTablaBasica'
 import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria'
 import ModalJornadas from '../../modales/modalJornadas/ModalJornadas'
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
-import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
+import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
+import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 
-function CrudJornadas({modoSeleccion, onClose, jornadaSeleccionada}) {
+function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirHorario, setAbrirHorario] = useState(false);
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -41,40 +43,92 @@ function CrudJornadas({modoSeleccion, onClose, jornadaSeleccionada}) {
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
+  const [textoAgregar, setTextoAgregar] = useState('');
+  const [franjaHoraria, setFranjaHoraria] = useState([]);
 
   useEffect(() => {
     setListaVacia(listaSelecciones.length === 0);
   }, [listaSelecciones]);
 
   const OnClickDestructivo = () => {
-    if(modoSeleccion){
+    if (modoSeleccion) {
       onClose && onClose();
-    }else{
+    } else {
       return null;
     }
-  } 
+  }
 
   const ManejarClickFila = (e) => {
-    if(modoSeleccion){
+    if (modoSeleccion) {
       jornadaSeleccionada && jornadaSeleccionada(e);
       onClose();
-    }else{
+    } else {
       setAbrirConsulta(true);
     }
   }
 
+  /********** SECCIÓN DE REGISTRO ********************************************************************/
+  const [reiniciarTexto, setReiniciarTexto] = useState(false);
+
+  const AbrirRegistroJornada = () => {
+    if (textoAgregar) {
+      if (textoAgregar.trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)) {
+        setAbrirHorario(true);
+      } else {
+        setReiniciarTexto(true);
+        alert("Dato incorrecto");
+      }
+    } else {
+      alert("Valor inválido");
+    }
+  }
+
+  function RegistrarJornada() {
+    setAbrirHorario(false);
+    const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
+    console.log(objFormado.franjaDisponibilidad);
+    const servicioJornada = new JornadaServicio();
+    servicioJornada.GuardarJornada(objFormado);
+    setListaFiltrada([...CargarLista()]);
+    setReiniciarTexto(true);
+  }
+
+  const CancelarRegistro = () => {
+    setAbrirHorario(false);
+    setFranjaHoraria([]);
+    setReiniciarTexto(true);
+  }
+
+  useEffect(() => {
+    reiniciarTexto && setReiniciarTexto(false);
+  }, [reiniciarTexto]);
+
+  const FormarObjetoTorre = (tipo) => {
+    const objAux = {};
+    let numeroRandom = Math.floor(Math.random() * 900) + 100;
+    objAux.id = numeroRandom;
+    objAux.tipo = tipo;
+    objAux.franjaDisponibilidad = franjaHoraria;
+    objAux.fechaRegistro = "2024-12-07T11:10:00";
+    return objAux;
+  }
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   return (
-    <div id='contCrudJornadas' style={modoSeleccion && {zIndex: 10}}>
+    <div id='contCrudJornadas' style={modoSeleccion && { zIndex: 10 }}>
       <CrudBasico
         entidad={"Jornadas"}
         propiedadTabla={listaAdaptada}
         esconderGeneral={true}
-        onClickPositivo={() => setAbrirHorario(true)}
+        onClickPositivo={AbrirRegistroJornada}
         clic={(e) => ManejarClickFila(e)}
         disabledDestructivo={listaVacia}
         listaSeleccionada={(lista) => setListaSelecciones(lista)}
         modoSeleccion={modoSeleccion}
         onClickDestructivo={OnClickDestructivo}
+        agregar={(t) => setTextoAgregar(t)}
+        reiniciarTextoAgregar={reiniciarTexto}
       />
 
       {
@@ -83,7 +137,9 @@ function CrudJornadas({modoSeleccion, onClose, jornadaSeleccionada}) {
           : null
       }
       {
-        abrirHorario ? <FranjaHoraria onClickDestructivo={() => setAbrirHorario(false)} />
+        abrirHorario ? <FranjaHoraria onClickDestructivo={CancelarRegistro}
+        onClickPositivo={RegistrarJornada}
+          franjaProp={(f) => setFranjaHoraria(f)} />
           : null
       }
     </div>

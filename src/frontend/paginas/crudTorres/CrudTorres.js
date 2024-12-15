@@ -5,7 +5,9 @@ import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import ModalTorres from '../../modales/modalTorres/ModalTorres';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
-import { CamposVacios, TextoConEspacio, TextoSinEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
+import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 
 function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
@@ -15,6 +17,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [textoAgregar, setTextoAgregar] = useState('');
 
   const CargarLista = () => {
+    console.log("cargando lista...");
     return new TorreServicio().CargarLista();
   }
 
@@ -67,16 +70,43 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   const OnClickPositivo = () => {
-    alert(textoAgregar);
+    RegistrarTorre();
   }
 
-  const FormarObjetoTorre = () => {
+  /********** SECCIÓN DE REGISTRO ********************************************************************/
+  const [reiniciarTexto, setReiniciarTexto] = useState(false);
+
+  function RegistrarTorre(){
+    if(textoAgregar){
+      if(textoAgregar.trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)){
+        const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
+        const servicioTorre = new TorreServicio();
+        servicioTorre.GuardarTorre(objFormado);
+        setListaFiltrada([...CargarLista()]);
+        setReiniciarTexto(true);
+      }else{
+        setReiniciarTexto(true);
+        alert("Dato incorrecto");
+      }
+    }else{
+      alert("Valor inválido");
+    }
+  }
+
+  useEffect(() => {
+    reiniciarTexto && setReiniciarTexto(false);
+  }, [reiniciarTexto]);
+
+  const FormarObjetoTorre = (nombre) => {
     const objAux = {};
-    objAux.id = "947";
-    objAux.nombre = textoAgregar.trim();
+    let numeroRandom = Math.floor(Math.random() * 900) + 100;
+    objAux.id = numeroRandom;
+    objAux.nombre = nombre;
     objAux.fechaRegistro = "2024-12-07T11:10:00";
     return objAux;
   }
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   return (
     <div id='contCrudTorres' style={modoSeleccion && { zIndex: 10 }}>
@@ -93,6 +123,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
         modoSeleccion={modoSeleccion}
         agregar={(t) => setTextoAgregar(t)}
         onClickPositivo={OnClickPositivo}
+        reiniciarTextoAgregar={reiniciarTexto}
       />
 
       {

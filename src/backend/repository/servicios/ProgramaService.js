@@ -10,6 +10,11 @@ class ProgramaServicio {
         const repo = new ProgramaRepo();
         return repo.GetAll();
     }
+
+    GuardarPrograma(programa){
+        const repo = new ProgramaRepo();
+        repo.SaveNew(programa);
+    }
 }
 
 

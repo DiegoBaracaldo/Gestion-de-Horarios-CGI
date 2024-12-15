@@ -168,9 +168,9 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     }, [franjas]);
 
     //Para testear las franjas que se agregan al array
-    useEffect(() => {
-        console.log(franjas);
-    }, [franjas]);
+    // useEffect(() => {
+    //     console.log(franjas);
+    // }, [franjas]);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     /* CONSTANTE Y FUNCIÓN QUE CREA EL BODY DE LA TABLA! */

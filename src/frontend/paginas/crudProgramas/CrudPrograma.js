@@ -13,7 +13,8 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [filtrarPor, setFiltrarPor] = useState('todos');
 
   //Sección de hooks que recogen info del objeto a registrar
-  const [fechaInicio, setFechaInicio] = useState(null);
+  const [programa, setPrograma] = useState({});
+
 
   useEffect(() => {
     FiltrarPorTipo();
@@ -83,7 +84,8 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const CerrarModal = () => {
     setAbrirConsulta(false);
     setAbrirRegistro(false);
-
+    //Se renueva la lista cada que se cierra el modal
+    setListaFiltrada(CargarLista());
   }
 
   //constantes de opciones
@@ -92,7 +94,8 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [listaSelecciones, setListaSelecciones] = useState([]);
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
 
-  /*************** SECCIÓN FILTRO **************/
+
+  /*************** SECCIÓN FILTRO *************************************************/
   const Filtrar = () => {
     setListaFiltrada(FiltroGeneral('nombre', textoBuscar, listaObjetos));
   }
@@ -100,7 +103,8 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   useEffect(() => {
     setTimeout(Filtrar, "50");
   }, [textoBuscar]);
-  /*********************************************/
+  //////////////////////////////////////////////////////////////////////////////////
+
 
   useEffect(() => {
     setListaVacia(listaSelecciones.length === 0);

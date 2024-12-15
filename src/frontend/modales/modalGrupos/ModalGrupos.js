@@ -42,11 +42,11 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>ficha: </label>
-                    <input maxLength={20} disabled={inputsOff} />
+                    <input type='number' disabled={inputsOff} />
                 </section>
                 <section>
                     <label>código grupo: </label>
-                    <input maxLength={25} disabled={inputsOff} />
+                    <input maxLength={100} disabled={inputsOff} />
                 </section>
                 <section>
                     <label>responsable: </label>
@@ -60,7 +60,7 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label >número de aprendices: </label>
-                    <input maxLength={2} disabled={inputsOff}
+                    <input disabled={inputsOff}
                         title='cantidad de estudiantes en el grupo (número de dos dígitos)' />
                 </section>
                 <section>

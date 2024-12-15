@@ -16,16 +16,16 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             <div className='seccCajitasModal'>
                 <section>
                     <label>código: </label>
-                    <input maxLength={25} disabled={inputsOff}/>
+                    <input type='number' disabled={inputsOff}/>
                 </section>
                 <section>
                     <label>descripción: </label>
-                    <textarea maxLength={45} disabled={inputsOff} 
-                    title='Nombre completo'/>
+                    <textarea maxLength={249} disabled={inputsOff} 
+                    title='Descripción de la competencia'/>
                 </section>
                 <section>
                     <label>horas requeridas por semana: </label>
-                    <input maxLength={3} disabled={inputsOff} />
+                    <input type='number' disabled={inputsOff} />
                 </section>
             </div>
         </ModalGeneral>

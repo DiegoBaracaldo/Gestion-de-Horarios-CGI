@@ -12,6 +12,9 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [textoBuscar, setTextoBuscar] = useState('');
   const [filtrarPor, setFiltrarPor] = useState('todos');
 
+  //Sección de hooks que recogen info del objeto a registrar
+  const [fechaInicio, setFechaInicio] = useState(null);
+
   useEffect(() => {
     FiltrarPorTipo();
   }, [filtrarPor]);

@@ -10,7 +10,7 @@ function ModalTorres({cerrarModal}) {
             <label>
                 Nombre: 
             </label>
-            <input/>
+            <input maxLength={100} required/>
         </section> 
         </div>
         

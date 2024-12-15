@@ -26,7 +26,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             <div className='seccCajitasModal'>
                 <section>
                     <label>nombre: </label>
-                    <input maxLength={45} disabled={inputsOff} 
+                    <input maxLength={100} disabled={inputsOff} 
                     title='Nombre del aula'/>
                 </section>
                 <section>
@@ -36,7 +36,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 </section>
                 <section>
                     <label>capacidad: </label>
-                    <input maxLength={2} disabled={inputsOff} 
+                    <input type='number' disabled={inputsOff} 
                     title='capacidad máxima de estudiantes posibles (2 dígitos)'/>
                 </section>
                 <section>

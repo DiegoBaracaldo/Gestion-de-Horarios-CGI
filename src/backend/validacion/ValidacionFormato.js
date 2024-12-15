@@ -1,7 +1,8 @@
 export function CamposVacios(objeto) {
     const todosSonValidos =
         Object.values(objeto)
-            .every(value => value !== '' && value !== null && value !== undefined && !Number.isNaN(value));
+            .every(value => value !== '' && value !== null 
+                && value !== undefined && !Number.isNaN(value));
 
     return !todosSonValidos;
 }
@@ -12,12 +13,12 @@ export function TextoConEspacio(texto) {
 }
 
 export function TextoSinEspacio(texto) {
-    const todosSonTextoSinEspacios = typeof texto === 'string' && /^[A-Za-z]*$/.test(texto);
+    const todosSonTextoSinEspacios = typeof texto === 'string' && /^[A-Za-z]*$/.test(texto.trim());
     return todosSonTextoSinEspacios;
 }
 
 export function AlfaNumericaSinEspacio(texto) {
-    const todosSonAlfaNumericaSinEspacios = typeof texto === 'string' && /^\d+$/.test(texto);
+    const todosSonAlfaNumericaSinEspacios = typeof texto === 'string' && /^\d+$/.test(texto.trim());
     return todosSonAlfaNumericaSinEspacios;
 }
 

@@ -66,7 +66,7 @@ function CrudBasico({
                 <h3>Nueva {entidad}:</h3>
                 {
                   esconderEntidad ? null :
-                    <input type="text" placeholder="Agregar..." maxLength={20} 
+                    <input type="text" placeholder="Agregar..." maxLength={100} 
                     value={textoAgregar} onChange={(e) => setTextoAgregar(e.target.value)}/>
                 }
               </>

@@ -21,29 +21,29 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             <div className='seccCajitasModal'>
                 <section>
                     <label>cédula: </label>
-                    <input maxLength={15} disabled={inputsOff}
+                    <input type='number' disabled={inputsOff}
                         title='Sólo números, sin signos especiales' />
                 </section>
                 <section>
                     <label>nombre: </label>
-                    <input maxLength={45} disabled={inputsOff}
+                    <input maxLength={100} disabled={inputsOff}
                         title='Nombre completo' />
                 </section>
                 <section>
                     <label>correo: </label>
-                    <input maxLength={45} disabled={inputsOff} />
+                    <input maxLength={100} disabled={inputsOff} />
                 </section>
                 <section>
                     <label>teléfono: </label>
-                    <input maxLength={20} disabled={inputsOff} />
+                    <input maxLength={100} disabled={inputsOff} />
                 </section>
                 <section>
                     <label>especialidad: </label>
-                    <input maxLength={45} disabled={inputsOff} />
+                    <input maxLength={100} disabled={inputsOff} />
                 </section>
                 <section>
                     <label>tope de horas: </label>
-                    <input maxLength={2} disabled={inputsOff}
+                    <input type='number' disabled={inputsOff}
                         title='número de dos dígitos máximo' />
                 </section>
                 <section>

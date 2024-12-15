@@ -5,12 +5,14 @@ import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import ModalTorres from '../../modales/modalTorres/ModalTorres';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
+import { CamposVacios, TextoConEspacio, TextoSinEspacio } from '../../../backend/validacion/ValidacionFormato';
 
-function CrudTorres({modoSeleccion, onClose, torreSeleccionada}) {
+function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
+  const [textoAgregar, setTextoAgregar] = useState('');
 
   const CargarLista = () => {
     return new TorreServicio().CargarLista();
@@ -48,24 +50,36 @@ function CrudTorres({modoSeleccion, onClose, torreSeleccionada}) {
   }, [listaSelecciones]);
 
   const OnClickDestructivo = () => {
-    if(modoSeleccion){
+    if (modoSeleccion) {
       onClose && onClose();
-    }else{
+    } else {
       return null;
     }
-  } 
+  }
 
   const ManejarClickFila = (e) => {
-    if(modoSeleccion){
+    if (modoSeleccion) {
       torreSeleccionada && torreSeleccionada(e);
       onClose();
-    }else{
+    } else {
       setAbrirEdicion(true);
     }
   }
 
+  const OnClickPositivo = () => {
+    alert(textoAgregar);
+  }
+
+  const FormarObjetoTorre = () => {
+    const objAux = {};
+    objAux.id = "947";
+    objAux.nombre = textoAgregar.trim();
+    objAux.fechaRegistro = "2024-12-07T11:10:00";
+    return objAux;
+  }
+
   return (
-    <div id='contCrudTorres' style={modoSeleccion && {zIndex: 10}}>
+    <div id='contCrudTorres' style={modoSeleccion && { zIndex: 10 }}>
       <CrudBasico
         entidad={"Torre"}
         propiedadTabla={listaAdaptada}
@@ -77,6 +91,8 @@ function CrudTorres({modoSeleccion, onClose, torreSeleccionada}) {
         listaSeleccionada={(lista) => setListaSelecciones(lista)}
         onClickDestructivo={OnClickDestructivo}
         modoSeleccion={modoSeleccion}
+        agregar={(t) => setTextoAgregar(t)}
+        onClickPositivo={OnClickPositivo}
       />
 
       {

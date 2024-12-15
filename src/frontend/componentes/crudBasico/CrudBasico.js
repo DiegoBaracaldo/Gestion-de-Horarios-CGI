@@ -23,14 +23,20 @@ function CrudBasico({
   disabledDestructivo,
   clic,
   seleccFiltro,
-  modoSeleccion
+  modoSeleccion,
+  agregar
 }) {
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
+  const [textoAgregar, setTextoAgregar] = useState('');
 
   useEffect(() => {
     busqueda && busqueda(textoBuscar);
   }, [textoBuscar]);
+  
+  useEffect(() => {
+    agregar && agregar(textoAgregar);
+  }, [textoAgregar]);
 
   const handleOptionClick = (e) => {
     const opcion = e.target.value;
@@ -60,7 +66,8 @@ function CrudBasico({
                 <h3>Nueva {entidad}:</h3>
                 {
                   esconderEntidad ? null :
-                    <input type="text" placeholder="Agregar..." maxLength={20} />
+                    <input type="text" placeholder="Agregar..." maxLength={20} 
+                    value={textoAgregar} onChange={(e) => setTextoAgregar(e.target.value)}/>
                 }
               </>
             )}

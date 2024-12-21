@@ -9,7 +9,7 @@ export const grupos = [
       idJornada: "001", // Referencia al ID de jornadas
       jornada: "mañana",
       cantidadAprendices: 45,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T14:50:00"
     },
     {
@@ -22,7 +22,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 52,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T14:55:00"
     },
     {
@@ -35,7 +35,7 @@ export const grupos = [
       idJornada: "003",
       jornada: "noche",
       cantidadAprendices: 39,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T15:00:00"
     },
     {
@@ -48,7 +48,7 @@ export const grupos = [
       idJornada: "004",
       jornada: "sabatino",
       cantidadAprendices: 41,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:05:00"
     },
     {
@@ -61,7 +61,7 @@ export const grupos = [
       codigoGrupo: "GRP2024XYZ05",
       idJornada: "005",
       cantidadAprendices: 49,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:10:00"
     },
     {
@@ -74,7 +74,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 35,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:15:00"
     },
     {
@@ -87,7 +87,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 47,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:20:00"
     },
     {
@@ -100,7 +100,7 @@ export const grupos = [
       idJornada: "001",
       jornada: "mañana",
       cantidadAprendices: 53,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:25:00"
     },
     {
@@ -113,7 +113,7 @@ export const grupos = [
       idJornada: "001",
       jornada: "mañana",
       cantidadAprendices: 48,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:30:00"
     },
     {
@@ -126,7 +126,7 @@ export const grupos = [
       idJornada: "003",
       jornada: "noche",
       cantidadAprendices: 50,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:35:00"
     }
   ];
@@ -143,7 +143,7 @@ export const grupos = [
       idJornada: "001", // Referencia al ID de jornadas
       jornada: "mañana",
       cantidadAprendices: 45,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T14:50:00"
     },
     {
@@ -156,7 +156,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 52,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T14:55:00"
     },
     {
@@ -169,7 +169,7 @@ export const grupos = [
       idJornada: "003",
       jornada: "noche",
       cantidadAprendices: 39,
-      esCadenaFormación: true,
+      esCadenaFormacion: true,
       fechaRegistro: "2024-12-07T15:00:00"
     },
     {
@@ -182,7 +182,7 @@ export const grupos = [
       idJornada: "004",
       jornada: "sabatino",
       cantidadAprendices: 41,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:05:00"
     },
     {
@@ -195,7 +195,7 @@ export const grupos = [
       codigoGrupo: "GRP2024XYZ05",
       idJornada: "005",
       cantidadAprendices: 49,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:10:00"
     },
     {
@@ -208,7 +208,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 35,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:15:00"
     },
     {
@@ -221,7 +221,7 @@ export const grupos = [
       idJornada: "002",
       jornada: "tarde",
       cantidadAprendices: 47,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:20:00"
     },
     {
@@ -234,7 +234,7 @@ export const grupos = [
       idJornada: "001",
       jornada: "mañana",
       cantidadAprendices: 53,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:25:00"
     },
     {
@@ -247,7 +247,7 @@ export const grupos = [
       idJornada: "001",
       jornada: "mañana",
       cantidadAprendices: 48,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:30:00"
     },
     {
@@ -260,7 +260,7 @@ export const grupos = [
       idJornada: "003",
       jornada: "noche",
       cantidadAprendices: 50,
-      esCadenaFormación: false,
+      esCadenaFormacion: false,
       fechaRegistro: "2024-12-07T15:35:00"
     }
   ];

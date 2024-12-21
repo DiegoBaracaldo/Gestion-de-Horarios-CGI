@@ -17,7 +17,7 @@ function ModalJornadas({abrirRegistro, abrirConsulta, cerrarModal
             <label>
                 Tipo: 
             </label>
-            <input maxLength={20} disabled={inputsOff}/>
+            <input maxLength={25} disabled={inputsOff}/>
         </section>
         <section>
             <label>

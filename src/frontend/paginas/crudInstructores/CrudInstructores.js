@@ -7,7 +7,7 @@ import InstructorServicio from '../../../backend/repository/servicios/Instructor
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { mockInstructoresTres } from '../../mocks/MocksInstructores';
 
-const CrudInstructores = () => {
+const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => {
 
     const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
@@ -75,17 +75,36 @@ const CrudInstructores = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setListaFiltrada(CargarLista());
     }
     /////////////////////////////////////////////////////
 
+    const OnClickDestructivo =  () => {
+        if(modoSeleccion){
+            onClose && onClose();
+        }else{
+            return null;
+        }
+    }
+
+    const OnClickFila = (r) => {
+        if(modoSeleccion){
+            responsableSeleccionado && responsableSeleccionado(r);
+            onClose();
+        }else{
+            AbrirConsulta();
+        }
+    }
+
     return (
-        <div id='contCrudInstruc'>
+        <div id='contCrudInstruc' style={modoSeleccion && {zIndex: '10'}}>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Instructores"
                 listaMenu={listaMenuIntruct} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={listaAdaptada}
-                subtitulos={subs} />
+                clicFila={r => OnClickFila(r)} datosJson={listaAdaptada}
+                subtitulos={subs} modoSeleccion={modoSeleccion}
+                onCLicDestructivo={OnClickDestructivo}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

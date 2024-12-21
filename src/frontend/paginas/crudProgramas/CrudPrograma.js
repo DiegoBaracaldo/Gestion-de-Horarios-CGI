@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import './CrudProgramas.css';
 import CrudBasico from '../../componentes/crudBasico/CrudBasico'
 import { mocksBasica } from '../../mocks/mocksTablaBasica'
 import ModalProgramas from '../../modales/modalProgramas/ModalProgramas.js';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
-function CrudPrograma() {
+function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [textoBuscar, setTextoBuscar] = useState('');
@@ -26,23 +27,37 @@ function CrudPrograma() {
   const [listaFiltradaCurso, setListaFiltradaCurso] = useState(listaObjetos);
   const [listaAdaptada, setListaAdaptada] = useState([]);
 
+
+  //Para recargar la lista cada que se cierra el modal
+  useEffect(() => {
+    if (!abrirConsulta || !abrirRegistro) setListaFiltrada([...CargarLista()]);
+  }, [abrirRegistro, abrirConsulta]);
+
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
     FiltrarPorTipo();
   }, [listaFiltrada]);
 
   useEffect(() => {
-    if(filtrarPor === 'todos') AdaptarLista(listaFiltrada);
-    if(filtrarPor === 'tecnico') AdaptarLista(listaFiltradaTecnico);
-    if(filtrarPor === 'tecnologo') AdaptarLista(listaFiltradaTecnologo);
-    if(filtrarPor === 'cursoCorto') AdaptarLista(listaFiltradaCurso);
+    if (filtrarPor === 'todos') AdaptarLista(listaFiltrada);
+    if (filtrarPor === 'tecnico') AdaptarLista(listaFiltradaTecnico);
+    if (filtrarPor === 'tecnologo') AdaptarLista(listaFiltradaTecnologo);
+    if (filtrarPor === 'cursoCorto') AdaptarLista(listaFiltradaCurso);
   }, [listaFiltradaTecnologo]);
 
   const AdaptarLista = (listaRecibida) => {
     const listaAux = [];
     listaRecibida &&
       listaRecibida.map(element => {
-        listaAux.push(element.nombre);
+        const objAux = {};
+        objAux.id = element.id;
+        objAux.tipo = element.tipo;
+        objAux.nombre = element.nombre;
+        objAux.cantidadTrimestres = element.cantidadTrimestres;
+        objAux.fechaInicio = element.fechaInicio;
+        objAux.fechaFin = element.fechaFin;
+        objAux.fechaRegistro = element.fechaRegistro;
+        listaAux.push(element);
       });
     setListaAdaptada(listaAux);
   }
@@ -71,7 +86,6 @@ function CrudPrograma() {
   const CerrarModal = () => {
     setAbrirConsulta(false);
     setAbrirRegistro(false);
-
   }
 
   //constantes de opciones
@@ -80,7 +94,8 @@ function CrudPrograma() {
   const [listaSelecciones, setListaSelecciones] = useState([]);
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
 
-  /*************** SECCIÓN FILTRO **************/
+
+  /*************** SECCIÓN FILTRO *************************************************/
   const Filtrar = () => {
     setListaFiltrada(FiltroGeneral('nombre', textoBuscar, listaObjetos));
   }
@@ -88,14 +103,32 @@ function CrudPrograma() {
   useEffect(() => {
     setTimeout(Filtrar, "50");
   }, [textoBuscar]);
-  /*********************************************/
+  //////////////////////////////////////////////////////////////////////////////////
+
 
   useEffect(() => {
     setListaVacia(listaSelecciones.length === 0);
   }, [listaSelecciones]);
 
+  const OnClickDestructivo = () => {
+    if (modoSeleccion) {
+      onClose && onClose();
+    } else {
+      return null;
+    }
+  }
+
+  const ManejarClickFila = (e) => {
+    if (modoSeleccion) {
+      programaSeleccionado && programaSeleccionado(e);
+      onClose();
+    } else {
+      AbrirConsulta();
+    }
+  }
+
   return (
-    <div id='contCrudJornadas'>
+    <div id='contCrudProgramas' style={modoSeleccion && { zIndex: 10 }}>
       <CrudBasico
         nameFiltro={"Programas"}
         busqueda={(t) => setTextoBuscar(t)}
@@ -103,11 +136,13 @@ function CrudPrograma() {
         entidad={"Programas"}
         propiedadTabla={listaAdaptada}
         onClickPositivo={AbrirRegistro}
-        clic={AbrirConsulta}
+        clic={(e) => ManejarClickFila(e)}
         opciones={opciones}
         disabledDestructivo={listaVacia}
         listaSeleccionada={(lista) => setListaSelecciones(lista)}
         seleccFiltro={(t) => setFiltrarPor(t)}
+        modoSeleccion={modoSeleccion}
+        onClickDestructivo={OnClickDestructivo}
       />
       {
         abrirConsulta || abrirRegistro ?
@@ -115,9 +150,6 @@ function CrudPrograma() {
             cerrarModal={() => CerrarModal()} />
           : null
       }
-
-
-
     </div>
   )
 }

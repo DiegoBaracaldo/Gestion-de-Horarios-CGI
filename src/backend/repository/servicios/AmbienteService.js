@@ -11,6 +11,11 @@ class AmbienteServicio {
         if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
+
+    GuardarAmbiente(ambiente){
+        const repo = new AmbienteRepo();
+        repo.SaveNew(ambiente);
+    }
 }
 
 

@@ -22,14 +22,26 @@ function CrudBasico({
   busqueda,
   disabledDestructivo,
   clic,
-  seleccFiltro
+  seleccFiltro,
+  modoSeleccion,
+  agregar,
+  reiniciarTextoAgregar
 }) {
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
+  const [textoAgregar, setTextoAgregar] = useState('');
 
-useEffect(() => {
-  busqueda && busqueda(textoBuscar);
-}, [textoBuscar]);
+  useEffect(() => {
+    reiniciarTextoAgregar && setTextoAgregar('');
+  }, [reiniciarTextoAgregar]);
+
+  useEffect(() => {
+    busqueda && busqueda(textoBuscar);
+  }, [textoBuscar]);
+  
+  useEffect(() => {
+    agregar && agregar(textoAgregar);
+  }, [textoAgregar]);
 
   const handleOptionClick = (e) => {
     const opcion = e.target.value;
@@ -37,14 +49,20 @@ useEffect(() => {
     seleccFiltro && seleccFiltro(opcion); // Actualiza la opción seleccionada
   };
 
+  //Para agregar la torre al presionar enter
+  const ManejarEnterAgregar = (e) => {
+    if(e.key === 'Enter') onClickPositivo && onClickPositivo();
+  }
+
   return (
     <div id="crudBasico">
       <div className="container">
         {/* Espacio izquierdo de tabla */}
         <div className="izquierda">
           <div className="tabla">
-            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic} 
-            listaSeleccProp={(lista) =>listaSeleccionada(lista)}/>
+            <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic}
+              listaSeleccProp={(lista) => listaSeleccionada(lista)}
+              modoSeleccion={modoSeleccion} />
           </div>
         </div>
 
@@ -53,18 +71,23 @@ useEffect(() => {
           {/* Bloque condicional para Nueva Entidad y Botón en el mismo div */}
           <div className="filtros">
             {/* Condicional para Nueva Entidad */}
-            {esconderEntidad ? null : (
+            {modoSeleccion ? null : (
               <>
                 <h3>Nueva {entidad}:</h3>
-                <input type="text" placeholder="Agregar..." maxLength={20}/>
+                {
+                  esconderEntidad ? null :
+                    <input type="text" placeholder="Agregar..." maxLength={100} 
+                    value={textoAgregar} onChange={(e) => setTextoAgregar(e.target.value)}
+                    onKeyUp={ManejarEnterAgregar}/>
+                }
               </>
             )}
- 
+
             {/* Condicional para Botón */}
-            {esconderBoton ? null : (
+            {modoSeleccion ? null : (
               <div className="agregar">
-                <BotonPositivo texto="Agregar" 
-                onClick={onClickPositivo && onClickPositivo} />
+                <BotonPositivo texto="Agregar"
+                  onClick={onClickPositivo && onClickPositivo} />
               </div>
             )}
           </div>
@@ -81,7 +104,7 @@ useEffect(() => {
                     placeholder="Buscar..."
                     value={textoBuscar} // Asegura que busqueda nunca sea undefined
                     onChange={e => setTextoBuscar(e.target.value)}
-                    maxLength={20}/>
+                    maxLength={20} />
                 </div>
               )}
 
@@ -99,9 +122,9 @@ useEffect(() => {
                       Técnico
                     </option>
                     <option value={"tecnologo"} className='dropdown-item'>
-                    Tecnólogo
+                      Tecnólogo
                     </option>
-                    
+
                   </select>
                 </div>
               )}
@@ -111,12 +134,15 @@ useEffect(() => {
           {/* Botones de acción */}
           <div className="botones">
             {
-              
+              modoSeleccion ? <BotonDestructivo texto="Cancelar" onClick={onClickDestructivo} />
+                :
+                <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo}
+                  disabledProp={disabledDestructivo} />
             }
-            <BotonDestructivo texto="Eliminar" onClick={onClickDestructivo } 
-            disabledProp={disabledDestructivo} />
             <br />
-            <BotonVolver />
+            {
+              modoSeleccion ? null : <BotonVolver />
+            }
           </div>
         </div>
       </div>

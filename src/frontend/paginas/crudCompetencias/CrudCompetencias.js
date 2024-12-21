@@ -7,13 +7,27 @@ import ModalCompetencias from '../../modales/modalCompetencias/ModalCompetencias
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { mockCompetenciasTres } from '../../mocks/MocksCompetencias';
+import CrudPrograma from '../crudProgramas/CrudPrograma';
 
 const CrudCompetencias = () => {
 
     const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
+    const [nombrePrograma, setNombrePrograma] = useState('Seleccionar programa...');
+    const [seleccPrograma, setSeleccPrograma] = useState(false);
+    const [programa, setPrograma] = useState({});
+    useEffect(() => {
+        if(Object.keys(programa).length > 0){
+            setListaObjetos([...CargarLista()]);
+            setEsconderBusqueda(false);
+            setNombrePrograma(programa.nombre);
+        }else{
+            setEsconderBusqueda(true);
+        }
+    }, [programa]);
+
     const CargarLista = () => {
-        return new CompetenciaServicio().CargarLista();
+        return new CompetenciaServicio().CargarLista(programa.id);
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -23,6 +37,11 @@ const CrudCompetencias = () => {
     const [listaAdaptada, setListaAdaptada] = useState([]);
     const [esconderBusqueda, setEsconderBusqueda] = useState(true);
     const [btnAgregarOff, setBtnAgregarOff] = useState(true);
+
+    useEffect(() => {
+        setListaFiltrada(listaObjetos);
+    }, [listaObjetos]);
+
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
@@ -41,13 +60,6 @@ const CrudCompetencias = () => {
     //captura de palabras para filtro y búsqueda
     const [seleccMenuFiltro, setSeleccMenuFiltro] = useState('');
     const [textoBusqueda, setTextoBusqueda] = useState('');
-
-    ////////////////////////////////////////////////
-    //aquí va la lógica al seleccionar un programa
-    const LogicaSeleccPrograma = () => {
-        setEsconderBusqueda(!esconderBusqueda);
-    }
-    ////////////////////////////////////////////////
 
     useEffect(() => {
         setBtnAgregarOff(esconderBusqueda);
@@ -68,8 +80,8 @@ const CrudCompetencias = () => {
     /////////////////////////////////////////////////////
 
     //sección libre del crud
-    const btnSeleccPrograma = <button className='btnSeleccPrograma' onClick={LogicaSeleccPrograma}>
-        Seleccionar programa...
+    const btnSeleccPrograma = <button className='btnSeleccPrograma' onClick={() => setSeleccPrograma(true)}>
+        {nombrePrograma}
     </button>
 
     ///////// SECCIÓN DE CONSULTA ///////////////
@@ -89,6 +101,7 @@ const CrudCompetencias = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setListaFiltrada(CargarLista());
     }
 
     return (
@@ -103,8 +116,14 @@ const CrudCompetencias = () => {
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} /> :
+                        onCloseProp={() => CerrarModal()} programa={programa}/> :
                     null
+            }
+            {
+                seleccPrograma ? <CrudPrograma modoSeleccion={true}
+                    onClose={() => setSeleccPrograma(false)}
+                    programaSeleccionado={(p) => setPrograma(p)} />
+                    : null
             }
         </div>
     );

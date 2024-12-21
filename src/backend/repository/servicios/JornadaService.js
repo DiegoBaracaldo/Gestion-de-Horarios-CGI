@@ -11,6 +11,11 @@ class JornadaServicio {
         if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
+
+    GuardarJornada(jornada){
+        const repo = new JornadaRepo();
+        repo.SaveNew(jornada);
+    }
 }
 
 

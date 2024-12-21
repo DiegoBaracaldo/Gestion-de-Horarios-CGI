@@ -4,7 +4,8 @@ import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './ModalGeneral.css';
 
 const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
-    isOpenRegistro, isOpenConsulta, onClose, bloquearInputs, edicionActivada
+    isOpenRegistro, isOpenConsulta, onClose, bloquearInputs, edicionActivada,
+    onClickPositivo
 }) => {
 
     const [modoEdicion, setModoEdicion] = useState(false);
@@ -53,7 +54,7 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
 
     const Registrar = () => {
         // lógica para registarr o editar al objeto
-        alert("registrando");
+        onClickPositivo && onClickPositivo();
     }
 
     const ManejarOnClicDestructivo = () => {

@@ -75,6 +75,7 @@ const CrudAmbientes = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setListaFiltrada(CargarLista());
     }
 
     function VerificarTorres() {

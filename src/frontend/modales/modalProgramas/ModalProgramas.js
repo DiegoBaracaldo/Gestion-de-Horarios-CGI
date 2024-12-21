@@ -18,6 +18,11 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
   const [fechaFin, setFechaFin] = useState('');
   const [programa, setPrograma] = useState({});
 
+  function ManejarTopeHoras(texto) {
+    if (texto.length > 2) setCantidadTrimestres(texto.substring(0, 2));
+    else setCantidadTrimestres(texto);
+}
+
   //Si el objeto fue formado correctamente para el registro
   useEffect(() => {
     if(Object.keys(programa).length > 0){
@@ -41,7 +46,7 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
     const objAux = {};
     objAux.id = codigo;
     objAux.tipo = tipo;
-    objAux.nombre = FormatearNombre(nombre.toString().trim());
+    objAux.nombre = FormatearNombre(nombre);
     objAux.cantidadTrimestres = cantidadTrimestres;
     objAux.fechaInicio = fechaInicio;
     objAux.fechaFin = fechaFin;
@@ -52,16 +57,16 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
   const ValidarObjPrograma = () => {
     let bandera = false;
     if (!CamposVacios(programa)) {
-      if (!codigo.toString().trim() || !HastaCincuenta(codigo) || !SoloNumeros(codigo)) {
+      if (!codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
         alert("Código incorrecto");
         setCodigo('');
-      } else if (!nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre.toString().trim())) {
+      } else if (!nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
         alert("Nombre incorrecto!");
         setNombre('');
-      } else if (!tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo.toString())) {
+      } else if (!tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
         alert("Tipo incorrecto");
         setTipo('tecnico');
-      } else if (!cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres) || !SoloNumeros(cantidadTrimestres)) {
+      } else if (!cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
         alert("Cantidad de trimestres incorrecta");
         setCantidadTrimestres('');
       } else if (!fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
@@ -126,7 +131,7 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
               Cantidad de trimestres:
             </label>
             <input disabled={inputsOff} type='number' value={cantidadTrimestres}
-              onChange={(e) => setCantidadTrimestres(e.target.value)} />
+              onChange={(e) => ManejarTopeHoras(e.target.value)} />
           </section>
 
           <section>

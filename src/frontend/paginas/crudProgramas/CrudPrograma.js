@@ -12,10 +12,6 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [textoBuscar, setTextoBuscar] = useState('');
   const [filtrarPor, setFiltrarPor] = useState('todos');
 
-  //Sección de hooks que recogen info del objeto a registrar
-  const [programa, setPrograma] = useState({});
-
-
   useEffect(() => {
     FiltrarPorTipo();
   }, [filtrarPor]);
@@ -30,6 +26,12 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [listaFiltradaTecnico, setListaFiltradaTecnico] = useState(listaObjetos);
   const [listaFiltradaCurso, setListaFiltradaCurso] = useState(listaObjetos);
   const [listaAdaptada, setListaAdaptada] = useState([]);
+
+
+  //Para recargar la lista cada que se cierra el modal
+  useEffect(() => {
+    if (!abrirConsulta || !abrirRegistro) setListaFiltrada([...CargarLista()]);
+  }, [abrirRegistro, abrirConsulta]);
 
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
@@ -84,8 +86,6 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const CerrarModal = () => {
     setAbrirConsulta(false);
     setAbrirRegistro(false);
-    //Se renueva la lista cada que se cierra el modal
-    setListaFiltrada(CargarLista());
   }
 
   //constantes de opciones
@@ -119,10 +119,10 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   }
 
   const ManejarClickFila = (e) => {
-    if(modoSeleccion){
+    if (modoSeleccion) {
       programaSeleccionado && programaSeleccionado(e);
       onClose();
-    }else{
+    } else {
       AbrirConsulta();
     }
   }
@@ -150,9 +150,6 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
             cerrarModal={() => CerrarModal()} />
           : null
       }
-
-
-
     </div>
   )
 }

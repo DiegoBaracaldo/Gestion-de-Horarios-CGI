@@ -11,6 +11,11 @@ class GrupoServicio {
         if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
+
+    GuardarGrupo(grupo){
+        const repo = new GrupoRepo();
+        repo.SaveNew(grupo);
+    }
 }
 
 

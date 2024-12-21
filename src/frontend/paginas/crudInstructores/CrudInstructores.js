@@ -75,6 +75,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setListaFiltrada(CargarLista());
     }
     /////////////////////////////////////////////////////
 

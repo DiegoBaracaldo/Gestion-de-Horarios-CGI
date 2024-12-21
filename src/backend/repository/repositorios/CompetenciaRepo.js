@@ -1,32 +1,36 @@
 import { competencias } from "../../mocks/MockCompetenciasRepo";
 
-class CompetenciaRepo{
+class CompetenciaRepo {
 
-    constructor(){
+    constructor() {
 
     }
 
-    GetAll(){
-        return competencias;
+    GetAllByIdPrograma(idPrograma) {
+        const listaAux = [];
+        competencias.forEach((competenciaObj) => {
+            if(competenciaObj.idPrograma === idPrograma) listaAux.push(competenciaObj);
+        });
+        return listaAux;
     }
 
-    GetById(id){
+    GetById(id) {
         let CompetenciaAux = null;
         competencias.forEach((Competencia) => {
-            if(Competencia.id === id) CompetenciaAux = Competencia;
+            if (Competencia.id === id) CompetenciaAux = Competencia;
         });
         return CompetenciaAux;
     }
 
-    SaveNew(Competencia){
+    SaveNew(Competencia) {
         competencias.push(Competencia);
     }
 
-    Save(idViejo, Competencia){
+    Save(idViejo, Competencia) {
         let CompetenciaViejo = this.GetById(idViejo);
-        if(CompetenciaViejo === null){
+        if (CompetenciaViejo === null) {
             this.SaveNew(Competencia);
-        }else{
+        } else {
             //actualizar
             let CompetenciaIndex = competencias.findIndex(e => e.id === idViejo);
             competencias[CompetenciaIndex] = Competencia;
@@ -34,7 +38,7 @@ class CompetenciaRepo{
     }
 
     //Se trabaja con array de ids a eliminar.
-    Remove(idArray){
+    Remove(idArray) {
         idArray.forEach((id) => {
             competencias.filter(Competencia => Competencia.id !== id);
         });

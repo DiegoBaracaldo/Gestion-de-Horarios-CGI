@@ -224,6 +224,12 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    const ManejarCancelar = () => {
+        //Para que  no permanezca la selección al cancelar el modal
+        franjaProp && franjaProp([]);
+        onClickDestructivo();
+    }
+
     return (
         <div id='franjaHoraria'>
             <div className='franja'>
@@ -276,7 +282,7 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                 </div>
                 <div className='contBtnDestructivo contBtn'>
                     <BotonDestructivo texto="Cancelar"
-                        onClick={onClickDestructivo ? () => onClickDestructivo() :
+                        onClick={onClickDestructivo ? ManejarCancelar :
                             () => alert("debes poner funcionalidad al botón destructivo!")} />
                 </div>
             </div>

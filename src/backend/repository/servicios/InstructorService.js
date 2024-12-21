@@ -11,6 +11,11 @@ class InstructorServicio {
         if (repo.GetAll()) return repo.GetAll();
         else return null;
     }
+
+    GuardarInstructor(instructor){
+        const repo = new InstructorRepo();
+        repo.SaveNew(instructor);
+    }
 }
 
 

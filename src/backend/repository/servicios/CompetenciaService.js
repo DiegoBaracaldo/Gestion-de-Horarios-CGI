@@ -6,10 +6,15 @@ class CompetenciaServicio {
 
     }
 
-    CargarLista() {
+    CargarLista(idPrograma) {
         const repo = new CompetenciaRepo();
-        if (repo.GetAll()) return repo.GetAll();
+        if (repo.GetAllByIdPrograma(idPrograma)) return repo.GetAllByIdPrograma(idPrograma);
         else return null;
+    }
+
+    GuardarCompetencia(competencia) {
+        const repo = new CompetenciaRepo();
+        repo.SaveNew(competencia);
     }
 }
 

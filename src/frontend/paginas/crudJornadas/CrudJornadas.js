@@ -84,13 +84,17 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   }
 
   function RegistrarJornada() {
-    setAbrirHorario(false);
-    const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
-    console.log(objFormado.franjaDisponibilidad);
-    const servicioJornada = new JornadaServicio();
-    servicioJornada.GuardarJornada(objFormado);
-    setListaFiltrada([...CargarLista()]);
-    setReiniciarTexto(true);
+    if(franjaHoraria.length > 0){
+      setAbrirHorario(false);
+      const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
+      const servicioJornada = new JornadaServicio();
+      servicioJornada.GuardarJornada(objFormado);
+      setListaFiltrada([...CargarLista()]);
+      setReiniciarTexto(true);
+    }else{
+      alert("Debes establecer un rango horario para la jornada!");
+    }
+
   }
 
   const CancelarRegistro = () => {

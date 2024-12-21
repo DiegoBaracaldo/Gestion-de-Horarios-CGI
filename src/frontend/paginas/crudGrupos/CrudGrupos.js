@@ -98,7 +98,7 @@ const CrudGrupos = () => {
         const listaAuxCadena = [];
         const listaAuxNoCadena = []
         listaFiltrada.forEach((element) => {
-            if (element.esCadenaFormación) listaAuxCadena.push(element);
+            if (element.esCadenaFormacion) listaAuxCadena.push(element);
             else listaAuxNoCadena.push(element);
         });
         setListaFiltradaCadena(listaAuxCadena);
@@ -145,6 +145,7 @@ const CrudGrupos = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setListaFiltrada(CargarLista());
     }
 
     function VerificarProgramas() {

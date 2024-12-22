@@ -8,20 +8,20 @@ import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 
-const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
+const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsultado }) => {
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
     /*****Se recogen los datos para el objeto que será registrado*****/
-    const [cedula, setCedula] = useState('');
-    const [nombre, setNombre] = useState('');
-    const [correo, setCorreo] = useState('');
-    const [telefono, setTelefono] = useState('');
-    const [especialidad, setEspecialidad] = useState('');
-    const [topeHoras, setTopeHoras] = useState('');
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState([]);
+    const [cedula, setCedula] = useState(objConsultado && objConsultado.id);
+    const [nombre, setNombre] = useState(objConsultado && objConsultado.nombre);
+    const [correo, setCorreo] = useState(objConsultado && objConsultado.correo);
+    const [telefono, setTelefono] = useState(objConsultado && objConsultado.telefono);
+    const [especialidad, setEspecialidad] = useState(objConsultado && objConsultado.especialidad);
+    const [topeHoras, setTopeHoras] = useState(objConsultado && objConsultado.topeHoras);
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(objConsultado && objConsultado.franjaDisponibilidad);
     const [instructor, setInstructor] = useState({});
 
     useEffect(() => {
@@ -157,7 +157,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                     <FranjaHoraria isOpen={isOpenFranjaHoraria}
                         onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
-                        onClickPositivo={RegistrarJornada}/>
+                        onClickPositivo={RegistrarJornada} 
+                        franjasOcupadasProp={franjaDisponibilidad}/>
             }
         </ModalGeneral>
     );

@@ -16,6 +16,11 @@ class InstructorServicio {
         const repo = new InstructorRepo();
         repo.SaveNew(instructor);
     }
+
+    CargarInstructor(idIstructor){
+        const repo = new InstructorRepo();
+        return repo.GetById(idIstructor);
+    }
 }
 
 

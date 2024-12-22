@@ -15,6 +15,11 @@ class ProgramaServicio {
         const repo = new ProgramaRepo();
         repo.SaveNew(programa);
     }
+
+    CargarPrograma(id){
+        const repo = new ProgramaRepo();
+        return repo.GetById(id);
+    }
 }
 
 

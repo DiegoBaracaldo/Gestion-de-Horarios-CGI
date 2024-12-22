@@ -11,6 +11,7 @@ import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 
 function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
+  const [torreConsultada, setTorreConsultada] = useState({});
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
@@ -65,6 +66,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
       torreSeleccionada && torreSeleccionada(e);
       onClose();
     } else {
+      setTorreConsultada(e);
       setAbrirEdicion(true);
     }
   }
@@ -127,8 +129,9 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
       />
 
       {
-        abrirEdicion ? <ModalTorres cerrarModal={() => setAbrirEdicion(false)} /> :
-          null
+        abrirEdicion ? <ModalTorres cerrarModal={() => setAbrirEdicion(false)} 
+        objConsulta={torreConsultada}/> 
+        :null
       }
     </div>
 

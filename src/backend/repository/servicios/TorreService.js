@@ -16,6 +16,11 @@ class TorreServicio {
         const repo = new TorreRepo();
         repo.SaveNew(torre);
     }
+
+    CargarTorre(idTorre){
+        const repo = new TorreRepo();
+        return repo.GetById(idTorre);
+    }
 }
 
 

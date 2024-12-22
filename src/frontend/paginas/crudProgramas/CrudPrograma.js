@@ -8,6 +8,7 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
 function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
+  const [programaConsultado, setprogramaConsultado] = useState({});
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [textoBuscar, setTextoBuscar] = useState('');
   const [filtrarPor, setFiltrarPor] = useState('todos');
@@ -86,13 +87,13 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const CerrarModal = () => {
     setAbrirConsulta(false);
     setAbrirRegistro(false);
+    setprogramaConsultado({});
   }
 
   //constantes de opciones
   const opciones = ['Curso corto', 'Técnico', 'Tecnólogo'];
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
-  const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
 
 
   /*************** SECCIÓN FILTRO *************************************************/
@@ -123,6 +124,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
       programaSeleccionado && programaSeleccionado(e);
       onClose();
     } else {
+      setprogramaConsultado(e);
       AbrirConsulta();
     }
   }
@@ -147,7 +149,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
       {
         abrirConsulta || abrirRegistro ?
           <ModalProgramas abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-            cerrarModal={() => CerrarModal()} />
+            cerrarModal={() => CerrarModal()} objConsulta={programaConsultado}/>
           : null
       }
     </div>

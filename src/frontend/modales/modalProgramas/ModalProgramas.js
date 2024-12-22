@@ -5,17 +5,17 @@ import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 
-function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
+function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta}) {
   const [inputsOff, setInputsOff] = useState(false);
 
   /*****Se recogen los datos para el objeto que será registrado*****/
-  const [codigo, setCodigo] = useState('');
-  const [nombre, setNombre] = useState('');
+  const [codigo, setCodigo] = useState(objConsulta && objConsulta.id);
+  const [nombre, setNombre] = useState(objConsulta && objConsulta.nombre);
   //el texto predeterminado debe coincidir con la opción predeterminada en el SELECT
-  const [tipo, setTipo] = useState('tecnico');
-  const [cantidadTrimestres, setCantidadTrimestres] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
+  const [tipo, setTipo] = useState(objConsulta && objConsulta.tipo);
+  const [cantidadTrimestres, setCantidadTrimestres] = useState(objConsulta && objConsulta.cantidadTrimestres);
+  const [fechaInicio, setFechaInicio] = useState(objConsulta && objConsulta.fechaInicio);
+  const [fechaFin, setFechaFin] = useState(objConsulta && objConsulta.fechaFin);
   const [programa, setPrograma] = useState({});
 
   function ManejarTopeHoras(texto) {

@@ -16,6 +16,11 @@ class CompetenciaServicio {
         const repo = new CompetenciaRepo();
         repo.SaveNew(competencia);
     }
+
+    CargarCompetencia(id) {
+        const repo = new CompetenciaRepo();
+        return repo.GetById(id);
+    }
 }
 
 

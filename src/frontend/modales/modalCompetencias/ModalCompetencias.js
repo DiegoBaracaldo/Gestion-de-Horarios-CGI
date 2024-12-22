@@ -7,15 +7,15 @@ import Competencia from '../../../backend/repository/entidades/Competencia';
 import { FormatearDescripcion } from '../../../backend/formato/FormatoDatos';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 
-const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa }) => {
+const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa, objConsulta }) => {
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    const [codigo, setCodigo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [horas, setHoras] = useState('');
+    const [codigo, setCodigo] = useState(objConsulta && objConsulta.id);
+    const [descripcion, setDescripcion] = useState(objConsulta && objConsulta.descripcion);
+    const [horas, setHoras] = useState(objConsulta && objConsulta.horasRequeridas);
     const [competencia, setCompetencia] = useState({});
 
     useEffect(() => {

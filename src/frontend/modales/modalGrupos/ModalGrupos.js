@@ -8,24 +8,39 @@ import { AlfaNumericaSinEspacio, CamposVacios, SoloNumeros } from '../../../back
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import Grupo from '../../../backend/repository/entidades/Grupo';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
+import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
+import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 
-const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
+const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
+    const CargarResponsableInicial = () => {
+        return new InstructorServicio().CargarInstructor(objConsulta.idResponsable) || {};
+    }
+
+    const CargarProgramaInicial = () => {
+        return new ProgramaServicio().CargarPrograma(objConsulta.idPrograma) || {};
+    }
+
+    const CargarJonadaInicial = () => {
+        return new JornadaServicio().CargarJornada(objConsulta.idJornada) || {};
+    }
+
     const [seleccResponsable, setSeleccResponsable] = useState(false);
-    const [responsable, setResponsable] = useState({});
+    const [responsable, setResponsable] = useState(CargarResponsableInicial());
     const [seleccPrograma, setSeleccPrograma] = useState(false);
-    const [programa, setPrograma] = useState({});
+    const [programa, setPrograma] = useState(CargarProgramaInicial());
     const [seleccJornada, setSeleccJornada] = useState(false);
-    const [jornada, setJornada] = useState({});
+    const [jornada, setJornada] = useState(CargarJonadaInicial());
     
-    const [ficha, setFicha] = useState('');
-    const [codigoGrupo, setCodigoGrupo] = useState('');
-    const [cantidadAprendices, setCantidadAprendices] = useState('');
-    const [esCadena, setEsCadena] = useState(false);
+    const [ficha, setFicha] = useState(objConsulta &&  objConsulta.id);
+    const [codigoGrupo, setCodigoGrupo] = useState(objConsulta &&  objConsulta.codigoGrupo);
+    const [cantidadAprendices, setCantidadAprendices] = useState(objConsulta &&  objConsulta.cantidadAprendices);
+    const [esCadena, setEsCadena] = useState(objConsulta &&  objConsulta.esCadenaFormacion);
     const [grupo, setGrupo] = useState({});
 
     const [programaNombre, setProgramaNombre] = useState("Seleccionar Programa...");

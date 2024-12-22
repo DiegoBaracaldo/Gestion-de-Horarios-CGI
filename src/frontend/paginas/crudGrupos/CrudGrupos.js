@@ -15,6 +15,8 @@ const CrudGrupos = () => {
         return new GrupoServicio().CargarLista();
     }
 
+    const [grupoConsultado, setGrupoConsultado] = useState({});
+
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
     const [listaObjetos, setListaObjetos] = useState(CargarLista);
@@ -33,9 +35,9 @@ const CrudGrupos = () => {
     }, [listaFiltrada]);
 
     useEffect(() => {
-        if(opcionCadena === "ambos") AdaptarLista(listaFiltrada);
-        if(opcionCadena === "si") AdaptarLista(listaFiltradaCadena);
-        if(opcionCadena === "no") AdaptarLista(listaFiltradaNoCadena);
+        if (opcionCadena === "ambos") AdaptarLista(listaFiltrada);
+        if (opcionCadena === "si") AdaptarLista(listaFiltradaCadena);
+        if (opcionCadena === "no") AdaptarLista(listaFiltradaNoCadena);
     }, [listaFiltradaNoCadena]); //se elige esta variable ya que es la última en cambiar al FiltrarCadenaFormacion()
 
     const AdaptarLista = (listaRecibida) => {
@@ -109,8 +111,17 @@ const CrudGrupos = () => {
     /****************** SECCIÓN DE CONSULTA *************************/
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
-    const AbrirConsulta = () => {
+    const AbrirConsulta = (e) => {
+        DefinirGrupoConsultado(e.id);
         setAbrirConsulta(true);
+    }
+
+    const DefinirGrupoConsultado = (numFicha) => {
+        let grupoAux = {};
+        listaFiltrada.forEach((grupo) => {
+            if(grupo.id === numFicha) grupoAux = grupo;
+        });
+        setGrupoConsultado(grupoAux);
     }
     /////////////////////////////////////////////////////
 
@@ -145,6 +156,7 @@ const CrudGrupos = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setGrupoConsultado({});
         setListaFiltrada(CargarLista());
     }
 
@@ -187,8 +199,8 @@ const CrudGrupos = () => {
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} /> :
-                    null
+                        onCloseProp={() => CerrarModal()} objConsulta={grupoConsultado}/>
+                    : null
             }
         </div>
     );

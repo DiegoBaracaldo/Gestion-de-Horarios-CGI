@@ -21,7 +21,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
-
+    const [instructorConsultado, setInstructorConsultado] = useState({});
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
@@ -75,6 +75,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setInstructorConsultado({});
         setListaFiltrada(CargarLista());
     }
     /////////////////////////////////////////////////////
@@ -92,8 +93,14 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
             responsableSeleccionado && responsableSeleccionado(r);
             onClose();
         }else{
+            DefinirInstructorConsultado(r.id);
             AbrirConsulta();
         }
+    }
+
+    const DefinirInstructorConsultado = (idInstructor) => {
+        const instructor = listaFiltrada.find(i => i.id === idInstructor);
+        setInstructorConsultado(instructor);
     }
 
     return (
@@ -108,7 +115,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} /> :
+                        onCloseProp={() => CerrarModal()} objConsultado={instructorConsultado}/> :
                     null
             }
         </div>

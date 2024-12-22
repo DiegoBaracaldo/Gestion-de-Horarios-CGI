@@ -13,6 +13,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirHorario, setAbrirHorario] = useState(false);
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [abrirConsulta, setAbrirConsulta] = useState(false);
+  const [jornadaConsultada, setJornadaConsultada] = useState({});
 
   const CargarLista = () => {
     return new JornadaServicio().CargarLista();
@@ -40,6 +41,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const CerrarModal = () => {
     setAbrirRegistro(false);
     setAbrirConsulta(false);
+    setJornadaConsultada({});
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -63,6 +65,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       jornadaSeleccionada && jornadaSeleccionada(e);
       onClose();
     } else {
+      setJornadaConsultada(e);
       setAbrirConsulta(true);
     }
   }
@@ -137,13 +140,13 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
 
       {
         abrirConsulta || abrirRegistro ? <ModalJornadas cerrarModal={() => CerrarModal()}
-          abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} />
+          abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} objConsulta={jornadaConsultada}/>
           : null
       }
       {
         abrirHorario ? <FranjaHoraria onClickDestructivo={CancelarRegistro}
         onClickPositivo={RegistrarJornada}
-          franjaProp={(f) => setFranjaHoraria(f)} />
+          franjaProp={(f) => setFranjaHoraria(f)}/>
           : null
       }
     </div>

@@ -8,8 +8,13 @@ import { HastaCien, HastaDos, HastaTres } from '../../../backend/validacion/Vali
 import Ambiente from '../../../backend/repository/entidades/Ambiente';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
+import TorreServicio from '../../../backend/repository/servicios/TorreService';
 
-const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
+const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
+
+    const CargarTorreInicial = () => {
+        return new TorreServicio().CargarTorre(objConsulta.idTorre) || {};
+    }
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
@@ -17,19 +22,21 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
     const [seleccTorre, setSeleccTorre] = useState(false);
-    const [torre, setTorre] = useState({});
+    const [torre, setTorre] = useState(CargarTorreInicial());
 
-    const [nombre, setNombre] = useState('');
-    const [capacidad, setCapacidad] = useState('');
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState([]);
+    const [nombre, setNombre] = useState(objConsulta && objConsulta.nombre);
+    const [capacidad, setCapacidad] = useState(objConsulta && objConsulta.capacidad);
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(objConsulta && objConsulta.franjaDisponibilidad);
     const [ambiente, setAmbiente] = useState({});
 
     useEffect(() => {
         if(Object.keys(ambiente).length > 0){
-            const ambienteServicio = new AmbienteServicio();
-            ambienteServicio.GuardarAmbiente(ambiente);
-            alert("Ambiente guardado correctamente!");
-            onCloseProp && onCloseProp();
+            if(!seActivoEdicion){
+                const ambienteServicio = new AmbienteServicio();
+                ambienteServicio.GuardarAmbiente(ambiente);
+                alert("Ambiente guardado correctamente!");
+                onCloseProp && onCloseProp();
+            }
         }
     }, [ambiente]);
 
@@ -74,14 +81,13 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
     const ValidarObjAmbiente = () => {
         let bandera = false;
         const idTorre = torre.id;
-        if(!CamposVacios(ambiente)){
-            if(!nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)){
+            if(!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)){
                 alert("Nombre Incorrecto");
                 setNombre('');
-            }else if(!idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)){
+            }else if(!idTorre || !idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)){
                 alert("Torre incorrecta!");
                 setTorre({});
-            }else if(!capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)){
+            }else if(!capacidad || !capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)){
                 alert("Capacidad incorrecta");
                 setCapacidad('');
             }else if(!franjaDisponibilidad.length > 0){
@@ -89,9 +95,6 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
             }else{
                 bandera = true;
             }
-        }else{
-            alert("Datos incorrectos!");
-        }
         return bandera;
     }
 
@@ -131,7 +134,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp }) => {
                 isOpenFranjaHoraria ? 
                 <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                 esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
-                onClickPositivo={RegistrarJornada}/> 
+                onClickPositivo={RegistrarJornada}
+                franjasOcupadasProp={franjaDisponibilidad}/> 
                 : null
             }
             {

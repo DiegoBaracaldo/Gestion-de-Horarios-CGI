@@ -13,6 +13,8 @@ const CrudCompetencias = () => {
 
     const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
+    const [competenciaConsultada, setCompetenciaConsultada] = useState();
+
     const [nombrePrograma, setNombrePrograma] = useState('Seleccionar programa...');
     const [seleccPrograma, setSeleccPrograma] = useState(false);
     const [programa, setPrograma] = useState({});
@@ -87,8 +89,17 @@ const CrudCompetencias = () => {
     ///////// SECCIÓN DE CONSULTA ///////////////
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
-    const AbrirConsulta = () => {
+    const AbrirConsulta = (e) => {
+        DefinirCompetConsultada(e.id);
         setAbrirConsulta(true);
+    }
+
+    const DefinirCompetConsultada = (idCompetencia) => {
+        let compAux = {};
+        listaFiltrada.forEach((competencia) => {
+            if(competencia.id === idCompetencia) compAux = competencia;
+        });
+        setCompetenciaConsultada(compAux);
     }
 
     ///////// SECCIÓN DE REGISTRO ///////////////
@@ -101,6 +112,7 @@ const CrudCompetencias = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setCompetenciaConsultada({});
         setListaFiltrada(CargarLista());
     }
 
@@ -116,8 +128,9 @@ const CrudCompetencias = () => {
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} programa={programa}/> :
-                    null
+                        onCloseProp={() => CerrarModal()} programa={programa}
+                        objConsulta={competenciaConsultada}/> 
+                        : null
             }
             {
                 seleccPrograma ? <CrudPrograma modoSeleccion={true}

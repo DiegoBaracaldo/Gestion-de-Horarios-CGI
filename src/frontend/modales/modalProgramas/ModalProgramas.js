@@ -5,17 +5,17 @@ import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 
-function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
+function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta}) {
   const [inputsOff, setInputsOff] = useState(false);
 
   /*****Se recogen los datos para el objeto que será registrado*****/
-  const [codigo, setCodigo] = useState('');
-  const [nombre, setNombre] = useState('');
+  const [codigo, setCodigo] = useState(objConsulta && objConsulta.id);
+  const [nombre, setNombre] = useState(objConsulta && objConsulta.nombre);
   //el texto predeterminado debe coincidir con la opción predeterminada en el SELECT
-  const [tipo, setTipo] = useState('tecnico');
-  const [cantidadTrimestres, setCantidadTrimestres] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
+  const [tipo, setTipo] = useState(objConsulta && objConsulta.tipo);
+  const [cantidadTrimestres, setCantidadTrimestres] = useState(objConsulta && objConsulta.cantidadTrimestres);
+  const [fechaInicio, setFechaInicio] = useState(objConsulta && objConsulta.fechaInicio);
+  const [fechaFin, setFechaFin] = useState(objConsulta && objConsulta.fechaFin);
   const [programa, setPrograma] = useState({});
 
   function ManejarTopeHoras(texto) {
@@ -56,23 +56,22 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
 
   const ValidarObjPrograma = () => {
     let bandera = false;
-    if (!CamposVacios(programa)) {
-      if (!codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
+      if (!codigo || !codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
         alert("Código incorrecto");
         setCodigo('');
-      } else if (!nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
+      } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
         alert("Nombre incorrecto!");
         setNombre('');
-      } else if (!tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
+      } else if (!tipo || !tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
         alert("Tipo incorrecto");
         setTipo('tecnico');
-      } else if (!cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
+      } else if (!cantidadTrimestres || !cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
         alert("Cantidad de trimestres incorrecta");
         setCantidadTrimestres('');
-      } else if (!fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
+      } else if (!fechaInicio || !fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
         alert("Fecha de inicio incorrecta!");
         setFechaInicio('');
-      } else if (!fechaFin.toString().trim() || EsFecha(fechaFin)) {
+      } else if (!fechaFin || !fechaFin.toString().trim() || EsFecha(fechaFin)) {
         alert("Fecha de fin incorrecta!");
         setFechaFin('');
       } else if (fechaFin < fechaInicio) {
@@ -80,9 +79,6 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal}) {
       } else {
         bandera = true;
       }
-    } else {
-      alert("Información Incorrecta!");
-    }
     return bandera;
   }
 

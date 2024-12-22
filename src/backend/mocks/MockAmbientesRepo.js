@@ -50,7 +50,7 @@ export const ambientes = [
     {
       id: "006",
       nombre: "Aula 302",
-      idTorre: "103",
+      idTorre: "106",
       nombreTorre: "Edificio Deportivo",
       capacidad: 40,
       franjaDisponibilidad: [18, 67, 133, 210, 310],
@@ -59,7 +59,7 @@ export const ambientes = [
     {
       id: "007",
       nombre: "Laboratorio de Idiomas",
-      idTorre: "102",
+      idTorre: "107",
       nombreTorre: "Edificio de Artes",
       capacidad: 30,
       franjaDisponibilidad: [5, 99, 150, 240, 300],
@@ -68,7 +68,7 @@ export const ambientes = [
     {
       id: "008",
       nombre: "Aula de Música",
-      idTorre: "105",
+      idTorre: "108",
       nombreTorre: "Edificio de Biblioteca",
       capacidad: 50,
       franjaDisponibilidad: [15, 77, 125, 210, 330],
@@ -77,7 +77,7 @@ export const ambientes = [
     {
       id: "009",
       nombre: "Laboratorio de Química",
-      idTorre: "104",
+      idTorre: "109",
       nombreTorre: "Edificio de Laboratorios",
       capacidad: 40,
       franjaDisponibilidad: [7, 45, 90, 160, 310],
@@ -86,7 +86,7 @@ export const ambientes = [
     {
       id: "010",
       nombre: "Aula de Conferencias",
-      idTorre: "101",
+      idTorre: "110",
       nombreTorre: "Edificio Residencial",
       capacidad: 50,
       franjaDisponibilidad: [10, 50, 100, 200, 336],

@@ -21,6 +21,8 @@ const CrudAmbientes = () => {
     const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
+    const [ambienteConsultado, setAmbienteConsultado] = useState({});
+
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
@@ -55,14 +57,24 @@ const CrudAmbientes = () => {
     useEffect(() => {
         setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
-    /////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
 
     ///////// SECCIÓN DE CONSULTA ///////////////
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
-    const AbrirConsulta = () => {
-        setAbrirConsulta(true);
+    const AbrirConsulta = (e) => {
+        DefinirAmbienteConsulta(e.nombre, e.nombreTorre);
     }
+
+    const DefinirAmbienteConsulta = (nombreAmbiente, nombreTorre) => {
+        const ambiente = listaFiltrada.find((element) => 
+            element.nombre === nombreAmbiente && element.nombreTorre === nombreTorre);
+        setAmbienteConsultado(ambiente);
+    }
+
+    useEffect(() => {
+        if(Object.keys(ambienteConsultado).length > 0) setAbrirConsulta(true);
+    }, [ambienteConsultado]);
 
     ///////// SECCIÓN DE REGISTRO ///////////////
     const [abrirRegistro, setAbrirRegistro] = useState(false);
@@ -75,6 +87,7 @@ const CrudAmbientes = () => {
     const CerrarModal = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
+        setAmbienteConsultado({});
         setListaFiltrada(CargarLista());
     }
 
@@ -89,12 +102,12 @@ const CrudAmbientes = () => {
                 disabledDestructivo={listaVacia} titulo="Ambientes"
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)}
-                clicFila={AbrirConsulta} onClicPositivo={AbrirRegistro}
+                clicFila={e => AbrirConsulta(e)} onClicPositivo={AbrirRegistro}
                 datosJson={listaAdaptada} subtitulos={subs} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} /> :
+                        onCloseProp={() => CerrarModal()} objConsulta={ambienteConsultado}/> :
                     null
             }
         </div>

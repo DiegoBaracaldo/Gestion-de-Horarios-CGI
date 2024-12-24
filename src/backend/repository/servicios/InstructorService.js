@@ -21,6 +21,11 @@ class InstructorServicio {
         const repo = new InstructorRepo();
         return repo.GetById(idIstructor);
     }
+
+    ActualizarInstructor(idViejo, instructor){
+        const repo = new InstructorRepo();
+        repo.Save(idViejo, instructor);
+    }
 }
 
 

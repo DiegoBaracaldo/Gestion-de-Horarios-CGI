@@ -21,6 +21,11 @@ class JornadaServicio {
         const repo = new JornadaRepo();
         return repo.GetById(id);
     }
+
+    ActualizarJornada(idViejo, jornada){
+        const repo = new JornadaRepo();
+        repo.Save(idViejo, jornada);
+    }
 }
 
 

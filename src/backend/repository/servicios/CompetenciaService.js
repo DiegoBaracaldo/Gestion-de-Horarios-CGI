@@ -21,6 +21,11 @@ class CompetenciaServicio {
         const repo = new CompetenciaRepo();
         return repo.GetById(id);
     }
+
+    ActualizarCompetencia(idViejo, competencia){
+        const repo = new CompetenciaRepo();
+        return repo.Save(idViejo, competencia);
+    }
 }
 
 

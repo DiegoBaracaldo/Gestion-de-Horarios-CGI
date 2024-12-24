@@ -15,20 +15,32 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
     /*****Se recogen los datos para el objeto que será registrado*****/
-    const [cedula, setCedula] = useState(objConsultado && objConsultado.id);
-    const [nombre, setNombre] = useState(objConsultado && objConsultado.nombre);
-    const [correo, setCorreo] = useState(objConsultado && objConsultado.correo);
-    const [telefono, setTelefono] = useState(objConsultado && objConsultado.telefono);
-    const [especialidad, setEspecialidad] = useState(objConsultado && objConsultado.especialidad);
-    const [topeHoras, setTopeHoras] = useState(objConsultado && objConsultado.topeHoras);
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(objConsultado && objConsultado.franjaDisponibilidad);
+    const cedulaInicial = objConsultado.id && objConsultado.id;
+    const [cedula, setCedula] = useState(cedulaInicial);
+    const nombreInicial = objConsultado.nombre && objConsultado.nombre;
+    const [nombre, setNombre] = useState(nombreInicial);
+    const correoInicial = objConsultado.correo && objConsultado.correo
+    const [correo, setCorreo] = useState(correoInicial);
+    const telefonoInicial = objConsultado.telefono && objConsultado.telefono;
+    const [telefono, setTelefono] = useState(telefonoInicial);
+    const especialidadInicial = objConsultado.especialidad && objConsultado.especialidad;
+    const [especialidad, setEspecialidad] = useState(especialidadInicial);
+    const topeHorasInicial = objConsultado.topeHoras && objConsultado.topeHoras;
+    const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
+    const franjaInicial = objConsultado.franjaDisponibilidad && objConsultado.franjaDisponibilidad;
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [instructor, setInstructor] = useState({});
 
     useEffect(() => {
         if(Object.keys(instructor).length > 0){
             const servicioInstructor = new InstructorServicio();
-            servicioInstructor.GuardarInstructor(instructor);
-            alert("Instructor  registrado correctamente!");
+            if(abrirConsulta){
+                servicioInstructor.ActualizarInstructor(cedulaInicial, instructor);
+                alert("Instructor actualizado correctamente!");
+            }else{
+                servicioInstructor.GuardarInstructor(instructor);
+                alert("Instructor  registrado correctamente!");
+            }
             onCloseProp && onCloseProp();
         }
     }, [instructor]);
@@ -41,7 +53,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const RegistrarInstructor = () => {
         //Se hace una validación exahustiva de los datos
         if (ValidarObjInstructor()) {
-            FormarObjInstructor();
+            if(abrirConsulta) ObjInstructorActualizado();
+            else FormarObjInstructor();
         }
     }
 
@@ -96,8 +109,35 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
         setInstructor(objAux);
     }
 
+    const ObjInstructorActualizado = () => {
+        setInstructor({
+            ...objConsultado,
+            id: cedula,
+            nombre: nombre,
+            correo: correo,
+            telefono: telefono,
+            especialidad: especialidad,
+            topeHoras: topeHoras,
+            franjaDisponibilidad: franjaDisponibilidad
+        });
+    }
+
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
+
+    function ReiniciarValores(){
+        setCedula(cedulaInicial);
+        setNombre(nombreInicial);
+        setCorreo(correoInicial);
+        setTelefono(telefonoInicial);
+        setEspecialidad(especialidadInicial);
+        setTopeHoras(topeHorasInicial);
+        setFranjaDisponibilidad(franjaInicial);
+    }
+
+    useEffect(() => {
+        if(!seActivoEdicion)ReiniciarValores();
+    }, [seActivoEdicion]);
 
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
@@ -154,7 +194,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
                         onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
                         onClickPositivo={RegistrarJornada} 
-                        franjasOcupadasProp={franjaDisponibilidad}/>
+                        franjasOcupadasProp={franjaDisponibilidad}
+                        esEdicion={seActivoEdicion}/>
             }
         </ModalGeneral>
     );

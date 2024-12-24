@@ -22,19 +22,32 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
     const [seleccTorre, setSeleccTorre] = useState(false);
-    const [torre, setTorre] = useState(CargarTorreInicial());
+    const torreInicial = CargarTorreInicial();
+    const [torre, setTorre] = useState(torreInicial);
 
-    const [nombre, setNombre] = useState(objConsulta && objConsulta.nombre);
-    const [capacidad, setCapacidad] = useState(objConsulta && objConsulta.capacidad);
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(objConsulta && objConsulta.franjaDisponibilidad);
+    const nombreInicial = objConsulta.nombre && objConsulta.nombre;
+    const [nombre, setNombre] = useState(nombreInicial);
+    const capacidadInicial = objConsulta.capacidad && objConsulta.capacidad;
+    const [capacidad, setCapacidad] = useState(capacidadInicial);
+    const franjaInicial = objConsulta.franjaDisponibilidad && objConsulta.franjaDisponibilidad;
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [ambiente, setAmbiente] = useState({});
 
+    //Es el id del objeto que se carga al iniciar el modal en modo consulta para pode editarlo
+    //aún si se edita su id.
+    const idViejo = objConsulta && objConsulta.id;
+
     useEffect(() => {
-        if(Object.keys(ambiente).length > 0){
-            if(!seActivoEdicion){
+        if (Object.keys(ambiente).length > 0) {
+            if (!seActivoEdicion) {
                 const ambienteServicio = new AmbienteServicio();
                 ambienteServicio.GuardarAmbiente(ambiente);
                 alert("Ambiente guardado correctamente!");
+                onCloseProp && onCloseProp();
+            } else {
+                const ambienteServicio = new AmbienteServicio();
+                ambienteServicio.ActualizarAmbiente(idViejo, ambiente);
+                alert("Ambiente actualizado correctamente!");
                 onCloseProp && onCloseProp();
             }
         }
@@ -47,21 +60,23 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }, [torre]);
 
     const RegistrarJornada = () => {
-        if(franjaDisponibilidad.length > 0){
+        if (franjaDisponibilidad.length > 0) {
             setIsOpenFranjaHoraria(false);
-        }else{
+        } else {
             alert("Debes establecer la disponibilidad horaria del aula de clase!");
         }
     }
 
     const ManejarCapacidad = (texto) => {
-        if(texto.length > 3) setCapacidad(texto.substring(0, 3));
+        if (texto.length > 3) setCapacidad(texto.substring(0, 3));
         else setCapacidad(texto);
     }
 
     const RegistrarAmbiente = () => {
-        if(ValidarObjAmbiente()){
-            FormarObjAmbiente();
+        if (ValidarObjAmbiente()) {
+            if (abrirConsulta) ObjAmbienteActualizado();
+            else FormarObjAmbiente();
+
         }
     }
 
@@ -78,71 +93,94 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         setAmbiente(ambienteAux);
     }
 
+    const ObjAmbienteActualizado = () => {
+        setAmbiente({
+            ...objConsulta,
+            nombre: FormatearNombre(nombre),
+            idTorre: torre.id,
+            capacidad: capacidad,
+            franjaDisponibilidad: franjaDisponibilidad,
+            nombreTorre: torre.nombre
+        });
+    }
+
     const ValidarObjAmbiente = () => {
         let bandera = false;
         const idTorre = torre.id;
-            if(!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)){
-                alert("Nombre Incorrecto");
-                setNombre('');
-            }else if(!idTorre || !idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)){
-                alert("Torre incorrecta!");
-                setTorre({});
-            }else if(!capacidad || !capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)){
-                alert("Capacidad incorrecta");
-                setCapacidad('');
-            }else if(!franjaDisponibilidad.length > 0){
-                alert("Debes establecer un rango horario de disponibilidad para el aula de clase!");
-            }else{
-                bandera = true;
-            }
+        if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)) {
+            alert("Nombre Incorrecto");
+            setNombre('');
+        } else if (!idTorre || !idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)) {
+            alert("Torre incorrecta!");
+            setTorre({});
+        } else if (!capacidad || !capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)) {
+            alert("Capacidad incorrecta");
+            setCapacidad('');
+        } else if (!franjaDisponibilidad.length > 0) {
+            alert("Debes establecer un rango horario de disponibilidad para el aula de clase!");
+        } else {
+            bandera = true;
+        }
         return bandera;
     }
 
+    function ReiniciarValores(){
+        setNombre(nombreInicial);
+        setTorre(torreInicial);
+        setCapacidad(capacidadInicial);
+        setFranjaDisponibilidad(franjaInicial);
+    }
+
+    useEffect(() => {
+        if(!seActivoEdicion)ReiniciarValores();
+    }, [seActivoEdicion]);
+
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
-        isOpenConsulta={abrirConsulta}
-        bloquearInputs={(valor) => setInputsOff(valor)}
-        edicionActivada={(valor) => setSeActivoEdicion(valor)}
-        onClickPositivo={RegistrarAmbiente}>
+            isOpenConsulta={abrirConsulta}
+            bloquearInputs={(valor) => setInputsOff(valor)}
+            edicionActivada={(valor) => setSeActivoEdicion(valor)}
+            onClickPositivo={RegistrarAmbiente}>
             <div className='seccCajitasModal'>
                 <section>
                     <label>nombre: </label>
-                    <input maxLength={100} disabled={inputsOff} 
-                    title='Nombre del aula' value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}/>
+                    <input maxLength={100} disabled={inputsOff}
+                        title='Nombre del aula' value={nombre}
+                        onChange={(e) => setNombre(e.target.value)} />
                 </section>
                 <section>
                     <label>torre: </label>
                     <button disabled={inputsOff} onClick={() => setSeleccTorre(true)}
-                        >{torreNombre}</button>
+                    >{torreNombre}</button>
                 </section>
                 <section>
                     <label>capacidad: </label>
-                    <input type='number' disabled={inputsOff} 
-                    title='capacidad máxima de estudiantes posibles (2 dígitos)'
-                    value={capacidad} onChange={(e) => ManejarCapacidad(e.target.value)}/>
+                    <input type='number' disabled={inputsOff}
+                        title='capacidad máxima de estudiantes posibles (2 dígitos)'
+                        value={capacidad} onChange={(e) => ManejarCapacidad(e.target.value)} />
                 </section>
                 <section>
                     <label>horario: </label>
                     {/* Si no es disponibilidad, es horario, si no es consulta, es resgistro,
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
-                    <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta} 
-                    edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)}/>
+                    <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
+                        edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)} />
                 </section>
             </div>
             {
-                isOpenFranjaHoraria ? 
-                <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
-                esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
-                onClickPositivo={RegistrarJornada}
-                franjasOcupadasProp={franjaDisponibilidad}/> 
-                : null
+                isOpenFranjaHoraria ?
+                    <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
+                        esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
+                        onClickPositivo={RegistrarJornada}
+                        franjasOcupadasProp={franjaDisponibilidad}
+                        esEdicion={seActivoEdicion} />
+                    : null
             }
             {
-                seleccTorre ? 
-                <CrudTorres modoSeleccion={true} onClose={() => setSeleccTorre(false)}
-                torreSeleccionada={(e) => setTorre(e)}/> 
-                : null
+                seleccTorre ?
+                    <CrudTorres modoSeleccion={true} onClose={() => setSeleccTorre(false)}
+                        torreSeleccionada={(e) => setTorre(e)} />
+                    : null
             }
         </ModalGeneral>
     );

@@ -21,6 +21,11 @@ class TorreServicio {
         const repo = new TorreRepo();
         return repo.GetById(idTorre);
     }
+
+    ActualizarTorre (idViejo, torre){
+        const repo = new TorreRepo();
+        repo.Save(idViejo, torre);
+    }
 }
 
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
-import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 import { HastaCincuenta, HastaDos, HastaDoscientosCuarentaYNueve } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { SoloNumeros } from '../../../backend/validacion/ValidacionFormato';
 import Competencia from '../../../backend/repository/entidades/Competencia';
@@ -13,16 +12,24 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    const [codigo, setCodigo] = useState(objConsulta && objConsulta.id);
-    const [descripcion, setDescripcion] = useState(objConsulta && objConsulta.descripcion);
-    const [horas, setHoras] = useState(objConsulta && objConsulta.horasRequeridas);
+    const codigoInicial = objConsulta.id && objConsulta.id;
+    const [codigo, setCodigo] = useState(codigoInicial);
+    const descripcionInicial = objConsulta.descripcion && objConsulta.descripcion;
+    const [descripcion, setDescripcion] = useState(descripcionInicial);
+    const horasInicial = objConsulta.horasRequeridas && objConsulta.horasRequeridas;
+    const [horas, setHoras] = useState(horasInicial);
     const [competencia, setCompetencia] = useState({});
 
     useEffect(() => {
         if(Object.keys(competencia).length > 0){
             const competenciaService = new CompetenciaServicio();
-            competenciaService.GuardarCompetencia(competencia);
-            alert("Competencia guardada correctamente!");
+            if(abrirConsulta){
+                competenciaService.ActualizarCompetencia(codigoInicial, competencia);
+                alert("Competencia actualizada correctamente!");
+            }else{
+                competenciaService.GuardarCompetencia(competencia);
+                alert("Competencia guardada correctamente!");
+            }
             onCloseProp && onCloseProp();
         }
     });
@@ -50,7 +57,7 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
         const competencia = new Competencia(
             codigo,
             programa.id,
-            descripcion,
+            FormatearDescripcion(descripcion),
             horas,
             "2024-12-07T14:55:00",
             programa.nombre
@@ -58,15 +65,38 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
         setCompetencia(competencia);
     }
 
+    const ObjCompetenciaActualizado = () => {
+        setCompetencia({
+            ...objConsulta,
+            id: codigo,
+            idPrograma: programa.id,
+            nombrePrograma: programa.nombre,
+            descripcion: FormatearDescripcion(descripcion),
+            horasRequeridas: horas
+        });
+    }
+
     const RegistrarCompetencia = () => {
         if(ValidarObjCompetencia()){
-            FormarObjCompetencia();
+            if(abrirConsulta) ObjCompetenciaActualizado();
+            else FormarObjCompetencia();
         }
     }
 
     const ManejarHoras = (texto) => {
         setHoras(texto.substring(0, 2));
     }
+
+
+    function ReiniciarValores(){
+        setCodigo(codigoInicial);
+        setDescripcion(descripcionInicial);
+        setHoras(horasInicial);
+    }
+
+    useEffect(() => {
+        if(!seActivoEdicion)ReiniciarValores();
+    }, [seActivoEdicion]);
 
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}

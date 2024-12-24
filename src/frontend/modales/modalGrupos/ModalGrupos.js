@@ -31,16 +31,23 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     }
 
     const [seleccResponsable, setSeleccResponsable] = useState(false);
-    const [responsable, setResponsable] = useState(CargarResponsableInicial());
+    const responsableInicial = CargarResponsableInicial();
+    const [responsable, setResponsable] = useState(responsableInicial);
     const [seleccPrograma, setSeleccPrograma] = useState(false);
-    const [programa, setPrograma] = useState(CargarProgramaInicial());
+    const programaInicial = CargarProgramaInicial()
+    const [programa, setPrograma] = useState(programaInicial);
     const [seleccJornada, setSeleccJornada] = useState(false);
-    const [jornada, setJornada] = useState(CargarJonadaInicial());
+    const jornadaInicial = CargarJonadaInicial();
+    const [jornada, setJornada] = useState(jornadaInicial);
     
-    const [ficha, setFicha] = useState(objConsulta &&  objConsulta.id);
-    const [codigoGrupo, setCodigoGrupo] = useState(objConsulta &&  objConsulta.codigoGrupo);
-    const [cantidadAprendices, setCantidadAprendices] = useState(objConsulta &&  objConsulta.cantidadAprendices);
-    const [esCadena, setEsCadena] = useState(objConsulta &&  objConsulta.esCadenaFormacion);
+    const fichaInicial = objConsulta.id &&  objConsulta.id;
+    const [ficha, setFicha] = useState(fichaInicial);
+    const codigoInicial = objConsulta.codigoGrupo &&  objConsulta.codigoGrupo;
+    const [codigoGrupo, setCodigoGrupo] = useState(codigoInicial);
+    const aprendicesInicial = objConsulta.cantidadAprendices &&  objConsulta.cantidadAprendices;
+    const [cantidadAprendices, setCantidadAprendices] = useState(aprendicesInicial);
+    const esCadenaInicial = objConsulta.esCadenaFormacion &&  objConsulta.esCadenaFormacion;
+    const [esCadena, setEsCadena] = useState(esCadenaInicial);
     const [grupo, setGrupo] = useState({});
 
     const [programaNombre, setProgramaNombre] = useState("Seleccionar Programa...");
@@ -49,10 +56,14 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
 
     useEffect(() => {
         if(Object.keys(grupo).length > 0){
-            console.log(grupo.esCadena);
             const servicioGrupo = new GrupoServicio();
-            servicioGrupo.GuardarGrupo(grupo);
-            alert("Grupo guardado correctamente!");
+            if(abrirConsulta){
+                servicioGrupo.ActualizarGrupo(fichaInicial, grupo);
+                alert("Grupo actualizado correctamente!");
+            }else{
+                servicioGrupo.GuardarGrupo(grupo);
+                alert("Grupo guardado correctamente!");
+            }
             onCloseProp && onCloseProp();
         }
     }, [grupo]);
@@ -125,11 +136,41 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         setGrupo(objAux);
     }
 
+    const ObjGrupoActualizado = () => {
+        setGrupo({
+            ...objConsulta,
+            id: ficha,
+            idPrograma: programa.id,
+            nombrePrograma: programa.nombre,
+            idResponsable: responsable.id,
+            codigoGrupo: codigoGrupo,
+            idJornada: jornada.id,
+            jornada: jornada.tipo,
+            cantidadAprendices: cantidadAprendices,
+            esCadenaFormacion: esCadena
+        });
+    }
+
     const RegistrarGrupo = () => {
         if(ValidarObjGrupo()){
-            FormarObjGrupo();
+            if(abrirConsulta) ObjGrupoActualizado();
+            else FormarObjGrupo();
         }
     }
+
+    function ReiniciarValores(){
+        setPrograma(programaInicial);
+        setFicha(fichaInicial);
+        setCodigoGrupo(codigoInicial);
+        setResponsable(responsableInicial);
+        setJornada(jornadaInicial);
+        setCantidadAprendices(aprendicesInicial);
+        setEsCadena(esCadenaInicial);
+    }
+
+    useEffect(() => {
+        if(!seActivoEdicion)ReiniciarValores();
+    }, [seActivoEdicion]);
 
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}

@@ -23,14 +23,9 @@ class TorreRepo{
     }
 
     Save(idViejo, torre){
-        let torreViejo = this.GetById(idViejo);
-        if(torreViejo === null){
-            this.SaveNew(torre);
-        }else{
             //actualizar
             let torreIndex = torres.findIndex(e => e.id === idViejo);
             torres[torreIndex] = torre;
-        }
     }
 
     //Se trabaja con array de ids a eliminar.

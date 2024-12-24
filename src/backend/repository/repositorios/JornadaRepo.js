@@ -1,39 +1,34 @@
 import { jornadas } from "../../mocks/MockJornadasRepo";
-class JornadaRepo{
+class JornadaRepo {
 
-    constructor(){
+    constructor() {
 
     }
 
-    GetAll(){
+    GetAll() {
         return jornadas;
     }
 
-    GetById(id){
+    GetById(id) {
         let jornadaAux = null;
         jornadas.forEach((jornada) => {
-            if(jornada.id === id) jornadaAux = jornada;
+            if (jornada.id === id) jornadaAux = jornada;
         });
         return jornadaAux;
     }
 
-    SaveNew(jornada){
+    SaveNew(jornada) {
         jornadas.push(jornada);
     }
 
-    Save(idViejo, jornada){
-        let jornadaViejo = this.GetById(idViejo);
-        if(jornadaViejo === null){
-            this.SaveNew(jornada);
-        }else{
-            //actualizar
-            let jornadaIndex = jornadas.findIndex(e => e.id === idViejo);
-            jornadas[jornadaIndex] = jornada;
-        }
+    Save(idViejo, jornada) {
+        //actualizar
+        let jornadaIndex = jornadas.findIndex(e => e.id === idViejo);
+        jornadas[jornadaIndex] = jornada;
     }
 
     //Se trabaja con array de ids a eliminar.
-    Remove(idArray){
+    Remove(idArray) {
         idArray.forEach((id) => {
             jornadas.filter(jornada => jornada.id !== id);
         });

@@ -11,6 +11,17 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
     const [modoEdicion, setModoEdicion] = useState(false);
     const [textoPositivo, setTextoPositivo] = useState('');
 
+    //Registrar con botón Enter
+    useEffect(() => {
+        const ManejarEnter = (event) => {
+            if(event.key === 'Enter' && (modoEdicion || isOpenRegistro)) onClickPositivo && onClickPositivo();
+        }
+
+        document.addEventListener('keydown', ManejarEnter);
+
+        return () => document.removeEventListener('keydown', ManejarEnter);
+    }, []);
+
     //Manejar modo edición
     useEffect(() => {
         if (modoEdicion) {
@@ -21,7 +32,7 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
         } else {
             bloquearInputs && bloquearInputs(true);
             setTextoPositivo("Editar");
-            //para notificar al padre que se activó la edición por si le sirve la info
+            //para notificar al padre que se desactivó la edición por si le sirve la info
             edicionActivada && edicionActivada(false);
         }
     }, [modoEdicion]);

@@ -23,14 +23,9 @@ class AmbienteRepo{
     }
 
     Save(idViejo, ambiente){
-        let ambienteViejo = this.GetById(idViejo);
-        if(ambienteViejo === null){
-            this.SaveNew(ambiente);
-        }else{
             //actualizar
             let ambienteIndex = ambientes.findIndex(e => e.id === idViejo);
             ambientes[ambienteIndex] = ambiente;
-        }
     }
 
     //Se trabaja con array de ids a eliminar.

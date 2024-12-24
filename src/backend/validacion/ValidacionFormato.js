@@ -18,7 +18,7 @@ export function TextoSinEspacio(texto) {
 }
 
 export function SoloNumeros(texto) {
-    const todosSonAlfaNumericaSinEspacios = typeof texto === 'string' && /^\d+$/.test(texto);
+    const todosSonAlfaNumericaSinEspacios = /^\d+$/.test(texto) && texto > 0;
     return todosSonAlfaNumericaSinEspacios;
 }
 

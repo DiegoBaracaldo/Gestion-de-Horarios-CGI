@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
 import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/MockCrudAvanzado';
 import './CrudCompetencias.css';
-import { listaMenuAmbientes, listaMenuCompetencias } from '../ListasMenuFiltro';
+import {listaMenuCompetencias } from '../ListasMenuFiltro';
 import ModalCompetencias from '../../modales/modalCompetencias/ModalCompetencias';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
@@ -13,7 +13,7 @@ const CrudCompetencias = () => {
 
     const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
-    const [competenciaConsultada, setCompetenciaConsultada] = useState();
+    const [competenciaConsultada, setCompetenciaConsultada] = useState({});
 
     const [nombrePrograma, setNombrePrograma] = useState('Seleccionar programa...');
     const [seleccPrograma, setSeleccPrograma] = useState(false);

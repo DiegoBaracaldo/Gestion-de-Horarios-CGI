@@ -5,30 +5,44 @@ import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 
-function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta}) {
+function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta }) {
   const [inputsOff, setInputsOff] = useState(false);
 
   /*****Se recogen los datos para el objeto que será registrado*****/
-  const [codigo, setCodigo] = useState(objConsulta && objConsulta.id);
-  const [nombre, setNombre] = useState(objConsulta && objConsulta.nombre);
+  const codigoInicial = objConsulta.id && objConsulta.id;
+  const [codigo, setCodigo] = useState(codigoInicial);
+  const nombreInicial = objConsulta.nombre && objConsulta.nombre;
+  const [nombre, setNombre] = useState(nombreInicial);
   //el texto predeterminado debe coincidir con la opción predeterminada en el SELECT
-  const [tipo, setTipo] = useState(objConsulta && objConsulta.tipo);
-  const [cantidadTrimestres, setCantidadTrimestres] = useState(objConsulta && objConsulta.cantidadTrimestres);
-  const [fechaInicio, setFechaInicio] = useState(objConsulta && objConsulta.fechaInicio);
-  const [fechaFin, setFechaFin] = useState(objConsulta && objConsulta.fechaFin);
+  const tipoInicial = objConsulta.tipo && objConsulta.tipo;
+  const [tipo, setTipo] = useState(tipoInicial);
+  const cantidadTrimestresInicial = objConsulta.cantidadTrimestres && objConsulta.cantidadTrimestres;
+  const [cantidadTrimestres, setCantidadTrimestres] = useState(cantidadTrimestresInicial);
+  const fechaInicioInicial = objConsulta.fechaInicio && objConsulta.fechaInicio
+  const [fechaInicio, setFechaInicio] = useState(fechaInicioInicial);
+  const fechaFinInicial = objConsulta.fechaFin && objConsulta.fechaFin;
+  const [fechaFin, setFechaFin] = useState(fechaFinInicial);
   const [programa, setPrograma] = useState({});
+
+
+  const idViejo = objConsulta && objConsulta.id;
 
   function ManejarTopeHoras(texto) {
     if (texto.length > 2) setCantidadTrimestres(texto.substring(0, 2));
     else setCantidadTrimestres(texto);
-}
+  }
 
   //Si el objeto fue formado correctamente para el registro
   useEffect(() => {
-    if(Object.keys(programa).length > 0){
+    if (Object.keys(programa).length > 0) {
       const servicioPrograma = new ProgramaServicio();
-      servicioPrograma.GuardarPrograma(programa);
-      alert("Programa registrado correctamente!");
+      if (abrirConsulta) {
+        servicioPrograma.ActualizarPrograma(idViejo, programa);
+        alert("Programa actualizado correctamente!");
+      } else {
+        servicioPrograma.GuardarPrograma(programa);
+        alert("Programa registrado correctamente!");
+      }
       cerrarModal && cerrarModal();
     }
   }, [programa]);
@@ -36,8 +50,9 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 
   const RegistrarPrograma = () => {
     //Se hace una validación exahustiva de los datos
-    if(ValidarObjPrograma()){
-      FormarObjPrograma();
+    if (ValidarObjPrograma()) {
+      if (abrirConsulta) ObjProgramaActualizado();
+      else FormarObjPrograma();
     }
   }
 
@@ -54,32 +69,53 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
     setPrograma(objAux);
   }
 
+  const ObjProgramaActualizado = () => {
+    setPrograma({
+      ...programa,
+      id: codigo,
+      nombre: FormatearNombre(nombre),
+      tipo: tipo,
+      cantidadTrimestres: cantidadTrimestres,
+      fechaInicio: fechaInicio,
+      fechaFin: fechaFin,
+    });
+  }
+
   const ValidarObjPrograma = () => {
     let bandera = false;
-      if (!codigo || !codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
-        alert("Código incorrecto");
-        setCodigo('');
-      } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
-        alert("Nombre incorrecto!");
-        setNombre('');
-      } else if (!tipo || !tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
-        alert("Tipo incorrecto");
-        setTipo('tecnico');
-      } else if (!cantidadTrimestres || !cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
-        alert("Cantidad de trimestres incorrecta");
-        setCantidadTrimestres('');
-      } else if (!fechaInicio || !fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
-        alert("Fecha de inicio incorrecta!");
-        setFechaInicio('');
-      } else if (!fechaFin || !fechaFin.toString().trim() || EsFecha(fechaFin)) {
-        alert("Fecha de fin incorrecta!");
-        setFechaFin('');
-      } else if (fechaFin < fechaInicio) {
-        alert("Fecha final debería ser mayor que fecha inicial!");
-      } else {
-        bandera = true;
-      }
+    if (!codigo || !codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
+      alert("Código incorrecto");
+      setCodigo('');
+    } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
+      alert("Nombre incorrecto!");
+      setNombre('');
+    } else if (!tipo || !tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
+      alert("Tipo incorrecto");
+      setTipo('tecnico');
+    } else if (!cantidadTrimestres || !cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
+      alert("Cantidad de trimestres incorrecta");
+      setCantidadTrimestres('');
+    } else if (!fechaInicio || !fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
+      alert("Fecha de inicio incorrecta!");
+      setFechaInicio('');
+    } else if (!fechaFin || !fechaFin.toString().trim() || EsFecha(fechaFin)) {
+      alert("Fecha de fin incorrecta!");
+      setFechaFin('');
+    } else if (fechaFin < fechaInicio) {
+      alert("Fecha final debería ser mayor que fecha inicial!");
+    } else {
+      bandera = true;
+    }
     return bandera;
+  }
+
+  const ReiniciarValores = () => {
+    setCodigo(codigoInicial);
+    setNombre(nombreInicial);
+    setTipo(tipoInicial);
+    setCantidadTrimestres(cantidadTrimestresInicial);
+    setFechaInicio(fechaInicioInicial);
+    setFechaFin(fechaFinInicial);
   }
 
   return (
@@ -88,6 +124,7 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
         onClose={cerrarModal && (() => cerrarModal())}
         bloquearInputs={(valor) => setInputsOff(valor)}
         onClickPositivo={RegistrarPrograma}
+        edicionActivada={(e) => !e ? ReiniciarValores() : null}
       >
 
         <div className='seccCajitasModal'>

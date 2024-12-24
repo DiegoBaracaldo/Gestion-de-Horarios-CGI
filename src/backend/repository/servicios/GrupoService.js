@@ -16,6 +16,11 @@ class GrupoServicio {
         const repo = new GrupoRepo();
         repo.SaveNew(grupo);
     }
+
+    ActualizarGrupo(idViejo, grupo){
+        const repo = new GrupoRepo();
+        repo.Save(idViejo, grupo);
+    }
 }
 
 

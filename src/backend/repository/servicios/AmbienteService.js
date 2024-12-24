@@ -16,6 +16,11 @@ class AmbienteServicio {
         const repo = new AmbienteRepo();
         repo.SaveNew(ambiente);
     }
+
+    ActualizarAmbiente(idViejo, ambiente){
+        const repo = new AmbienteRepo();
+        repo.Save(idViejo, ambiente);
+    }
 }
 
 

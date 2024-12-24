@@ -1,45 +1,116 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral';
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria'
 import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
-function ModalJornadas({abrirRegistro, abrirConsulta, cerrarModal, objConsulta
- }) {
-    const [inputsOff,setInputsOff]= useState(false); 
-    const [edicionActivada,setEdicionActivada]= useState(false); 
-    const [abrirHorario,setAbrirHorario]= useState(false); 
+import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { HastaVeintiCinco } from '../../../backend/validacion/ValidacionCantidadCaracteres';
+import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
+}) {
+    const [inputsOff, setInputsOff] = useState(false);
+    const [edicionActivada, setEdicionActivada] = useState(false);
+    const [abrirHorario, setAbrirHorario] = useState(false);
 
-    const [tipo, setTipo] = useState(objConsulta && objConsulta.tipo);
-    const [horario, setHorario] = useState(objConsulta && objConsulta.franjaDisponibilidad);
+    const tipoInicial = objConsulta.tipo && objConsulta.tipo;
+    const [tipo, setTipo] = useState(tipoInicial);
+    const horarioInicial =  objConsulta.franjaDisponibilidad && objConsulta.franjaDisponibilidad;
+    const [horario, setHorario] = useState(horarioInicial);
+    const [jornada, setJornada] = useState(objConsulta ? objConsulta : {});
+    const [primeraCarga, setPrimeraCarga] = useState(true);
 
-  return (
-    <ModalGeneral isOpenRegistro={abrirRegistro} isOpenConsulta={abrirConsulta}
-    onClose={cerrarModal && cerrarModal} bloquearInputs={(valor)=> setInputsOff(valor)}
-    edicionActivada={(valor)=>setEdicionActivada(valor)}>
-        <div className='seccCajitasModal'>
-        <section>
-            <label>
-                Tipo: 
-            </label>
-            <input maxLength={25} disabled={inputsOff} value={tipo}
-            onChange={(e) => setTipo(e.target.value)}/>
-        </section>
-        <section>
-            <label>
-                Horario: 
-            </label>
-            <BotonDispHoraria esDisponibilidad={false} esConsulta={abrirConsulta} 
-            edicionActivada={edicionActivada} onClicHorario={()=> setAbrirHorario(true)} />
-        </section>
-        </div>
-        {
-            abrirHorario ? <FranjaHoraria onClickDestructivo={()=> setAbrirHorario(false)}
-            esConsulta={inputsOff}
-            franjasOcupadasProp={horario}/>
-            : null 
+    const idViejo = objConsulta && objConsulta.id;
+
+    const Actualizarjornada = () => {
+        setPrimeraCarga(false);
+    }
+
+    useEffect(() => {
+        if (Object.keys(objConsulta).length > 0 && !primeraCarga) {
+            const servicioJornada = new JornadaServicio();
+            servicioJornada.ActualizarJornada(idViejo, jornada);
+            alert("Jornada actualizada correctamente!");
+            cerrarModal && cerrarModal();
         }
-    </ModalGeneral>
+    }, [jornada]);
 
-  )
+    useEffect(() => {
+        if (!primeraCarga) {
+            if (ValidarobjJornada()) ObjJornadaActualizado();
+        }
+    }, [primeraCarga]);
+
+    const ObjJornadaActualizado = () => {
+        setJornada({
+            ...objConsulta,
+            tipo: tipo,
+            franjaDisponibilidad: horario
+        });
+    }
+
+    const ValidarobjJornada = () => {
+        let bandera = false;
+        if (!CamposVacios(jornada)) {
+            if (!tipo || !tipo.toString().trim() || !HastaVeintiCinco(tipo) || !TextoConEspacio(tipo)) {
+                alert("Tipo de jornada incorrecta, escribe bien!");
+                setTipo('');
+            }else if(!horario.length > 0){
+                alert("Debes establecer un horario para la jornada!");
+            } else {
+                bandera = true;
+            }
+        } else {
+            alert("Datos incorrectos!");
+        }
+        return bandera;
+    }
+
+    const RegistrarHorarioJornada = () => {
+        if (horario.length > 0) setAbrirHorario(false);
+        else alert("Debes establecer un rango hroario para la jornada!");
+    }
+
+    function ReiniciarValores(){
+        setTipo(tipoInicial);
+        setHorario(horarioInicial);
+    }
+
+    useEffect(() => {
+        if(!edicionActivada) ReiniciarValores();
+    }, [edicionActivada]);
+
+    return (
+        <ModalGeneral isOpenRegistro={abrirRegistro} isOpenConsulta={abrirConsulta}
+            onClose={cerrarModal && cerrarModal} bloquearInputs={(valor) => setInputsOff(valor)}
+            edicionActivada={(valor) => setEdicionActivada(valor)}
+            onClickPositivo={Actualizarjornada}>
+            <div className='seccCajitasModal'>
+                <section>
+                    <label>
+                        Tipo:
+                    </label>
+                    <input maxLength={25} disabled={inputsOff} value={tipo}
+                        onChange={(e) => setTipo(e.target.value)} />
+                </section>
+                <section>
+                    <label>
+                        Horario:
+                    </label>
+                    <BotonDispHoraria esDisponibilidad={false} esConsulta={abrirConsulta}
+                        edicionActivada={edicionActivada} onClicHorario={() => setAbrirHorario(true)} />
+                </section>
+            </div>
+            {
+                abrirHorario ? <FranjaHoraria onClickDestructivo={() => setAbrirHorario(false)}
+                    esConsulta={inputsOff}
+                    franjasOcupadasProp={horario}
+                    esEdicion={edicionActivada} 
+                    onClickPositivo={RegistrarHorarioJornada}
+                    franjaProp={(f) => setHorario(f)}/>
+                    : null
+            }
+        </ModalGeneral>
+
+    )
 }
 
 export default ModalJornadas

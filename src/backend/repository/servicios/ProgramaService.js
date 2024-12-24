@@ -20,6 +20,11 @@ class ProgramaServicio {
         const repo = new ProgramaRepo();
         return repo.GetById(id);
     }
+
+    ActualizarPrograma(idViejo, programa){
+        const repo = new ProgramaRepo();
+        repo.Save(idViejo, programa);
+    }
 }
 
 

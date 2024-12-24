@@ -9,7 +9,7 @@ class CompetenciaRepo {
     GetAllByIdPrograma(idPrograma) {
         const listaAux = [];
         competencias.forEach((competenciaObj) => {
-            if(competenciaObj.idPrograma === idPrograma) listaAux.push(competenciaObj);
+            if (competenciaObj.idPrograma === idPrograma) listaAux.push(competenciaObj);
         });
         return listaAux;
     }
@@ -27,14 +27,9 @@ class CompetenciaRepo {
     }
 
     Save(idViejo, Competencia) {
-        let CompetenciaViejo = this.GetById(idViejo);
-        if (CompetenciaViejo === null) {
-            this.SaveNew(Competencia);
-        } else {
-            //actualizar
-            let CompetenciaIndex = competencias.findIndex(e => e.id === idViejo);
-            competencias[CompetenciaIndex] = Competencia;
-        }
+        //actualizar
+        let CompetenciaIndex = competencias.findIndex(e => e.id === idViejo);
+        competencias[CompetenciaIndex] = Competencia;
     }
 
     //Se trabaja con array de ids a eliminar.

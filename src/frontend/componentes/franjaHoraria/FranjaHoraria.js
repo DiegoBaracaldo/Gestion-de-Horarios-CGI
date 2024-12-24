@@ -3,8 +3,10 @@ import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './FranjaHoraria.css';
 
-const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franjasOcupadasProp, esConsulta
+const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franjasOcupadasProp, esConsulta,
+    esEdicion
 }) => {
+
 
     const [matrizCeldasFranja, setMatrizCeldasFranja] = useState(ValorInicialMatriz());
     const [classCeldaHora, setClassCeldaHora] = useState('celdaHora');
@@ -24,15 +26,22 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
         /* Este ciclo es  para darle a cada celda cu valor para el algoritmo de creación de horario
         y tambiéen manejar el estado para saber si se debe pintar la celda o no */
         for (let i = 0; i < 48; i++) {
-            /* Ir llenando cada fila */
+            /* Ir llenando cada columna de la fila */
             let filaAux = [];
             for (let j = 0; j < 7; j++) {
                 //analizar si la celda está ocupada para pintarla de  rojo e inhabilitarla
                 let celdaOcupada = false;
-                if (franjasOcupadasProp) celdaOcupada = franjasOcupadasProp.includes(contadorAlgoritmo);
+                let celdaVerde = false;
+                if(franjasOcupadasProp){
+                    if (esConsulta){
+                        celdaOcupada = franjasOcupadasProp.includes(contadorAlgoritmo);
+                    }else{
+                        celdaVerde =  franjasOcupadasProp.includes(contadorAlgoritmo);
+                    }
+                }
                 const auxDato = {
                     valor: contadorAlgoritmo,
-                    pintadoVerde: false,
+                    pintadoVerde: celdaVerde,
                     pintadoRojo: celdaOcupada
                 }
                 //contadorAlgoritmo cuenta hasta 336
@@ -156,7 +165,7 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
         const nuevaLista = [];
         matrizCeldasFranja.forEach(fila => {
             fila.forEach(celda => {
-                if (celda.pintadoVerde) nuevaLista.push(celda.valor);
+                if (celda.pintadoVerde || celda.pintadoRojo) nuevaLista.push(celda.valor);
             });
         });
         setFranjas(nuevaLista);
@@ -225,8 +234,8 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     const ManejarCancelar = () => {
-        //Para que  no permanezca la selección al cancelar el modal
-        franjaProp && franjaProp([]);
+        //Para que  no permanezca la selección al cancelar el modal SOLO EN MODO REGISTRO
+        if(!esConsulta && !esEdicion)franjaProp && franjaProp([]);
         onClickDestructivo();
     }
 

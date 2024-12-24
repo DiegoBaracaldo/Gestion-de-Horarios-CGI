@@ -42,6 +42,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     setAbrirRegistro(false);
     setAbrirConsulta(false);
     setJornadaConsultada({});
+    setListaFiltrada([...CargarLista()]);
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);

@@ -22,6 +22,10 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
     return new TorreServicio().CargarLista();
   }
 
+  useEffect(() => {
+    if(!abrirEdicion) setListaFiltrada(CargarLista());
+  }, [abrirEdicion]);
+
   const [listaObjetos, setListaObjetos] = useState(CargarLista);
   const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
   const [listaAdaptada, setListaAdaptada] = useState([]);
@@ -80,7 +84,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   function RegistrarTorre(){
     if(textoAgregar){
-      if(textoAgregar.trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)){
+      if(textoAgregar && textoAgregar.toString().trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)){
         const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
         const servicioTorre = new TorreServicio();
         servicioTorre.GuardarTorre(objFormado);

@@ -26,6 +26,11 @@ class TorreServicio {
         const repo = new TorreRepo();
         repo.Save(idViejo, torre);
     }
+    
+    EliminarTorre(listaIDs){
+        const repo = new TorreRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

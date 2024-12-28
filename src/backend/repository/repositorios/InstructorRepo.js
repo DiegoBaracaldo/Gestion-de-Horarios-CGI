@@ -30,8 +30,16 @@ class InstructorRepo {
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray) {
-        idArray.forEach((id) => {
-            instructores.filter(Instructor => Instructor.id !== id);
+        //Se recogen los index para hacer splice a la lista
+        const arrayIndex = [];
+        instructores.forEach((inst, index) => {
+            if (idArray.includes(inst.id)) arrayIndex.push(index);
+        });
+        console.log(arrayIndex);
+        arrayIndex.forEach((indexInstructor, index) => {
+            //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+            indexInstructor = indexInstructor - index;
+            instructores.splice(indexInstructor, 1);
         });
     }
 }

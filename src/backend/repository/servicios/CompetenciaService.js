@@ -26,6 +26,11 @@ class CompetenciaServicio {
         const repo = new CompetenciaRepo();
         return repo.Save(idViejo, competencia);
     }
+
+    EliminarCompetencia(listaIDs){
+        const repo = new CompetenciaRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

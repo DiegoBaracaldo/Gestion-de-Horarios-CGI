@@ -29,9 +29,17 @@ class JornadaRepo {
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray) {
-        idArray.forEach((id) => {
-            jornadas.filter(jornada => jornada.id !== id);
-        });
+         //Se recogen los index para hacer splice a la lista
+         const arrayIndex = [];
+         jornadas.forEach((jornada, index) => {
+             if (idArray.includes(jornada.id)) arrayIndex.push(index);
+         });
+         console.log(arrayIndex);
+         arrayIndex.forEach((indexJornada, index) => {
+             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+             indexJornada = indexJornada - index;
+             jornadas.splice(indexJornada, 1);
+         });
     }
 }
 export default JornadaRepo;

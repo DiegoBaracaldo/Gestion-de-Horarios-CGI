@@ -21,6 +21,11 @@ class AmbienteServicio {
         const repo = new AmbienteRepo();
         repo.Save(idViejo, ambiente);
     }
+
+    EliminarAmbiente(listaIDs){
+        const repo = new AmbienteRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

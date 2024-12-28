@@ -6,20 +6,15 @@ import BotonVolver from '../botonVolver/BotonVolver';
 import { useEffect, useState } from 'react';
 
 const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
-    onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo, listaSeleccionada,
-    esconderBusqueda, subtitulos, modoSeleccion
+    onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo,
+    esconderBusqueda, subtitulos, modoSeleccion, listaSeleccionada
 }) => {
 
-    const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
     const [seleccFiltroTexto, setseleccFiltroTexto] = useState(listaMenu ? listaMenu[0].texto : '');
     const [textoInput, setTextoInput] = useState("");
     //Hook para que el CRUD se ponga en modo "selección"
 
-    useEffect(() => {
-        //se pasa la lista recibida al padre a  través de una función
-        listaSeleccionada && listaSeleccionada(listaSeleccRecibida);
-    }, [listaSeleccRecibida]);
 
     const ManejarSelecFiltro = (e) => {
         const auxValor = e.target.value;
@@ -79,7 +74,7 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
             <section className='centerCrudAvanzado'>
                 <article className='seccListaAvanzada'>
                     <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}
-                        listaSeleccProp={(lista) => setListaSeleccRecibida(lista)}
+                        listaSeleccProp={listaSeleccionada && listaSeleccionada}
                         subtitulos={subtitulos} modoSeleccion={modoSeleccion} />
                 </article>
             </section>
@@ -98,7 +93,8 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                         </article>
                         :
                         <article className='contBtnDestructivo boton'>
-                            <BotonDestructivo texto="Eliminar" onClick={onCLicDestructivo}
+                            <BotonDestructivo texto="Eliminar" 
+                            onClick={onCLicDestructivo}
                                 disabledProp={disabledDestructivo} />
                         </article>
                 }

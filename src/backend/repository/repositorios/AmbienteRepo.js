@@ -30,8 +30,16 @@ class AmbienteRepo{
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray){
-        idArray.forEach((id) => {
-            ambientes.filter(ambiente => ambiente.id !== id);
+        //Se recogen los index para hacer splice a la lista
+        const arrayIndex = [];
+        ambientes.forEach((ambiente, index) => {
+            if (idArray.includes(ambiente.id)) arrayIndex.push(index);
+        });
+        console.log(arrayIndex);
+        arrayIndex.forEach((indexAmbiente, index) => {
+            //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+            indexAmbiente = indexAmbiente - index;
+            ambientes.splice(indexAmbiente, 1);
         });
     }
 }

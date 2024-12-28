@@ -25,6 +25,11 @@ class ProgramaServicio {
         const repo = new ProgramaRepo();
         repo.Save(idViejo, programa);
     }
+    
+    EliminarPrograma(listaIDs){
+        const repo = new ProgramaRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

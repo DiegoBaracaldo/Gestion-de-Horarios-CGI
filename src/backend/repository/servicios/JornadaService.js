@@ -26,6 +26,11 @@ class JornadaServicio {
         const repo = new JornadaRepo();
         repo.Save(idViejo, jornada);
     }
+
+    EliminarJornada(listaIDs){
+        const repo = new JornadaRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

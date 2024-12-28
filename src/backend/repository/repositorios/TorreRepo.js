@@ -30,9 +30,17 @@ class TorreRepo{
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray){
-        idArray.forEach((id) => {
-            torres.filter(torre => torre.id !== id);
-        });
+         //Se recogen los index para hacer splice a la lista
+         const arrayIndex = [];
+         torres.forEach((torre, index) => {
+             if (idArray.includes(torre.id)) arrayIndex.push(index);
+         });
+         console.log(arrayIndex);
+         arrayIndex.forEach((indexTorre, index) => {
+             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+             indexTorre = indexTorre - index;
+             torres.splice(indexTorre, 1);
+         });
     }
 }
 export default TorreRepo;

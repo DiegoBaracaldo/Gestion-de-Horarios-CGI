@@ -116,6 +116,23 @@ const CrudCompetencias = () => {
         setListaFiltrada(CargarLista());
     }
 
+    function EliminarCompetencias(){
+        const competenciaServicio = new CompetenciaServicio();
+        const listaAuxID = listaSelecciones.map(comp => comp.id);
+        competenciaServicio.EliminarCompetencia(listaAuxID);
+    }
+
+    const OnClicDestructivo = () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar las competencias seleccionadas?");
+        if(confirmar){
+          EliminarCompetencias();
+          alert("Competencias eliminadas satisfactoriamente!");
+          setListaFiltrada([...CargarLista()]);
+        }else{
+          return null;
+        }
+    }
+
     return (
         <div id='contCrudCompetencias'>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
@@ -124,7 +141,8 @@ const CrudCompetencias = () => {
                 buscarPor={(texto) => setTextoBusqueda(texto)} esconderBusqueda={esconderBusqueda}
                 seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} onClicPositivo={AbrirRegistro}
                 clicFila={AbrirConsulta} datosJson={esconderBusqueda ? null : listaAdaptada}
-                subtitulos={subs} />
+                subtitulos={subs} 
+                onCLicDestructivo={OnClicDestructivo}/>
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

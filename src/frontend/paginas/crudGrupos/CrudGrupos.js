@@ -6,6 +6,9 @@ import ModalGrupos from '../../modales/modalGrupos/ModalGrupos';
 import { mockGruposTres } from '../../mocks/MocksGrupos';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
+import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
+import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 
 const CrudGrupos = () => {
 
@@ -161,16 +164,36 @@ const CrudGrupos = () => {
     }
 
     function VerificarProgramas() {
-        //código para verificar que exista al menos un programa académico en la BD
-        return true;
+        const servicioPrograma = new ProgramaServicio();
+        if(servicioPrograma.CargarLista().length > 0) return true;
+        else return false;
     }
     function VerificarResponsables() {
-        //código para verificar que exista al menos un instructor en la BD
-        return true;
+        const servicioInstructor = new InstructorServicio();
+        if(servicioInstructor.CargarLista().length > 0)return true;
+        else return false;
     }
     function VerificarJornadas() {
-        //código para verificar que exista al menos una jornada académico en la BD
-        return true;
+        const servicioJornada = new JornadaServicio();
+        if(servicioJornada.CargarLista().length > 0) return true;
+        else return false;
+    }
+
+    const EliminarGrupos  = () => {
+        const grupoServicio = new GrupoServicio();
+        const listaAuxID = listaSelecciones.map(grupo => grupo.id);
+        grupoServicio.EliminarGrupo(listaAuxID);
+    }
+
+    const onClicDestructivo = () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
+        if(confirmar){
+          EliminarGrupos();
+          alert("Grupos eliminados satisfactoriamente!");
+          setListaFiltrada([...CargarLista()]);
+        }else{
+          return null;
+        }
     }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>
@@ -195,7 +218,8 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} />
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} 
+                onCLicDestructivo={onClicDestructivo}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

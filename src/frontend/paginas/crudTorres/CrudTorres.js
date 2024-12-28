@@ -61,6 +61,19 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
     if (modoSeleccion) {
       onClose && onClose();
     } else {
+      EliminarTorres();
+    }
+  }
+
+  function EliminarTorres(){
+    const confirmar = window.confirm("¿Confirma que desea eliminar las torres seleccionadas?");
+    if(confirmar){
+      const servicioTorre = new TorreServicio();
+      const auxListaID = listaSelecciones.map(torre => torre.id);
+      servicioTorre.EliminarTorre(auxListaID);
+      alert("Torres eliminadas satisfactoriamente!");
+      setListaFiltrada([...CargarLista()]);
+    }else{
       return null;
     }
   }

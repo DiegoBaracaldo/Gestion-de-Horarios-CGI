@@ -1,9 +1,11 @@
 //electron.js
 const {app, BrowserWindow} = require('electron');
 const path = require('path');
+const ConexionBD = require('./baseDatos/BaseDatos');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
+const conextionBD = new ConexionBD();
 
 function createWindow(){
     mainWindow = new BrowserWindow({
@@ -37,5 +39,8 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
     if(mainWindow === null){
         createWindow();
+        if(!conextionBD.VerificarTablas())conextionBD.CrearBaseDatos();
+        else alert("No se creó base de datos");
+        conextionBD.CerrarBaseDatos();
     }
 });

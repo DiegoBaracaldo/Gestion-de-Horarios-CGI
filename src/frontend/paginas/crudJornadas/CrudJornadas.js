@@ -57,8 +57,21 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     if (modoSeleccion) {
       onClose && onClose();
     } else {
-      return null;
+      const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
+      if(confirmar){
+        EliminarJornadas();
+        alert("Jornadas eliminadas satisfactoriamente!");
+        setListaFiltrada([...CargarLista()]);
+      }else{
+        return null;
+      }
     }
+  }
+
+  function EliminarJornadas(){
+    const servicioJornada = new JornadaServicio();
+    const auxListaID = listaSelecciones.map(jornada => jornada.id);
+    servicioJornada.EliminarJornada(auxListaID);
   }
 
   const ManejarClickFila = (e) => {

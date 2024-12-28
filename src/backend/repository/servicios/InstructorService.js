@@ -26,6 +26,11 @@ class InstructorServicio {
         const repo = new InstructorRepo();
         repo.Save(idViejo, instructor);
     }
+
+    ElimarInstructores(listaIDs){
+        const repo = new InstructorRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

@@ -84,7 +84,14 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         if(modoSeleccion){
             onClose && onClose();
         }else{
-            return null;
+            const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
+            if(confirmar){
+              EliminarInstructores();
+              alert("Instructores eliminadas satisfactoriamente!");
+              setListaFiltrada([...CargarLista()]);
+            }else{
+              return null;
+            }
         }
     }
 
@@ -101,6 +108,12 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     const DefinirInstructorConsultado = (idInstructor) => {
         const instructor = listaFiltrada.find(i => i.id === idInstructor);
         setInstructorConsultado(instructor);
+    }
+
+    const EliminarInstructores = () => {
+        const instructoresService =  new InstructorServicio();
+        const listaAux = listaSelecciones.map(instr => instr.id);
+        instructoresService.ElimarInstructores(listaAux);
     }
 
     return (

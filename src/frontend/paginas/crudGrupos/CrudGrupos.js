@@ -173,6 +173,23 @@ const CrudGrupos = () => {
         return true;
     }
 
+    const EliminarGrupos  = () => {
+        const grupoServicio = new GrupoServicio();
+        const listaAuxID = listaSelecciones.map(grupo => grupo.id);
+        grupoServicio.EliminarGrupo(listaAuxID);
+    }
+
+    const onClicDestructivo = () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
+        if(confirmar){
+          EliminarGrupos();
+          alert("Grupos eliminados satisfactoriamente!");
+          setListaFiltrada([...CargarLista()]);
+        }else{
+          return null;
+        }
+    }
+
     const filtroExtra = <div id='contFiltroExtraGrupos'>
         <label htmlFor='esCadenaFormacion'>es cadena de formación: </label>
         <label className='opciones'>
@@ -195,7 +212,8 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} />
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} 
+                onCLicDestructivo={onClicDestructivo}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

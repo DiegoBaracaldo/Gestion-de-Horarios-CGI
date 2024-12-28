@@ -11,6 +11,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
     const [numColumnas, setNumColumnas] = useState(subtitulos ? subtitulos.length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
+    const [listaObjetosSelecc, setListaObjetosSelecc] = useState([]);
 
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
@@ -20,23 +21,37 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
         setSelecciones(Array(numFilas).fill(false));
     }, [numFilas]);
 
-    const ManejarChecks = (index) => {
+    const ManejarChecks = (index, objeto) => {
+        //Primero se almacenan las selecciones
         const nuevasSelecciones = [...selecciones];
         nuevasSelecciones[index] = !nuevasSelecciones[index];
+        const seleccNueva = nuevasSelecciones[index];
         setSelecciones(nuevasSelecciones);
+        //Luego se almacenan los objetos seleccionados
+        const objSeleccionados = [...listaObjetosSelecc];
+        if(seleccNueva){
+            objSeleccionados.push(objeto);
+            setListaObjetosSelecc(objSeleccionados);
+        }else{
+            //Se saca de la lista si se desmarca
+            setListaObjetosSelecc(objSeleccionados.filter(obj => JSON.stringify(obj) !== JSON.stringify(objeto)));
+        } 
     }
+
+
+
     //almacenar la información de los index seleccionados en la lista para eliminarlos
     useEffect(() => {
-        const arraySelecciones = [];
-        selecciones.forEach((element, index) => {
-            element && arraySelecciones.push(index);
-        });
         //le paso la lista a una prop que puede recibirse en un setState en el padre
-        listaSeleccProp && listaSeleccProp(arraySelecciones);
-    }, [selecciones]);
+        listaSeleccProp && listaSeleccProp(listaObjetosSelecc);
+    }, [listaObjetosSelecc]);
 
     const SeleccionarTodo = (e) => {
-        setSelecciones(new Array(selecciones.length).fill(e.target.checked));
+        const valor = e.target.checked;
+        setSelecciones(new Array(selecciones.length).fill(valor));
+        //Se llena o vacía el array de ids para eliminación 
+        if(valor)setListaObjetosSelecc(datosJson && datosJson);
+        else setListaObjetosSelecc([]);
     }
 
     const PedirFuncionalidad = () => {
@@ -79,7 +94,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                                     {
                                         modoSeleccion ? null :
                                             <input type='checkbox'
-                                                onChange={() => ManejarChecks(index)} checked={selecciones[index]}
+                                                onChange={() => ManejarChecks(index, element)} checked={selecciones[index]}
                                                 key={index} />
                                     }</td>
                                 {

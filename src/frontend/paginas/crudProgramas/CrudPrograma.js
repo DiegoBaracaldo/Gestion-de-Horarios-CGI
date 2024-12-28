@@ -115,8 +115,21 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     if (modoSeleccion) {
       onClose && onClose();
     } else {
-      return null;
+      const confirmar = window.confirm("¿Confirma que desea eliminar los programas académicos seleccionados!");
+      if(confirmar){
+        EliminarProgramas();
+        alert("Programas eliminados correctamente!");
+        setListaFiltrada([...CargarLista()]);
+      }else{
+        return null;
+      }
     }
+  }
+
+  function EliminarProgramas(){
+    const servicioPrograma = new ProgramaServicio();
+    const listaAuxID = listaSelecciones.map(programa => programa.id);
+    servicioPrograma.EliminarPrograma(listaAuxID);
   }
 
   const ManejarClickFila = (e) => {

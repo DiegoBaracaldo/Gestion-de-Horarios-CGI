@@ -50,7 +50,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
     useEffect(() => {
         const arraySelecciones = [];
         selecciones.forEach((element, index) => {
-            element && arraySelecciones.push(index);
+            element && arraySelecciones.push(datosJson[index]);
         });
         //le paso la lista a una prop que puede recibirse en un setState en el padre
         listaSeleccProp && listaSeleccProp(arraySelecciones);

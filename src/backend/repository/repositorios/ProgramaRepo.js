@@ -30,9 +30,17 @@ class ProgramaRepo {
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray) {
-        idArray.forEach((id) => {
-            programasAcademicos.filter(producto => producto.id !== id);
-        });
+         //Se recogen los index para hacer splice a la lista
+         const arrayIndex = [];
+         programasAcademicos.forEach((programa, index) => {
+             if (idArray.includes(programa.id)) arrayIndex.push(index);
+         });
+         console.log(arrayIndex);
+         arrayIndex.forEach((indexPrograma, index) => {
+             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+             indexPrograma = indexPrograma - index;
+             programasAcademicos.splice(indexPrograma, 1);
+         });
     }
 }
 export default ProgramaRepo;

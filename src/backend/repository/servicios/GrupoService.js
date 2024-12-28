@@ -21,6 +21,11 @@ class GrupoServicio {
         const repo = new GrupoRepo();
         repo.Save(idViejo, grupo);
     }
+
+    EliminarGrupo(listaIDs){
+        const repo = new GrupoRepo();
+        repo.Remove(listaIDs);
+    }
 }
 
 

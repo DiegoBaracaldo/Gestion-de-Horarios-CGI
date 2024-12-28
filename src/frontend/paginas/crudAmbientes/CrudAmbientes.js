@@ -9,7 +9,7 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 
 const CrudAmbientes = () => {
 
-    const subs = ['Ambiente', 'Torre', 'Capacidad de Estudiantes'];
+    const subs = ['id','Ambiente', 'Torre', 'Capacidad de Estudiantes'];
 
     const CargarLista = () => {
         return new AmbienteServicio().CargarLista();
@@ -29,6 +29,7 @@ const CrudAmbientes = () => {
         listaFiltrada &&
             listaFiltrada.map((element) => {
                 let objetoAux = {};
+                objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
                 objetoAux.nombreTorre = element.nombreTorre;
                 objetoAux.capacidad = element.capacidad;
@@ -95,6 +96,23 @@ const CrudAmbientes = () => {
         //aquí va el código para verificar que existan registros de torres
         return true;
     }
+    
+    const EliminarAmbientes = () => {
+        const servicioAmbientes = new AmbienteServicio();
+        const listaAuxID = listaSelecciones.map(ambiente => ambiente.id);
+        servicioAmbientes.EliminarAmbiente(listaAuxID);
+    }
+
+    const OnClicDestructivo = () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los ambientes seleccionadas?");
+        if(confirmar){
+          EliminarAmbientes();
+          alert("Ambientes eliminados satisfactoriamente!");
+          setListaFiltrada([...CargarLista()]);
+        }else{
+          return null;
+        }
+    }
 
     return (
         <div id='contCrudAmbientes'>
@@ -103,7 +121,8 @@ const CrudAmbientes = () => {
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)}
                 clicFila={e => AbrirConsulta(e)} onClicPositivo={AbrirRegistro}
-                datosJson={listaAdaptada} subtitulos={subs} />
+                datosJson={listaAdaptada} subtitulos={subs} 
+                onCLicDestructivo={OnClicDestructivo}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

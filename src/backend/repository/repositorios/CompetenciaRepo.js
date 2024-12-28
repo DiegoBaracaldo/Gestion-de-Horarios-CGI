@@ -34,8 +34,16 @@ class CompetenciaRepo {
 
     //Se trabaja con array de ids a eliminar.
     Remove(idArray) {
-        idArray.forEach((id) => {
-            competencias.filter(Competencia => Competencia.id !== id);
+        //Se recogen los index para hacer splice a la lista
+        const arrayIndex = [];
+        competencias.forEach((competencia, index) => {
+            if (idArray.includes(competencia.id)) arrayIndex.push(index);
+        });
+        console.log(arrayIndex);
+        arrayIndex.forEach((indexCompetencia, index) => {
+            //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+            indexCompetencia = indexCompetencia - index;
+            competencias.splice(indexCompetencia, 1);
         });
     }
 }

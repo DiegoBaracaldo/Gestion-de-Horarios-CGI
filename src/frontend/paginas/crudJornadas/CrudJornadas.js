@@ -15,19 +15,34 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
   const [jornadaConsultada, setJornadaConsultada] = useState({});
 
-  const CargarLista = () => {
-    return new JornadaServicio().CargarLista();
+
+  const [listaObjetos, setListaObjetos] = useState([]);
+  const [listaFiltrada, setListaFiltrada] = useState([]);
+  const [listaAdaptada, setListaAdaptada] = useState([]);
+
+  const CargarLista = async () => {
+    console.log("cargando lista...");
+    try {
+      setListaObjetos(await new JornadaServicio().CargarLista());
+    } catch (error) {
+      console.log("error en crud jornadas por: ", error);
+      setListaObjetos([]);
+    }
   }
 
-  const [listaObjetos, setListaObjetos] = useState(CargarLista);
-  const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
-  const [listaAdaptada, setListaAdaptada] = useState([]);
+  useEffect(() => {
+    CargarLista();
+  }, []);
+
+  useEffect(() => {
+    setListaFiltrada(listaObjetos);
+  }, [listaObjetos]);
 
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
     const listaAux = [];
     listaFiltrada &&
-      listaFiltrada.map((element) => {
+      listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
         objAux.tipo = element.tipo;
@@ -42,7 +57,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     setAbrirRegistro(false);
     setAbrirConsulta(false);
     setJornadaConsultada({});
-    setListaFiltrada([...CargarLista()]);
+    CargarLista();
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -61,7 +76,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       if(confirmar){
         EliminarJornadas();
         alert("Jornadas eliminadas satisfactoriamente!");
-        setListaFiltrada([...CargarLista()]);
+        CargarLista();
       }else{
         return null;
       }
@@ -106,7 +121,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
       const servicioJornada = new JornadaServicio();
       servicioJornada.GuardarJornada(objFormado);
-      setListaFiltrada([...CargarLista()]);
+      CargarLista();
       setReiniciarTexto(true);
     }else{
       alert("Debes establecer un rango horario para la jornada!");

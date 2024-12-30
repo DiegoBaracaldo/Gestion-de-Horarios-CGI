@@ -1,4 +1,3 @@
-import GrupoRepo from "../repositorios/GrupoRepo"
 
 class GrupoServicio {
 
@@ -6,26 +5,30 @@ class GrupoServicio {
 
     }
 
-    CargarLista() {
-        const repo = new GrupoRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async CargarLista() {
+        console.log("Cargando lista...");
+        try {
+            return await window.electron.GetAllGrupos();
+        } catch (error) {
+            console.log("Error en grupoService por: ", error);
+            return [];
+        }
     }
 
-    GuardarGrupo(grupo){
-        const repo = new GrupoRepo();
-        repo.SaveNew(grupo);
-    }
+    // GuardarGrupo(grupo){
+    //     const repo = new GrupoRepo();
+    //     repo.SaveNew(grupo);
+    // }
 
-    ActualizarGrupo(idViejo, grupo){
-        const repo = new GrupoRepo();
-        repo.Save(idViejo, grupo);
-    }
+    // ActualizarGrupo(idViejo, grupo){
+    //     const repo = new GrupoRepo();
+    //     repo.Save(idViejo, grupo);
+    // }
 
-    EliminarGrupo(listaIDs){
-        const repo = new GrupoRepo();
-        repo.Remove(listaIDs);
-    }
+    // EliminarGrupo(listaIDs){
+    //     const repo = new GrupoRepo();
+    //     repo.Remove(listaIDs);
+    // }
 }
 
 

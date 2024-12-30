@@ -17,22 +17,30 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     FiltrarPorTipo();
   }, [filtrarPor]);
 
-  const CargarLista = () => {
-    return new ProgramaServicio().CargarLista();
+  const CargarLista = async() => {
+    console.log("cargando lista...");
+    try {
+      setListaObjetos(await new ProgramaServicio().CargarLista());
+    } catch (error) {
+      console.log("error en crud programas por: ", error);
+      setListaObjetos([]);
+    }
   }
 
-  const [listaObjetos, setListaObjetos] = useState(CargarLista);
-  const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
-  const [listaFiltradaTecnologo, setListaFiltradaTecnologo] = useState(listaObjetos);
-  const [listaFiltradaTecnico, setListaFiltradaTecnico] = useState(listaObjetos);
-  const [listaFiltradaCurso, setListaFiltradaCurso] = useState(listaObjetos);
+  const [listaObjetos, setListaObjetos] = useState([]);
+  const [listaFiltrada, setListaFiltrada] = useState([]);
+  const [listaFiltradaTecnologo, setListaFiltradaTecnologo] = useState([]);
+  const [listaFiltradaTecnico, setListaFiltradaTecnico] = useState([]);
+  const [listaFiltradaCurso, setListaFiltradaCurso] = useState([]);
   const [listaAdaptada, setListaAdaptada] = useState([]);
 
-
-  //Para recargar la lista cada que se cierra el modal
   useEffect(() => {
-    if (!abrirConsulta || !abrirRegistro) setListaFiltrada([...CargarLista()]);
-  }, [abrirRegistro, abrirConsulta]);
+    setListaFiltrada(listaObjetos);
+  }, [listaObjetos]);
+
+  useEffect(() => {
+    CargarLista();
+  }, []);
 
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
@@ -49,7 +57,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const AdaptarLista = (listaRecibida) => {
     const listaAux = [];
     listaRecibida &&
-      listaRecibida.map(element => {
+      listaRecibida.forEach(element => {
         const objAux = {};
         objAux.id = element.id;
         objAux.tipo = element.tipo;
@@ -88,6 +96,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     setAbrirConsulta(false);
     setAbrirRegistro(false);
     setprogramaConsultado({});
+    CargarLista();
   }
 
   //constantes de opciones
@@ -102,7 +111,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   }
 
   useEffect(() => {
-    setTimeout(Filtrar, "50");
+    if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
   }, [textoBuscar]);
   //////////////////////////////////////////////////////////////////////////////////
 
@@ -119,7 +128,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
       if(confirmar){
         EliminarProgramas();
         alert("Programas eliminados correctamente!");
-        setListaFiltrada([...CargarLista()]);
+        CargarLista();
       }else{
         return null;
       }

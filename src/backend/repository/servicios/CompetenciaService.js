@@ -1,36 +1,38 @@
-import CompetenciaRepo from "../repositorios/CompetenciaRepo"
-
 class CompetenciaServicio {
 
     constructor() {
 
     }
 
-    CargarLista(idPrograma) {
-        const repo = new CompetenciaRepo();
-        if (repo.GetAllByIdPrograma(idPrograma)) return repo.GetAllByIdPrograma(idPrograma);
-        else return null;
+    async CargarLista(idPrograma) {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllCompetencias(idPrograma);
+        } catch (error) {
+          console.log("error en servicio competencias por: ", error);
+          return [];
+        }
     }
 
-    GuardarCompetencia(competencia) {
-        const repo = new CompetenciaRepo();
-        repo.SaveNew(competencia);
-    }
+    // GuardarCompetencia(competencia) {
+    //     const repo = new CompetenciaRepo();
+    //     repo.SaveNew(competencia);
+    // }
 
-    CargarCompetencia(id) {
-        const repo = new CompetenciaRepo();
-        return repo.GetById(id);
-    }
+    // CargarCompetencia(id) {
+    //     const repo = new CompetenciaRepo();
+    //     return repo.GetById(id);
+    // }
 
-    ActualizarCompetencia(idViejo, competencia){
-        const repo = new CompetenciaRepo();
-        return repo.Save(idViejo, competencia);
-    }
+    // ActualizarCompetencia(idViejo, competencia){
+    //     const repo = new CompetenciaRepo();
+    //     return repo.Save(idViejo, competencia);
+    // }
 
-    EliminarCompetencia(listaIDs){
-        const repo = new CompetenciaRepo();
-        repo.Remove(listaIDs);
-    }
+    // EliminarCompetencia(listaIDs){
+    //     const repo = new CompetenciaRepo();
+    //     repo.Remove(listaIDs);
+    // }
 }
 
 

@@ -20,7 +20,7 @@ const CrudCompetencias = () => {
     const [programa, setPrograma] = useState({});
     useEffect(() => {
         if(Object.keys(programa).length > 0){
-            setListaObjetos([...CargarLista()]);
+            CargarLista();
             setEsconderBusqueda(false);
             setNombrePrograma(programa.nombre);
         }else{
@@ -28,17 +28,27 @@ const CrudCompetencias = () => {
         }
     }, [programa]);
 
-    const CargarLista = () => {
-        return new CompetenciaServicio().CargarLista(programa.id);
+    const CargarLista = async () => {
+        console.log("cargando lista...");
+        try {
+          setListaObjetos(await new CompetenciaServicio().CargarLista(programa.id));
+        } catch (error) {
+          console.log("error en crud competencias por: ", error);
+          setListaObjetos([]);
+        }
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-    const [listaObjetos, setListaObjetos] = useState(CargarLista);
-    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaObjetos, setListaObjetos] = useState([]);
+    const [listaFiltrada, setListaFiltrada] = useState([]);
     const [listaAdaptada, setListaAdaptada] = useState([]);
     const [esconderBusqueda, setEsconderBusqueda] = useState(true);
     const [btnAgregarOff, setBtnAgregarOff] = useState(true);
+
+    useEffect(() => {
+        CargarLista();
+    }, []);
 
     useEffect(() => {
         setListaFiltrada(listaObjetos);
@@ -49,7 +59,7 @@ const CrudCompetencias = () => {
     useEffect(() => {
         const listaAux = [];
         listaFiltrada &&
-            listaFiltrada.map((element) => {
+            listaFiltrada.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
                 objetoAux.descripcion = element.descripcion;
@@ -77,7 +87,7 @@ const CrudCompetencias = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        setTimeout(Filtrar, "50");
+        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     /////////////////////////////////////////////////////
 
@@ -113,7 +123,7 @@ const CrudCompetencias = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
         setCompetenciaConsultada({});
-        setListaFiltrada(CargarLista());
+        CargarLista();
     }
 
     function EliminarCompetencias(){
@@ -127,7 +137,7 @@ const CrudCompetencias = () => {
         if(confirmar){
           EliminarCompetencias();
           alert("Competencias eliminadas satisfactoriamente!");
-          setListaFiltrada([...CargarLista()]);
+          CargarLista();
         }else{
           return null;
         }

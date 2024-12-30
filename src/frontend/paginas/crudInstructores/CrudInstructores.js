@@ -11,23 +11,37 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
-    const CargarLista = () => {
-        return new InstructorServicio().CargarLista();
+    const CargarLista = async () => {
+        console.log("cargando lista...");
+        try {
+          setListaObjetos(await new InstructorServicio().CargarLista());
+        } catch (error) {
+          console.log("error en crud instructores por: ", error);
+          setListaObjetos([]);
+        }
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-    const [listaObjetos, setListaObjetos] = useState(CargarLista);
-    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaObjetos, setListaObjetos] = useState([]);
+    const [listaFiltrada, setListaFiltrada] = useState([]);
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
     const [instructorConsultado, setInstructorConsultado] = useState({});
+
+    useEffect(() => {
+        CargarLista();
+    },[]);
+
+    useEffect(() => {
+        setListaFiltrada(listaObjetos);
+    },[listaObjetos]);
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
         listaFiltrada &&
-            listaFiltrada.map((element) => {
+            listaFiltrada.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
@@ -52,7 +66,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        setTimeout(Filtrar, "50");
+        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     /////////////////////////////////////////////////////
 
@@ -76,7 +90,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         setAbrirRegistro(false);
         setAbrirConsulta(false);
         setInstructorConsultado({});
-        setListaFiltrada(CargarLista());
+        CargarLista();
     }
     /////////////////////////////////////////////////////
 
@@ -88,7 +102,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
             if(confirmar){
               EliminarInstructores();
               alert("Instructores eliminadas satisfactoriamente!");
-              setListaFiltrada([...CargarLista()]);
+              CargarLista();
             }else{
               return null;
             }

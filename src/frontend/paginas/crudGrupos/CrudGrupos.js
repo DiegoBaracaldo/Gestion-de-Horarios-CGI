@@ -9,27 +9,41 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+import TorreServicio from '../../../backend/repository/servicios/TorreService';
 
 const CrudGrupos = () => {
 
     const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
-    const CargarLista = () => {
-        return new GrupoServicio().CargarLista();
+    const CargarLista = async () => {
+        try {
+            setListaObjetos(await new GrupoServicio().CargarLista());
+        } catch (error) {
+            console.log("Error en crud Grupos por: ", error);
+            setListaObjetos([]);
+        }
     }
 
     const [grupoConsultado, setGrupoConsultado] = useState({});
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-    const [listaObjetos, setListaObjetos] = useState(CargarLista);
-    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaObjetos, setListaObjetos] = useState([]);
+    const [listaFiltrada, setListaFiltrada] = useState([]);
     const [listaFiltradaCadena, setListaFiltradaCadena] = useState([]);
     const [listaFiltradaNoCadena, setListaFiltradaNoCadena] = useState([]);
     const [listaAdaptada, setListaAdaptada] = useState([]);
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
     const [opcionCadena, setOpcionCadena] = useState("ambos");
+
+    useEffect(() => {
+        CargarLista();
+    }, []);
+
+    useEffect(() => {
+        setListaFiltrada(listaObjetos);
+    }, [listaObjetos]);
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
@@ -46,7 +60,7 @@ const CrudGrupos = () => {
     const AdaptarLista = (listaRecibida) => {
         const listaAux = [];
         listaRecibida &&
-            listaRecibida.map((element) => {
+            listaRecibida.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
                 objetoAux.codigoGrupo = element.codigoGrupo;
@@ -96,7 +110,7 @@ const CrudGrupos = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        setTimeout(Filtrar, "50");
+        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
 
     const FiltrarCadenaFormacion = () => {
@@ -160,7 +174,7 @@ const CrudGrupos = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
         setGrupoConsultado({});
-        setListaFiltrada(CargarLista());
+        CargarLista();
     }
 
     function VerificarProgramas() {
@@ -190,7 +204,7 @@ const CrudGrupos = () => {
         if(confirmar){
           EliminarGrupos();
           alert("Grupos eliminados satisfactoriamente!");
-          setListaFiltrada([...CargarLista()]);
+          CargarLista();
         }else{
           return null;
         }

@@ -17,23 +17,35 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [textoBuscar, setTextoBuscar] = useState('');
   const [textoAgregar, setTextoAgregar] = useState('');
 
-  const CargarLista = () => {
+  const [listaObjetos, setListaObjetos] = useState([]);
+  const [listaFiltrada, setListaFiltrada] = useState([]);
+  const [listaAdaptada, setListaAdaptada] = useState([]);
+
+  //Carga inicial de objetos
+  const CargarListaInicial = async () => {
     console.log("cargando lista...");
-    return new TorreServicio().CargarLista();
+    try {
+      setListaObjetos(await new TorreServicio().CargarLista());
+    } catch (error) {
+      console.log("error en crud torres por: ", error);
+      setListaObjetos([]);
+    }
   }
 
+  //Cada que el modal de edición está cerrado (carga inicial)
   useEffect(() => {
-    if(!abrirEdicion) setListaFiltrada(CargarLista());
-  }, [abrirEdicion]);
+    CargarListaInicial();
+  }, []);
 
-  const [listaObjetos, setListaObjetos] = useState(CargarLista);
-  const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
-  const [listaAdaptada, setListaAdaptada] = useState([]);
+  //Cuando cambia la lista de objetos inicial
+  useEffect(() => {
+    setListaFiltrada(listaObjetos);
+  }, [listaObjetos]);
 
   useEffect(() => {
     const listaAux = [];
     listaFiltrada &&
-      listaFiltrada.map((element) => {
+      listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
         objAux.nombre = element.nombre;
@@ -49,7 +61,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   useEffect(() => {
-    setTimeout(Filtrar, "50");
+    if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
   }, [textoBuscar]);
   /*********************************************/
 
@@ -65,15 +77,15 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
     }
   }
 
-  function EliminarTorres(){
+  function EliminarTorres() {
     const confirmar = window.confirm("¿Confirma que desea eliminar las torres seleccionadas?");
-    if(confirmar){
+    if (confirmar) {
       const servicioTorre = new TorreServicio();
       const auxListaID = listaSelecciones.map(torre => torre.id);
       servicioTorre.EliminarTorre(auxListaID);
       alert("Torres eliminadas satisfactoriamente!");
-      setListaFiltrada([...CargarLista()]);
-    }else{
+      CargarListaInicial();
+    } else {
       return null;
     }
   }
@@ -95,19 +107,19 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   /********** SECCIÓN DE REGISTRO ********************************************************************/
   const [reiniciarTexto, setReiniciarTexto] = useState(false);
 
-  function RegistrarTorre(){
-    if(textoAgregar){
-      if(textoAgregar && textoAgregar.toString().trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)){
+  function RegistrarTorre() {
+    if (textoAgregar) {
+      if (textoAgregar && textoAgregar.toString().trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)) {
         const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
         const servicioTorre = new TorreServicio();
         servicioTorre.GuardarTorre(objFormado);
-        setListaFiltrada([...CargarLista()]);
+        CargarListaInicial();
         setReiniciarTexto(true);
-      }else{
+      } else {
         setReiniciarTexto(true);
         alert("Dato incorrecto");
       }
-    }else{
+    } else {
       alert("Valor inválido");
     }
   }
@@ -146,9 +158,9 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
       />
 
       {
-        abrirEdicion ? <ModalTorres cerrarModal={() => setAbrirEdicion(false)} 
-        objConsulta={torreConsultada}/> 
-        :null
+        abrirEdicion ? <ModalTorres cerrarModal={() => setAbrirEdicion(false)}
+          objConsulta={torreConsultada} />
+          : null
       }
     </div>
 

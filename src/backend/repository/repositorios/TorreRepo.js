@@ -1,46 +1,51 @@
-import { torres } from "../../mocks/MockTorresRepo";
 
-class TorreRepo{
+class TorreRepo {
 
-    constructor(){
-
+    constructor(db) {
+        this.db = db;
     }
 
-    GetAll(){
-        return torres;
-    }
-
-    GetById(id){
-        let torreAux = null;
-        torres.forEach((torre) => {
-            if(torre.id === id) torreAux = torre;
+    async GetAll() {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM torres";
+            this.db.all(query, [], (error, filas) => {
+                if(error) reject(error);
+                else resolve(filas);
+            });
         });
-        return torreAux;
     }
 
-    SaveNew(torre){
-        torres.push(torre);
-    }
+    //     GetById(id){
+    //         let torreAux = null;
+    //         torres.forEach((torre) => {
+    //             if(torre.id === id) torreAux = torre;
+    //         });
+    //         return torreAux;
+    //     }
 
-    Save(idViejo, torre){
-            //actualizar
-            let torreIndex = torres.findIndex(e => e.id === idViejo);
-            torres[torreIndex] = torre;
-    }
+    //     SaveNew(torre){
+    //         torres.push(torre);
+    //     }
 
-    //Se trabaja con array de ids a eliminar.
-    Remove(idArray){
-         //Se recogen los index para hacer splice a la lista
-         const arrayIndex = [];
-         torres.forEach((torre, index) => {
-             if (idArray.includes(torre.id)) arrayIndex.push(index);
-         });
-         console.log(arrayIndex);
-         arrayIndex.forEach((indexTorre, index) => {
-             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-             indexTorre = indexTorre - index;
-             torres.splice(indexTorre, 1);
-         });
-    }
+    //     Save(idViejo, torre){
+    //             //actualizar
+    //             let torreIndex = torres.findIndex(e => e.id === idViejo);
+    //             torres[torreIndex] = torre;
+    //     }
+
+    //     //Se trabaja con array de ids a eliminar.
+    //     Remove(idArray){
+    //          //Se recogen los index para hacer splice a la lista
+    //          const arrayIndex = [];
+    //          torres.forEach((torre, index) => {
+    //              if (idArray.includes(torre.id)) arrayIndex.push(index);
+    //          });
+    //          console.log(arrayIndex);
+    //          arrayIndex.forEach((indexTorre, index) => {
+    //              //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
+    //              indexTorre = indexTorre - index;
+    //              torres.splice(indexTorre, 1);
+    //          });
+    //     }
 }
-export default TorreRepo;
+module.exports = TorreRepo;

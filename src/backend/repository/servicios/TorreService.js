@@ -1,4 +1,3 @@
-import TorreRepo from "../repositorios/TorreRepo"
 
 class TorreServicio {
 
@@ -6,31 +5,35 @@ class TorreServicio {
 
     }
 
-    CargarLista() {
-        const repo = new TorreRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async CargarLista() {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllTorres();
+        } catch (error) {
+          console.log("error en crud torres por: ", error);
+          return [];
+        }
     }
 
-    GuardarTorre(torre){
-        const repo = new TorreRepo();
-        repo.SaveNew(torre);
-    }
+    // GuardarTorre(torre){
+    //     const repo = new TorreRepo();
+    //     repo.SaveNew(torre);
+    // }
 
-    CargarTorre(idTorre){
-        const repo = new TorreRepo();
-        return repo.GetById(idTorre);
-    }
+    // CargarTorre(idTorre){
+    //     const repo = new TorreRepo();
+    //     return repo.GetById(idTorre);
+    // }
 
-    ActualizarTorre (idViejo, torre){
-        const repo = new TorreRepo();
-        repo.Save(idViejo, torre);
-    }
+    // ActualizarTorre (idViejo, torre){
+    //     const repo = new TorreRepo();
+    //     repo.Save(idViejo, torre);
+    // }
     
-    EliminarTorre(listaIDs){
-        const repo = new TorreRepo();
-        repo.Remove(listaIDs);
-    }
+    // EliminarTorre(listaIDs){
+    //     const repo = new TorreRepo();
+    //     repo.Remove(listaIDs);
+    // }
 }
 
 

@@ -1,31 +1,33 @@
-import AmbienteRepo from "../repositorios/AmbienteRepo"
-
 class AmbienteServicio {
 
     constructor() {
 
     }
 
-    CargarLista() {
-        const repo = new AmbienteRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async CargarLista() {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllAmbientes();
+        } catch (error) {
+          console.log("error en ambiente service por: ", error);
+          return [];
+        }
     }
 
-    GuardarAmbiente(ambiente){
-        const repo = new AmbienteRepo();
-        repo.SaveNew(ambiente);
-    }
+    // GuardarAmbiente(ambiente){
+    //     const repo = new AmbienteRepo();
+    //     repo.SaveNew(ambiente);
+    // }
 
-    ActualizarAmbiente(idViejo, ambiente){
-        const repo = new AmbienteRepo();
-        repo.Save(idViejo, ambiente);
-    }
+    // ActualizarAmbiente(idViejo, ambiente){
+    //     const repo = new AmbienteRepo();
+    //     repo.Save(idViejo, ambiente);
+    // }
 
-    EliminarAmbiente(listaIDs){
-        const repo = new AmbienteRepo();
-        repo.Remove(listaIDs);
-    }
+    // EliminarAmbiente(listaIDs){
+    //     const repo = new AmbienteRepo();
+    //     repo.Remove(listaIDs);
+    // }
 }
 
 

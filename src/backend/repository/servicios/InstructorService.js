@@ -1,4 +1,3 @@
-import InstructorRepo from "../repositorios/InstructorRepo"
 
 class InstructorServicio {
 
@@ -6,31 +5,35 @@ class InstructorServicio {
 
     }
 
-    CargarLista() {
-        const repo = new InstructorRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async CargarLista() {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllInstructores();
+        } catch (error) {
+          console.log("error en crud torres por: ", error);
+          return [];
+        }
     }
 
-    GuardarInstructor(instructor){
-        const repo = new InstructorRepo();
-        repo.SaveNew(instructor);
-    }
+//     GuardarInstructor(instructor){
+//         const repo = new InstructorRepo();
+//         repo.SaveNew(instructor);
+//     }
 
-    CargarInstructor(idIstructor){
-        const repo = new InstructorRepo();
-        return repo.GetById(idIstructor);
-    }
+//     CargarInstructor(idIstructor){
+//         const repo = new InstructorRepo();
+//         return repo.GetById(idIstructor);
+//     }
 
-    ActualizarInstructor(idViejo, instructor){
-        const repo = new InstructorRepo();
-        repo.Save(idViejo, instructor);
-    }
+//     ActualizarInstructor(idViejo, instructor){
+//         const repo = new InstructorRepo();
+//         repo.Save(idViejo, instructor);
+//     }
 
-    ElimarInstructores(listaIDs){
-        const repo = new InstructorRepo();
-        repo.Remove(listaIDs);
-    }
+//     ElimarInstructores(listaIDs){
+//         const repo = new InstructorRepo();
+//         repo.Remove(listaIDs);
+//     }
 }
 
 

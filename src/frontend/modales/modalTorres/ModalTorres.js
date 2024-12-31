@@ -8,8 +8,8 @@ import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 
 function ModalTorres({cerrarModal, objConsulta}) {
 
-  const [nombreTorre, setNombreTorre] = useState(objConsulta.nombre && objConsulta.nombre);
-  const idViejo = objConsulta && objConsulta.id;
+  const [nombreTorre, setNombreTorre] = useState(objConsulta.nombre || '');
+  const idViejo = objConsulta.id || '';
 
   const ActualizarTorre = async () => {
     if(ValidarObjTorre()){

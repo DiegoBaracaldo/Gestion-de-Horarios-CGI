@@ -134,8 +134,8 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
       const servicioPrograma = new ProgramaServicio();
       const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));
       const respuesta = await servicioPrograma.EliminarPrograma(auxListaID);
-      alert(respuesta !== 0 ? ("Torres eliminadas satisfactoriamente!: ")
-        : ("Error al eliminar las torres!"));
+      alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
+        : ("Error al eliminar las programas!"));
       CargarLista();
     } else {
       return null;

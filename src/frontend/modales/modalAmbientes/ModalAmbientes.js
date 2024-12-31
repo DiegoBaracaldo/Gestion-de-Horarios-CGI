@@ -25,18 +25,18 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const torreInicial = CargarTorreInicial();
     const [torre, setTorre] = useState(torreInicial);
 
-    const nombreInicial = objConsulta.nombre && objConsulta.nombre;
+    const nombreInicial = objConsulta.nombre || '';
     const [nombre, setNombre] = useState(nombreInicial);
-    const capacidadInicial = objConsulta.capacidad && objConsulta.capacidad;
+    const capacidadInicial = objConsulta.capacidad || '';
     const [capacidad, setCapacidad] = useState(capacidadInicial);
-    const franjaInicial = objConsulta.franjaDisponibilidad && 
-        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim()));
+    const franjaInicial = objConsulta.franjaDisponibilidad &&
+        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [ambiente, setAmbiente] = useState({});
 
     //Es el id del objeto que se carga al iniciar el modal en modo consulta para pode editarlo
     //aún si se edita su id.
-    const idViejo = objConsulta && objConsulta.id;
+    const idViejo = objConsulta.id || '';
 
     useEffect(() => {
         if (Object.keys(ambiente).length > 0) {
@@ -125,7 +125,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         return bandera;
     }
 
-    function ReiniciarValores(){
+    function ReiniciarValores() {
         setNombre(nombreInicial);
         setTorre(torreInicial);
         setCapacidad(capacidadInicial);
@@ -133,11 +133,11 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }
 
     useEffect(() => {
-        if(!seActivoEdicion)ReiniciarValores();
+        if (!seActivoEdicion) ReiniciarValores();
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}

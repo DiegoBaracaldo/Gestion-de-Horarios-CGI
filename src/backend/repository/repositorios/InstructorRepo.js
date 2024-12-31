@@ -5,6 +5,16 @@ class InstructorRepo {
         this.db = db;
     }
 
+    async AtLeastOne(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM instructores LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if(err) reject(err);
+                else resolve(fila.hasRecords);
+            });
+        });
+    }
+
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM instructores";
@@ -15,37 +25,65 @@ class InstructorRepo {
         });
     }
 
-    // GetById(id) {
-    //     let InstructorAux = null;
-    //     instructores.forEach((Instructor) => {
-    //         if (Instructor.id === id) InstructorAux = Instructor;
-    //     });
-    //     return InstructorAux;
-    // }
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM instructores WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
+    }
 
-    // SaveNew(Instructor) {
-    //     instructores.push(Instructor);
-    // }
+    async SaveNew(instructor) {
+        const {id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad} = instructor;
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO instructores "+
+            "(id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) "+
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    // Save(idViejo, Instructor) {
-    //     //actualizar
-    //     let InstructorIndex = instructores.findIndex(e => e.id === idViejo);
-    //     instructores[InstructorIndex] = Instructor;
-    // }
+            this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad], function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                }
+            });
+        });
+    }
 
-    // //Se trabaja con array de ids a eliminar.
-    // Remove(idArray) {
-    //     //Se recogen los index para hacer splice a la lista
-    //     const arrayIndex = [];
-    //     instructores.forEach((inst, index) => {
-    //         if (idArray.includes(inst.id)) arrayIndex.push(index);
-    //     });
-    //     console.log(arrayIndex);
-    //     arrayIndex.forEach((indexInstructor, index) => {
-    //         //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-    //         indexInstructor = indexInstructor - index;
-    //         instructores.splice(indexInstructor, 1);
-    //     });
-    // }
+    async Save(idViejo, instructor) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE instructores SET "+
+            "id = ?, nombre = ?, "+
+            "topeHoras = ?, correo = ?, " +
+            "telefono = ?, especialidad = ?, franjaDisponibilidad = ?"+
+            "WHERE id = ?";
+            const {id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad} = instructor; // Desestructuración del objeto torre
+
+            this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad, idViejo], function (error) {
+                if (error) reject(error);
+                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+            });
+        });
+    }
+
+    //Se trabaja con array de ids a eliminar.
+    async Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM instructores WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
+    }
 }
 module.exports = InstructorRepo;

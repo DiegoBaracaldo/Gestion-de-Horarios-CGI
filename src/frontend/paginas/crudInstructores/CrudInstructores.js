@@ -98,14 +98,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         if(modoSeleccion){
             onClose && onClose();
         }else{
-            const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
-            if(confirmar){
-              EliminarInstructores();
-              alert("Instructores eliminadas satisfactoriamente!");
-              CargarLista();
-            }else{
-              return null;
-            }
+            EliminarInstructores();
         }
     }
 
@@ -124,10 +117,18 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         setInstructorConsultado(instructor);
     }
 
-    const EliminarInstructores = () => {
-        const instructoresService =  new InstructorServicio();
-        const listaAux = listaSelecciones.map(instr => instr.id);
-        instructoresService.ElimarInstructores(listaAux);
+    const EliminarInstructores = async () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
+        if (confirmar) {
+          const servicioInstructor = new InstructorServicio();
+          const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
+          const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
+          alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
+            : ("Error al eliminar los programas!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     return (

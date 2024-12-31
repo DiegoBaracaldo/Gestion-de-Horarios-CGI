@@ -5,22 +5,23 @@ import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
 import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaVeintiCinco } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 }) {
     const [inputsOff, setInputsOff] = useState(false);
     const [edicionActivada, setEdicionActivada] = useState(false);
     const [abrirHorario, setAbrirHorario] = useState(false);
 
-    const tipoInicial = objConsulta.tipo && objConsulta.tipo;
+    const tipoInicial = objConsulta.tipo || '';
     const [tipo, setTipo] = useState(tipoInicial);
     const horarioInicial =
         objConsulta.franjaDisponibilidad &&
-        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim()));
+        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
     const [horario, setHorario] = useState(horarioInicial);
-    const [jornada, setJornada] = useState(objConsulta ? objConsulta : {});
+    const [jornada, setJornada] = useState({});
     const [primeraCarga, setPrimeraCarga] = useState(true);
 
-    const idViejo = objConsulta && objConsulta.id;
+    const idViejo = objConsulta.id || '';
 
     const Actualizarjornada = () => {
         setPrimeraCarga(false);
@@ -49,7 +50,7 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
     const ObjJornadaActualizado = () => {
         setJornada({
             ...objConsulta,
-            tipo: tipo,
+            tipo: FormatearNombre(tipo),
             franjaDisponibilidad: horario.toString()
         });
     }
@@ -87,7 +88,7 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 
     return (
         <ModalGeneral isOpenRegistro={abrirRegistro} isOpenConsulta={abrirConsulta}
-            onClose={cerrarModal && cerrarModal} bloquearInputs={(valor) => setInputsOff(valor)}
+            onClose={cerrarModal} bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setEdicionActivada(valor)}
             onClickPositivo={Actualizarjornada}>
             <div className='seccCajitasModal'>

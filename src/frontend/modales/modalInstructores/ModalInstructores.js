@@ -15,36 +15,36 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
     /*****Se recogen los datos para el objeto que será registrado*****/
-    const cedulaInicial = objConsultado.id && objConsultado.id;
+    const cedulaInicial = objConsultado.id || '';
     const [cedula, setCedula] = useState(cedulaInicial);
-    const nombreInicial = objConsultado.nombre && objConsultado.nombre;
+    const nombreInicial = objConsultado.nombre || '';
     const [nombre, setNombre] = useState(nombreInicial);
-    const correoInicial = objConsultado.correo && objConsultado.correo
+    const correoInicial = objConsultado.correo || '';
     const [correo, setCorreo] = useState(correoInicial);
-    const telefonoInicial = objConsultado.telefono && objConsultado.telefono;
+    const telefonoInicial = objConsultado.telefono || '';
     const [telefono, setTelefono] = useState(telefonoInicial);
-    const especialidadInicial = objConsultado.especialidad && objConsultado.especialidad;
+    const especialidadInicial = objConsultado.especialidad || '';
     const [especialidad, setEspecialidad] = useState(especialidadInicial);
-    const topeHorasInicial = objConsultado.topeHoras && objConsultado.topeHoras;
+    const topeHorasInicial = objConsultado.topeHoras || '';
     const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
-    const franjaInicial = objConsultado.franjaDisponibilidad && 
-        objConsultado.franjaDisponibilidad.split(',').map(item => Number(item.trim()));
+    const franjaInicial = objConsultado.franjaDisponibilidad &&
+        objConsultado.franjaDisponibilidad .split(',').map(item => Number(item.trim())) || [];
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [instructor, setInstructor] = useState({});
 
     useEffect(() => {
-        if(Object.keys(instructor).length > 0){
-            const servicioInstructor = new InstructorServicio();
-            if(abrirConsulta){
-                servicioInstructor.ActualizarInstructor(cedulaInicial, instructor);
-                alert("Instructor actualizado correctamente!");
-            }else{
-                servicioInstructor.GuardarInstructor(instructor);
-                alert("Instructor  registrado correctamente!");
-            }
-            onCloseProp && onCloseProp();
+        if (Object.keys(instructor).length > 0) {
+            Registrar();
         }
     }, [instructor]);
+
+    async function Registrar() {
+        const servicioInstructor = new InstructorServicio();
+        const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
+            : await servicioInstructor.GuardarInstructor(instructor);
+        alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+        onCloseProp && onCloseProp();
+    }
 
     function ManejarTopeHoras(texto) {
         if (texto.length > 2) setTopeHoras(texto.substring(0, 2));
@@ -54,79 +54,76 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const RegistrarInstructor = () => {
         //Se hace una validación exahustiva de los datos
         if (ValidarObjInstructor()) {
-            if(abrirConsulta) ObjInstructorActualizado();
+            if (abrirConsulta) ObjInstructorActualizado();
             else FormarObjInstructor();
         }
     }
 
     const RegistrarJornada = () => {
-        if(franjaDisponibilidad.length > 0){
+        if (franjaDisponibilidad.length > 0) {
             setIsOpenFranjaHoraria(false);
-        }else{
+        } else {
             alert("Debes establecer la disponibilidad horaria del instructor!");
         }
     }
 
     const ValidarObjInstructor = () => {
         let bandera = false;
-            if (!cedula || !cedula.toString().trim() || !HastaCincuenta(cedula) || !SoloNumeros(cedula)) {
-                alert("Cédula incorrecta!");
-                setCedula('');
-            } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !TextoConEspacio(nombre)) {
-                alert("Nombre incorrecto!");
-                setNombre('');
-            } else if (!correo || !correo.toString().trim() || !HastaCien(correo) || !EsCorreo(correo)) {
-                alert("Correo electrónico incorrecto");
-                setCorreo('');
-            } else if (!telefono || !telefono.toString().trim() || !HastaCien(telefono) || !EsTelefono(telefono)) {
-                alert("Teléfono incorrecto");
-                setTelefono('');
-            } else if (!especialidad || !especialidad.toString().trim() || !HastaCien(especialidad) || !TextoConEspacio(especialidad)) {
-                alert("Especialidad incorrecta");
-                setEspecialidad('');
-            } else if (!topeHoras || !topeHoras.toString().trim() || !HastaDos(topeHoras) || !SoloNumeros(topeHoras)) {
-                alert("Tope de horas semanales incorrecto");
-                setTopeHoras('');
-            }else if(!franjaDisponibilidad.length > 0){
-                alert("Debes establecer una disponibilidad horaria para el instructor!");
-            }else {
-                bandera = true;
-            }
+        if (!cedula || !cedula.toString().trim() || !HastaCincuenta(cedula) || !SoloNumeros(cedula)) {
+            alert("Cédula incorrecta!");
+            setCedula('');
+        } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !TextoConEspacio(nombre)) {
+            alert("Nombre incorrecto!");
+            setNombre('');
+        } else if (!correo || !correo.toString().trim() || !HastaCien(correo) || !EsCorreo(correo)) {
+            alert("Correo electrónico incorrecto");
+            setCorreo('');
+        } else if (!telefono || !telefono.toString().trim() || !HastaCien(telefono) || !EsTelefono(telefono)) {
+            alert("Teléfono incorrecto");
+            setTelefono('');
+        } else if (!especialidad || !especialidad.toString().trim() || !HastaCien(especialidad) || !TextoConEspacio(especialidad)) {
+            alert("Especialidad incorrecta");
+            setEspecialidad('');
+        } else if (!topeHoras || !topeHoras.toString().trim() || !HastaDos(topeHoras) || !SoloNumeros(topeHoras)) {
+            alert("Tope de horas semanales incorrecto");
+            setTopeHoras('');
+        } else if (!franjaDisponibilidad.length > 0) {
+            alert("Debes establecer una disponibilidad horaria para el instructor!");
+        } else {
+            bandera = true;
+        }
         return bandera;
     }
 
     const FormarObjInstructor = () => {
         const objAux = {};
-        objAux.id = cedula;
+        objAux.id = Number(cedula);
         objAux.nombre = FormatearNombre(nombre);
-        objAux.topeHoras = topeHoras;
+        objAux.topeHoras = Number(topeHoras);
         objAux.correo = correo;
         objAux.telefono = telefono;
         objAux.especialidad = FormatearNombre(especialidad);
-        objAux.disponible = true;
-        objAux.esResponsable = false;
-        objAux.franjaDisponibilidad = franjaDisponibilidad;
-        objAux.fechaRegistro = '2024-12-07T13:05:00';
+        objAux.franjaDisponibilidad = franjaDisponibilidad.toString();
         setInstructor(objAux);
     }
 
     const ObjInstructorActualizado = () => {
         setInstructor({
             ...objConsultado,
-            id: cedula,
-            nombre: nombre,
+            id: Number(cedula),
+            nombre:FormatearNombre(nombre),
             correo: correo,
             telefono: telefono,
             especialidad: especialidad,
-            topeHoras: topeHoras,
-            franjaDisponibilidad: franjaDisponibilidad
+            topeHoras: Number(topeHoras),
+            franjaDisponibilidad: franjaDisponibilidad.toString()
         });
     }
 
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
 
-    function ReiniciarValores(){
+    function ReiniciarValores() {
         setCedula(cedulaInicial);
         setNombre(nombreInicial);
         setCorreo(correoInicial);
@@ -137,11 +134,11 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     }
 
     useEffect(() => {
-        if(!seActivoEdicion)ReiniciarValores();
+        if (!seActivoEdicion) ReiniciarValores();
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}
@@ -194,9 +191,9 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
                     <FranjaHoraria isOpen={isOpenFranjaHoraria}
                         onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
-                        onClickPositivo={RegistrarJornada} 
+                        onClickPositivo={RegistrarJornada}
                         franjasOcupadasProp={franjaDisponibilidad}
-                        esEdicion={seActivoEdicion}/>
+                        esEdicion={seActivoEdicion} />
             }
         </ModalGeneral>
     );

@@ -3,6 +3,16 @@ class JornadaRepo {
     constructor(db) {
         this.db = db;
     }
+    
+    async AtLeastOne(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM jornadas LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if(err) reject(err);
+                else resolve(fila.hasRecords);
+            });
+        });
+    }
 
     GetAll() {
         return new Promise((resolve, reject) => {

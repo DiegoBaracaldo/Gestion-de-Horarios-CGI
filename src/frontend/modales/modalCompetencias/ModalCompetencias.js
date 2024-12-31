@@ -12,11 +12,11 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    const codigoInicial = objConsulta.id && objConsulta.id;
+    const codigoInicial = objConsulta.id || '';
     const [codigo, setCodigo] = useState(codigoInicial);
-    const descripcionInicial = objConsulta.descripcion && objConsulta.descripcion;
+    const descripcionInicial = objConsulta.descripcion || '';
     const [descripcion, setDescripcion] = useState(descripcionInicial);
-    const horasInicial = objConsulta.horasRequeridas && objConsulta.horasRequeridas;
+    const horasInicial = objConsulta.horasRequeridas || '';
     const [horas, setHoras] = useState(horasInicial);
     const [competencia, setCompetencia] = useState({});
 
@@ -99,7 +99,7 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}

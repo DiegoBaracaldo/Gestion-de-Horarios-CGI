@@ -177,37 +177,38 @@ const CrudGrupos = () => {
         CargarLista();
     }
 
-    function VerificarProgramas() {
+    async function VerificarProgramas() {
         const servicioPrograma = new ProgramaServicio();
-        if(servicioPrograma.CargarLista().length > 0) return true;
-        else return false;
+        const respuesta = await servicioPrograma.ExisteUno();
+        return respuesta === 0 ? false : true;
     }
-    function VerificarResponsables() {
+    async function VerificarResponsables() {
         const servicioInstructor = new InstructorServicio();
-        if(servicioInstructor.CargarLista().length > 0)return true;
-        else return false;
+        const respuesta = await servicioInstructor.ExisteUno();
+        return respuesta === 0 ? false : true;
     }
-    function VerificarJornadas() {
+    async function VerificarJornadas() {
         const servicioJornada = new JornadaServicio();
-        if(servicioJornada.CargarLista().length > 0) return true;
-        else return false;
+        const respuesta = await servicioJornada.ExisteUno();
+        return respuesta === 0 ? false : true;
     }
 
-    const EliminarGrupos  = () => {
-        const grupoServicio = new GrupoServicio();
-        const listaAuxID = listaSelecciones.map(grupo => grupo.id);
-        grupoServicio.EliminarGrupo(listaAuxID);
+    const EliminarGrupos  = async () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
+        if (confirmar) {
+          const servicioGrupo = new GrupoServicio();
+          const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
+          const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
+          alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
+            : ("Error al eliminar los grupos!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     const onClicDestructivo = () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
-        if(confirmar){
-          EliminarGrupos();
-          alert("Grupos eliminados satisfactoriamente!");
-          CargarLista();
-        }else{
-          return null;
-        }
+        EliminarGrupos();
     }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>

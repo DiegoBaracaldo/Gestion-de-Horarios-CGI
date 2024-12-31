@@ -15,20 +15,45 @@ class GrupoServicio {
         }
     }
 
-    // GuardarGrupo(grupo){
-    //     const repo = new GrupoRepo();
-    //     repo.SaveNew(grupo);
-    // }
-
-    // ActualizarGrupo(idViejo, grupo){
-    //     const repo = new GrupoRepo();
-    //     repo.Save(idViejo, grupo);
-    // }
-
-    // EliminarGrupo(listaIDs){
-    //     const repo = new GrupoRepo();
-    //     repo.Remove(listaIDs);
-    // }
+    async GuardarGrupo(grupo){
+        console.log("guardando grupo...");
+        try {
+          return await window.electron.SaveNewGrupo(grupo);
+        } catch (error) {
+          console.log("error en servicio grupo por: ", error);
+          return 0;
+        }
+      }
+  
+      async CargarGrupo(id){
+        console.log("Cargando grupo...");
+        try {
+          return await window.electron.GetGrupoByID(id);
+        } catch (error) {
+          console.log("error en servicio grupo por: ", error);
+          return {};
+        }
+      }
+  
+      async ActualizarGrupo(idViejo, grupo){
+        console.log("Actualizando grupo...");
+        try {
+          return await window.electron.SaveGrupo(idViejo, grupo);
+        } catch (error) {
+          console.log("error en servicio grupo por: ", error);
+          return 0;
+        }
+      }
+  
+      async EliminarGrupo(listaIDs){
+        console.log("Eliminando grupo...");
+        try {
+          return await window.electron.RemoveGrupo(listaIDs);
+        } catch (error) {
+          console.log("error en servicio grupo por: ", error);
+          return 0;
+        }
+      }
 }
 
 

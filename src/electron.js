@@ -133,6 +133,14 @@ function RegistrarIPC() {
     
 
     // Jornadas
+    ipcMain.handle('AtLeastOneJornada', async() => {
+        try {
+            return await jornadaRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainJornadas por: " + error);
+            return 0;
+        }
+    });
     ipcMain.handle('GetAllJornadas', async () => {
         try {
             return await jornadaRepo.GetAll();
@@ -175,6 +183,14 @@ function RegistrarIPC() {
     });
 
     // Programas
+    ipcMain.handle('AtLeastOnePrograma', async() => {
+        try {
+            return await programaRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainProgramas por: " + error);
+            return 0;
+        }
+    });
     ipcMain.handle('GetAllProgramas', async () => {
         try {
             return await programaRepo.GetAll();
@@ -217,12 +233,52 @@ function RegistrarIPC() {
     });
 
     //Instructores
+    ipcMain.handle('AtLeastOneInstructor', async() => {
+        try {
+            return await instructorRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainInstructores por: " + error);
+            return 0;
+        }
+    });
     ipcMain.handle('GetAllInstructores', async () => {
         try {
             return await instructorRepo.GetAll();
         } catch (error) {
             console.log("Error en electron ipcMain Instructores  por: " + error);
             return [];
+        }
+    });
+    ipcMain.handle('GetInstructorByID', async (event, id) => {
+        try {
+            return await instructorRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewInstructor', async (event, instructor) => {
+        try {
+            return await instructorRepo.SaveNew(instructor);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveInstructor', async (event, idViejo, instructor) => {
+        try {
+            return await instructorRepo.Save(idViejo, instructor);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveInstructor por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveInstructor', async (event, idArray) => {
+        try {
+            return await instructorRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveInstructor por:   " + error);
+            return 0;
         }
     });
 
@@ -233,6 +289,38 @@ function RegistrarIPC() {
         } catch (error) {
             console.log("Error en electron ipcMain Grupos  por: " + error);
             return [];
+        }
+    });
+    ipcMain.handle('GetGrupoByID', async (event, id) => {
+        try {
+            return await grupoRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewGrupo', async (event, grupo) => {
+        try {
+            return await grupoRepo.SaveNew(grupo);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveGrupo', async (event, idViejo, grupo) => {
+        try {
+            return await grupoRepo.Save(idViejo, grupo);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveGrupo por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveGrupo', async (event, idArray) => {
+        try {
+            return await grupoRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveGrupo por:   " + error);
+            return 0;
         }
     });
     

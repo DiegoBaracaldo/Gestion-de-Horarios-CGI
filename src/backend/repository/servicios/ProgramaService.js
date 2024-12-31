@@ -6,6 +6,16 @@ class ProgramaServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOnePrograma();
+      } catch (error) {
+        console.log("error en servicio programa por: ", error);
+        return 0;
+      }
+    }
+
     async CargarLista() {
         console.log("cargando lista...");
         try {

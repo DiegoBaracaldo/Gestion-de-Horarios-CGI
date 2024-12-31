@@ -5,6 +5,16 @@ class JornadaServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneJornada();
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
+    }
+
     async CargarLista() {
         console.log("cargando lista...");
         try {

@@ -29,6 +29,9 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     const [instructorConsultado, setInstructorConsultado] = useState({});
 
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
+
     useEffect(() => {
         CargarLista();
     },[]);
@@ -99,6 +102,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
             onClose && onClose();
         }else{
             EliminarInstructores();
+            setVaciarListaSelecc(true);
         }
     }
 
@@ -123,8 +127,8 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
           const servicioInstructor = new InstructorServicio();
           const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
           const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
-          alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
-            : ("Error al eliminar los programas!"));
+          alert(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
+            : ("Error al eliminar los instructores!"));
           CargarLista();
         } else {
           return null;
@@ -139,7 +143,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
                 clicFila={r => OnClickFila(r)} datosJson={listaAdaptada}
                 subtitulos={subs} modoSeleccion={modoSeleccion}
-                onCLicDestructivo={OnClickDestructivo}/>
+                onCLicDestructivo={OnClickDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

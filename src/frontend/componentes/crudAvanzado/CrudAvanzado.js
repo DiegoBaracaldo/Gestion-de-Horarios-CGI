@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
     onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo,
-    esconderBusqueda, subtitulos, modoSeleccion, listaSeleccionada
+    esconderBusqueda, subtitulos, modoSeleccion, listaSeleccionada, vaciarListaSelecc
 }) => {
 
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
@@ -75,7 +75,8 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                 <article className='seccListaAvanzada'>
                     <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}
                         listaSeleccProp={listaSeleccionada && listaSeleccionada}
-                        subtitulos={subtitulos} modoSeleccion={modoSeleccion} />
+                        subtitulos={subtitulos} modoSeleccion={modoSeleccion} 
+                        vaciarListaSelecc={vaciarListaSelecc}/>
                 </article>
             </section>
 

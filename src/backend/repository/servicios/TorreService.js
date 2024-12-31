@@ -5,6 +5,16 @@ class TorreServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneTorre();
+      } catch (error) {
+        console.log("error en servicio torre por: ", error);
+        return 0;
+      }
+    }
+
     async CargarLista() {
         console.log("cargando lista de torres...");
         try {

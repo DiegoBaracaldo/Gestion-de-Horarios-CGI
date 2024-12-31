@@ -14,25 +14,45 @@ class CompetenciaServicio {
         }
     }
 
-    // GuardarCompetencia(competencia) {
-    //     const repo = new CompetenciaRepo();
-    //     repo.SaveNew(competencia);
-    // }
+    async GuardarCompetencia(competencia){
+      console.log("guardando competencia...");
+      try {
+        return await window.electron.SaveNewCompetencia(competencia);
+      } catch (error) {
+        console.log("error en servicio competencia por: ", error);
+        return 0;
+      }
+    }
 
-    // CargarCompetencia(id) {
-    //     const repo = new CompetenciaRepo();
-    //     return repo.GetById(id);
-    // }
+    async CargarCompetencia(id){
+      console.log("Cargando competencia...");
+      try {
+        return await window.electron.GetCompetenciaByID(id);
+      } catch (error) {
+        console.log("error en servicio competencia por: ", error);
+        return {};
+      }
+    }
 
-    // ActualizarCompetencia(idViejo, competencia){
-    //     const repo = new CompetenciaRepo();
-    //     return repo.Save(idViejo, competencia);
-    // }
+    async ActualizarCompetencia(idViejo, competencia){
+      console.log("Actualizando competencia...");
+      try {
+        return await window.electron.SaveCompetencia(idViejo, competencia);
+      } catch (error) {
+        console.log("error en servicio competencia por: ", error);
+        return 0;
+      }
+    }
 
-    // EliminarCompetencia(listaIDs){
-    //     const repo = new CompetenciaRepo();
-    //     repo.Remove(listaIDs);
-    // }
+    async EliminarCompetencia(listaIDs){
+      console.log("Eliminando competencia...");
+      try {
+        return await window.electron.RemoveCompetencia(listaIDs);
+      } catch (error) {
+        console.log("error en servicio competencia por: ", error);
+        return 0;
+      }
+    }
 }
 
 

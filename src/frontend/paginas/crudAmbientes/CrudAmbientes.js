@@ -29,6 +29,9 @@ const CrudAmbientes = () => {
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
     const [ambienteConsultado, setAmbienteConsultado] = useState({});
+    
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
 
     useEffect(() => {
         CargarLista();
@@ -107,27 +110,28 @@ const CrudAmbientes = () => {
         CargarLista();
     }
 
-    function VerificarTorres() {
-        const servicioTorres = new TorreServicio();
-        if(servicioTorres.CargarLista().length > 0) return true;
-        else return false;
+    async function VerificarTorres() {
+        const respuesta = await new TorreServicio().ExisteUno();
+        return respuesta !== 0 ? true : false;
     }
     
-    const EliminarAmbientes = () => {
-        const servicioAmbientes = new AmbienteServicio();
-        const listaAuxID = listaSelecciones.map(ambiente => ambiente.id);
-        servicioAmbientes.EliminarAmbiente(listaAuxID);
+    const EliminarAmbientes = async () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los ambientes seleccionados?");
+        if (confirmar) {
+          const servicioAmbiente = new AmbienteServicio();
+          const auxListaID = listaSelecciones.map(ambiente => parseInt(ambiente.id.toString()));
+          const respuesta = await servicioAmbiente.EliminarAmbiente(auxListaID);
+          alert(respuesta !== 0 ? ("Ambientes eliminados satisfactoriamente!: ")
+            : ("Error al eliminar los ambientes!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     const OnClicDestructivo = () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los ambientes seleccionadas?");
-        if(confirmar){
-          EliminarAmbientes();
-          alert("Ambientes eliminados satisfactoriamente!");
-          CargarLista();
-        }else{
-          return null;
-        }
+        EliminarAmbientes();
+        setVaciarListaSelecc(true);
     }
 
     return (
@@ -138,7 +142,7 @@ const CrudAmbientes = () => {
                 buscarPor={(texto) => setTextoBusqueda(texto)}
                 clicFila={e => AbrirConsulta(e)} onClicPositivo={AbrirRegistro}
                 datosJson={listaAdaptada} subtitulos={subs} 
-                onCLicDestructivo={OnClicDestructivo}/>
+                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

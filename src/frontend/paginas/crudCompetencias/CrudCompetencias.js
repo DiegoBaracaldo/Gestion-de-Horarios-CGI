@@ -55,6 +55,9 @@ const CrudCompetencias = () => {
     }, [listaObjetos]);
 
 
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
+
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
@@ -126,21 +129,23 @@ const CrudCompetencias = () => {
         CargarLista();
     }
 
-    function EliminarCompetencias(){
-        const competenciaServicio = new CompetenciaServicio();
-        const listaAuxID = listaSelecciones.map(comp => comp.id);
-        competenciaServicio.EliminarCompetencia(listaAuxID);
+    async function EliminarCompetencias(){
+        const confirmar = window.confirm("¿Confirma que desea eliminar los competencias seleccionados?");
+        if (confirmar) {
+          const servicioCompetencia = new CompetenciaServicio();
+          const auxListaID = listaSelecciones.map(competencia => parseInt(competencia.id.toString()));
+          const respuesta = await servicioCompetencia.EliminarCompetencia(auxListaID);
+          alert(respuesta !== 0 ? ("Competencias eliminadas satisfactoriamente!: ")
+            : ("Error al eliminar las competencias!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     const OnClicDestructivo = () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar las competencias seleccionadas?");
-        if(confirmar){
-          EliminarCompetencias();
-          alert("Competencias eliminadas satisfactoriamente!");
-          CargarLista();
-        }else{
-          return null;
-        }
+        EliminarCompetencias();
+        setVaciarListaSelecc(true);
     }
 
     return (
@@ -152,7 +157,7 @@ const CrudCompetencias = () => {
                 seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} onClicPositivo={AbrirRegistro}
                 clicFila={AbrirConsulta} datosJson={esconderBusqueda ? null : listaAdaptada}
                 subtitulos={subs} 
-                onCLicDestructivo={OnClicDestructivo}/>
+                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

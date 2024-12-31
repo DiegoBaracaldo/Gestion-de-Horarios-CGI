@@ -3,7 +3,7 @@ import './ListaAvanzada.css';
 
 
 const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccProp,
-    modoSeleccion
+    modoSeleccion, vaciarListaSelecc
 }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
@@ -57,6 +57,10 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
     const PedirFuncionalidad = () => {
         alert("Agregar funcionalidad a este componente por favor...");
     }
+
+    useEffect(() => {
+        if(vaciarListaSelecc) setListaObjetosSelecc([]);
+    }, [vaciarListaSelecc]);
 
     return (
         <table id='listaAvanzada'>

@@ -23,37 +23,65 @@ class AmbienteRepo{
         });
     }
 
-    // GetById(id){
-    //     let ambienteAux = null;
-    //     ambientes.forEach((ambiente) => {
-    //         if(ambiente.id === id) ambienteAux = ambiente;
-    //     });
-    //     return ambienteAux;
-    // }
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM ambientes WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
+    }
 
-    // SaveNew(ambiente){
-    //     ambientes.push(ambiente);
-    // }
+    async SaveNew(ambiente) {
+        const {nombre, idTorre, capacidad, franjaDisponibilidad} = ambiente;
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO ambientes "+
+            "(nombre, idTorre, capacidad, franjaDisponibilidad) "+
+            "VALUES (?, ?, ?, ?)";
 
-    // Save(idViejo, ambiente){
-    //         //actualizar
-    //         let ambienteIndex = ambientes.findIndex(e => e.id === idViejo);
-    //         ambientes[ambienteIndex] = ambiente;
-    // }
+            this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad], function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                }
+            });
+        });
+    }
 
-    // //Se trabaja con array de ids a eliminar.
-    // Remove(idArray){
-    //     //Se recogen los index para hacer splice a la lista
-    //     const arrayIndex = [];
-    //     ambientes.forEach((ambiente, index) => {
-    //         if (idArray.includes(ambiente.id)) arrayIndex.push(index);
-    //     });
-    //     console.log(arrayIndex);
-    //     arrayIndex.forEach((indexAmbiente, index) => {
-    //         //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-    //         indexAmbiente = indexAmbiente - index;
-    //         ambientes.splice(indexAmbiente, 1);
-    //     });
-    // }
+    async Save(idViejo, ambiente) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE ambientes SET "+
+            "nombre = ?, "+
+            "idTorre = ?, capacidad = ?, " +
+            "franjaDisponibilidad = ?"+
+            "WHERE id = ?";
+            const {nombre, idTorre, capacidad, franjaDisponibilidad} = ambiente; // Desestructuración del objeto torre
+
+            this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
+                if (error) reject(error);
+                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+            });
+        });
+    }
+
+    //Se trabaja con array de ids a eliminar.
+    async Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM ambientes WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
+    }
 }
 module.exports = AmbienteRepo;

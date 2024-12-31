@@ -12,9 +12,7 @@ import TorreServicio from '../../../backend/repository/servicios/TorreService';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
-    const CargarTorreInicial = () => {
-        return new TorreServicio().CargarTorre(objConsulta.idTorre) || {};
-    }
+
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
@@ -22,8 +20,21 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
     const [seleccTorre, setSeleccTorre] = useState(false);
-    const torreInicial = CargarTorreInicial();
+    let torreInicial = {};
     const [torre, setTorre] = useState(torreInicial);
+
+    useEffect(() => {
+        if(abrirConsulta) CargarTorreInicial();
+    }, []);
+
+    const CargarTorreInicial = async () => {
+        try {
+            torreInicial = await new TorreServicio().CargarTorre(objConsulta.idTorre);
+            setTorre(torreInicial);
+        } catch (error) {
+            console.log("Error al obtener torre del ambiente por: ", error);
+        }
+    }
 
     const nombreInicial = objConsulta.nombre || '';
     const [nombre, setNombre] = useState(nombreInicial);
@@ -40,19 +51,18 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
 
     useEffect(() => {
         if (Object.keys(ambiente).length > 0) {
-            if (!seActivoEdicion) {
-                const ambienteServicio = new AmbienteServicio();
-                ambienteServicio.GuardarAmbiente(ambiente);
-                alert("Ambiente guardado correctamente!");
-                onCloseProp && onCloseProp();
-            } else {
-                const ambienteServicio = new AmbienteServicio();
-                ambienteServicio.ActualizarAmbiente(idViejo, ambiente);
-                alert("Ambiente actualizado correctamente!");
-                onCloseProp && onCloseProp();
-            }
+            Registrar();
         }
     }, [ambiente]);
+
+    async function Registrar() {
+        const ambienteServicio = new AmbienteServicio();
+        const respuesta = seActivoEdicion ?
+            await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
+            await ambienteServicio.GuardarAmbiente(ambiente);
+        alert(respuesta !== 0 ? ("Operación EXITOSA!") : ("Operación FALLIDA!"));
+        onCloseProp && onCloseProp();
+    }
 
     const [torreNombre, setTorreNombre] = useState('Seleccionar torre...');
 
@@ -82,15 +92,12 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }
 
     const FormarObjAmbiente = () => {
-        const ambienteAux = new Ambiente(
-            Math.floor(Math.random() * 900) + 100,
-            FormatearNombre(nombre),
-            torre.id,
-            capacidad,
-            franjaDisponibilidad,
-            "2024-12-07T11:10:00",
-            torre.nombre
-        );
+        const ambienteAux = {
+            nombre: FormatearNombre(nombre),
+            idTorre: torre.id,
+            capacidad: Number(capacidad),
+            franjaDisponibilidad: franjaDisponibilidad.toString()
+        };
         setAmbiente(ambienteAux);
     }
 
@@ -99,9 +106,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
             ...objConsulta,
             nombre: FormatearNombre(nombre),
             idTorre: torre.id,
-            capacidad: capacidad,
-            franjaDisponibilidad: franjaDisponibilidad,
-            nombreTorre: torre.nombre
+            capacidad: Number(capacidad),
+            franjaDisponibilidad: franjaDisponibilidad.toString()
         });
     }
 

@@ -89,6 +89,14 @@ async function IniciarBaseDatos() {
 
 function RegistrarIPC() {
     // TORRES
+    ipcMain.handle('AtLeastOneTorre', async() => {
+        try {
+            return await torreRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainTorres por: " + error);
+            return 0;
+        }
+    });
     ipcMain.handle('GetAllTorres', async () => {
         try {
             //aquí se devuelven o las filas encontradas en resolve o el array vacío de reject
@@ -333,6 +341,38 @@ function RegistrarIPC() {
             return [];
         }
     });
+    ipcMain.handle('GetAmbienteByID', async (event, id) => {
+        try {
+            return await ambienteRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewAmbiente', async (event, ambiente) => {
+        try {
+            return await ambienteRepo.SaveNew(ambiente);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveAmbiente', async (event, idViejo, ambiente) => {
+        try {
+            return await ambienteRepo.Save(idViejo, ambiente);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveAmbiente por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveAmbiente', async (event, idArray) => {
+        try {
+            return await ambienteRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveAmbiente por:   " + error);
+            return 0;
+        }
+    });
     
     //Competencias
     ipcMain.handle('GetAllCompetencias', async (event, idPrograma) => {
@@ -341,6 +381,38 @@ function RegistrarIPC() {
         } catch (error) {
             console.log("Error en electron ipcMain Competencias  por: " + error);
             return [];
+        }
+    });
+    ipcMain.handle('GetCompetenciaByID', async (event, id) => {
+        try {
+            return await competenciaRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewCompetencia', async (event, competencia) => {
+        try {
+            return await competenciaRepo.SaveNew(competencia);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveCompetencia', async (event, idViejo, competencia) => {
+        try {
+            return await competenciaRepo.Save(idViejo, competencia);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveCompetencia por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveCompetencia', async (event, idArray) => {
+        try {
+            return await competenciaRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveCompetencia por:   " + error);
+            return 0;
         }
     });
 }

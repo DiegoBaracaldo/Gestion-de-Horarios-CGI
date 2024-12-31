@@ -36,6 +36,9 @@ const CrudGrupos = () => {
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
     const [opcionCadena, setOpcionCadena] = useState("ambos");
+    
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
 
     useEffect(() => {
         CargarLista();
@@ -201,7 +204,7 @@ const CrudGrupos = () => {
           const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
           alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
             : ("Error al eliminar los grupos!"));
-          CargarLista();
+            CargarLista();
         } else {
           return null;
         }
@@ -209,6 +212,7 @@ const CrudGrupos = () => {
 
     const onClicDestructivo = () => {
         EliminarGrupos();
+        setVaciarListaSelecc(true);
     }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>

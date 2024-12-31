@@ -9,43 +9,68 @@ class ProgramaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM programas";
             this.db.all(query, [], (error, filas) => {
-                if(error) reject(error);
+                if (error) reject(error);
                 else resolve(filas);
             });
         });
     }
 
-    // GetById(id) {
-    //     let programaAux = null;
-    //     programasAcademicos.forEach((programa) => {
-    //         if (programa.id === id) programaAux = programa;
-    //     });
-    //     return programaAux;
-    // }
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM programas WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
+    }
 
-    // SaveNew(programa) {
-    //     programasAcademicos.push(programa);
-    // }
+    SaveNew(programa) {
+        const { id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin } = programa;
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO programas " +
+                "(id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
 
-    // Save(idViejo, programa) {
-    //     //actualizar
-    //     let programaIndex = programasAcademicos.findIndex(e => e.id === idViejo);
-    //     programasAcademicos[programaIndex] = programa;
-    // }
+            this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin], function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                }
+            });
+        });
+    }
 
-    // //Se trabaja con array de ids a eliminar.
-    // Remove(idArray) {
-    //      //Se recogen los index para hacer splice a la lista
-    //      const arrayIndex = [];
-    //      programasAcademicos.forEach((programa, index) => {
-    //          if (idArray.includes(programa.id)) arrayIndex.push(index);
-    //      });
-    //      console.log(arrayIndex);
-    //      arrayIndex.forEach((indexPrograma, index) => {
-    //          //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-    //          indexPrograma = indexPrograma - index;
-    //          programasAcademicos.splice(indexPrograma, 1);
-    //      });
-    // }
+    Save(idViejo, programa) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE programas SET "+
+            "id=?, nombre=?, tipo=?, cantidadTrimestres=?, fechaInicio=?, fechaFin=?  WHERE id = ?";
+            const {id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin} = programa; // Desestructuración del objeto torre
+
+            this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin, idViejo], function (error) {
+                if (error) reject(error);
+                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+            });
+        });
+    }
+
+    //Se trabaja con array de ids a eliminar.
+    Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM programas WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
+    }
 }
 module.exports = ProgramaRepo;

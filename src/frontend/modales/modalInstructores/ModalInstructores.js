@@ -27,7 +27,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const [especialidad, setEspecialidad] = useState(especialidadInicial);
     const topeHorasInicial = objConsultado.topeHoras && objConsultado.topeHoras;
     const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
-    const franjaInicial = objConsultado.franjaDisponibilidad && objConsultado.franjaDisponibilidad;
+    const franjaInicial = objConsultado.franjaDisponibilidad && 
+        objConsultado.franjaDisponibilidad.split(',').map(item => Number(item.trim()));
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [instructor, setInstructor] = useState({});
 

@@ -35,18 +35,17 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   //Si el objeto fue formado correctamente para el registro
   useEffect(() => {
     if (Object.keys(programa).length > 0) {
-      const servicioPrograma = new ProgramaServicio();
-      if (abrirConsulta) {
-        servicioPrograma.ActualizarPrograma(idViejo, programa);
-        alert("Programa actualizado correctamente!");
-      } else {
-        servicioPrograma.GuardarPrograma(programa);
-        alert("Programa registrado correctamente!");
-      }
-      cerrarModal && cerrarModal();
+      Registrar();
     }
   }, [programa]);
 
+  async function Registrar() {
+    const servicioPrograma = new ProgramaServicio();
+    const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
+      : await servicioPrograma.GuardarPrograma(programa);
+    alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+    cerrarModal && cerrarModal();
+  }
 
   const RegistrarPrograma = () => {
     //Se hace una validación exahustiva de los datos
@@ -59,23 +58,22 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   const FormarObjPrograma = () => {
     //ojo, hay que formatear los datos necesarios
     const objAux = {};
-    objAux.id = codigo;
+    objAux.id = Number(codigo);
     objAux.tipo = tipo;
     objAux.nombre = FormatearNombre(nombre);
-    objAux.cantidadTrimestres = cantidadTrimestres;
+    objAux.cantidadTrimestres = Number(cantidadTrimestres);
     objAux.fechaInicio = fechaInicio;
     objAux.fechaFin = fechaFin;
-    objAux.fechaRegistro = "2024-12-07T11:10:00";
     setPrograma(objAux);
   }
 
   const ObjProgramaActualizado = () => {
     setPrograma({
       ...programa,
-      id: codigo,
+      id: Number(codigo),
       nombre: FormatearNombre(nombre),
       tipo: tipo,
-      cantidadTrimestres: cantidadTrimestres,
+      cantidadTrimestres: Number(cantidadTrimestres),
       fechaInicio: fechaInicio,
       fechaFin: fechaFin,
     });

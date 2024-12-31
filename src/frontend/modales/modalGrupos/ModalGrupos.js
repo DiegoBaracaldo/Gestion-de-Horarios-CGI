@@ -46,7 +46,8 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     const [codigoGrupo, setCodigoGrupo] = useState(codigoInicial);
     const aprendicesInicial = objConsulta.cantidadAprendices &&  objConsulta.cantidadAprendices;
     const [cantidadAprendices, setCantidadAprendices] = useState(aprendicesInicial);
-    const esCadenaInicial = objConsulta.esCadenaFormacion &&  objConsulta.esCadenaFormacion;
+    const esCadenaInicial = objConsulta.esCadenaFormacion 
+        && ( objConsulta.esCadenaFormacion === 1 ? true : false);
     const [esCadena, setEsCadena] = useState(esCadenaInicial);
     const [grupo, setGrupo] = useState({});
 

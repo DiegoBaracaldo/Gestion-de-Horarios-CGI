@@ -16,25 +16,45 @@ class ProgramaServicio {
         }
     }
 
-    // GuardarPrograma(programa){
-    //     const repo = new ProgramaRepo();
-    //     repo.SaveNew(programa);
-    // }
+    async GuardarPrograma(programa){
+      console.log("guardando programa...");
+      try {
+        return await window.electron.SaveNewPrograma(programa);
+      } catch (error) {
+        console.log("error en servicio programa por: ", error);
+        return 0;
+      }
+    }
 
-    // CargarPrograma(id){
-    //     const repo = new ProgramaRepo();
-    //     return repo.GetById(id);
-    // }
+    async CargarPrograma(id){
+      console.log("Cargando programa...");
+      try {
+        return await window.electron.GetProgramaByID(id);
+      } catch (error) {
+        console.log("error en servicio programa por: ", error);
+        return {};
+      }
+    }
 
-    // ActualizarPrograma(idViejo, programa){
-    //     const repo = new ProgramaRepo();
-    //     repo.Save(idViejo, programa);
-    // }
-    
-    // EliminarPrograma(listaIDs){
-    //     const repo = new ProgramaRepo();
-    //     repo.Remove(listaIDs);
-    // }
+    async ActualizarPrograma(idViejo, programa){
+      console.log("Actualizando programa...");
+      try {
+        return await window.electron.SavePrograma(idViejo, programa);
+      } catch (error) {
+        console.log("error en servicio programa por: ", error);
+        return 0;
+      }
+    }
+  
+    async EliminarPrograma(listaIDs){
+      console.log("Eliminando programa...");
+      try {
+        return await window.electron.RemovePrograma(listaIDs);
+      } catch (error) {
+        console.log("error en servicio programa por: ", error);
+        return 0;
+      }
+    }
 }
 
 

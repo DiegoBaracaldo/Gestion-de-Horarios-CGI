@@ -15,25 +15,45 @@ class JornadaServicio {
         }
     }
 
-    // GuardarJornada(jornada){
-    //     const repo = new JornadaRepo();
-    //     repo.SaveNew(jornada);
-    // }
+    async GuardarJornada(jornada){
+      console.log("guardando jornada...");
+      try {
+        return await window.electron.SaveNewJornada(jornada);
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
+    }
 
-    // CargarJornada(id){
-    //     const repo = new JornadaRepo();
-    //     return repo.GetById(id);
-    // }
+    async CargarJornada(id){
+      console.log("Cargando jornada...");
+      try {
+        return await window.electron.GetJornadaByID(id);
+      } catch (error) {
+        console.log("error en servicio jornadas por: ", error);
+        return {};
+      }
+    }
 
-    // ActualizarJornada(idViejo, jornada){
-    //     const repo = new JornadaRepo();
-    //     repo.Save(idViejo, jornada);
-    // }
+    async ActualizarJornada(idViejo, jornada){
+      console.log("Actualizando jornada...");
+      try {
+        return await window.electron.SaveJornada(idViejo, jornada);
+      } catch (error) {
+        console.log("error en servicio jornadas por: ", error);
+        return 0;
+      }
+    }
 
-    // EliminarJornada(listaIDs){
-    //     const repo = new JornadaRepo();
-    //     repo.Remove(listaIDs);
-    // }
+    async EliminarJornada(listaIDs){
+      console.log("Eliminando jornada...");
+      try {
+        return await window.electron.RemoveJornada(listaIDs);
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
+    }
 }
 
 

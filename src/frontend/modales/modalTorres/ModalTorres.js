@@ -11,13 +11,13 @@ function ModalTorres({cerrarModal, objConsulta}) {
   const [nombreTorre, setNombreTorre] = useState(objConsulta.nombre && objConsulta.nombre);
   const idViejo = objConsulta && objConsulta.id;
 
-  const ActualizarTorre = () => {
+  const ActualizarTorre = async () => {
     if(ValidarObjTorre()){
 
       const torreService = new TorreServicio();
-      torreService.ActualizarTorre(idViejo, ObtenerObjActualizado());
-      alert("Torre actualizada con éxito");
-      cerrarModal && cerrarModal();
+      const respuesta = await torreService.ActualizarTorre(idViejo, ObtenerObjActualizado());
+      if(respuesta !== 0) ResultadoOperacion("Éxito al editar la torre!");
+      else ResultadoOperacion("Torre actualizada con éxito");
     }
   }
 
@@ -41,6 +41,11 @@ function ModalTorres({cerrarModal, objConsulta}) {
       alert("Datos incorrectos!");
     }
     return bandera;
+  }
+  
+  function ResultadoOperacion(mensaje){
+    alert(mensaje);
+    cerrarModal && cerrarModal();
   }
 
   return (

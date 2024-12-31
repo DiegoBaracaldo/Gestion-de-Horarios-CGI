@@ -17,7 +17,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     FiltrarPorTipo();
   }, [filtrarPor]);
 
-  const CargarLista = async() => {
+  const CargarLista = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new ProgramaServicio().CargarLista());
@@ -111,7 +111,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   }
 
   useEffect(() => {
-    if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
+    if (listaObjetos.length > 0) setTimeout(Filtrar, "50");
   }, [textoBuscar]);
   //////////////////////////////////////////////////////////////////////////////////
 
@@ -124,21 +124,22 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     if (modoSeleccion) {
       onClose && onClose();
     } else {
-      const confirmar = window.confirm("¿Confirma que desea eliminar los programas académicos seleccionados!");
-      if(confirmar){
-        EliminarProgramas();
-        alert("Programas eliminados correctamente!");
-        CargarLista();
-      }else{
-        return null;
-      }
+      EliminarProgramas();
     }
   }
 
-  function EliminarProgramas(){
-    const servicioPrograma = new ProgramaServicio();
-    const listaAuxID = listaSelecciones.map(programa => programa.id);
-    servicioPrograma.EliminarPrograma(listaAuxID);
+  async function EliminarProgramas() {
+    const confirmar = window.confirm("¿Confirma que desea eliminar los programas seleccionados?");
+    if (confirmar) {
+      const servicioPrograma = new ProgramaServicio();
+      const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));
+      const respuesta = await servicioPrograma.EliminarPrograma(auxListaID);
+      alert(respuesta !== 0 ? ("Torres eliminadas satisfactoriamente!: ")
+        : ("Error al eliminar las torres!"));
+      CargarLista();
+    } else {
+      return null;
+    }
   }
 
   const ManejarClickFila = (e) => {
@@ -171,7 +172,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
       {
         abrirConsulta || abrirRegistro ?
           <ModalProgramas abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-            cerrarModal={() => CerrarModal()} objConsulta={programaConsultado}/>
+            cerrarModal={() => CerrarModal()} objConsulta={programaConsultado} />
           : null
       }
     </div>

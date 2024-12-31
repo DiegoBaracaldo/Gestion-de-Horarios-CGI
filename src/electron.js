@@ -98,6 +98,39 @@ function RegistrarIPC() {
             return []; //Devuelve array vacío en caso de error de base de datos
         }
     });
+    ipcMain.handle('GetTorreByID', async (event, id) => {
+        try {
+            return await torreRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewTorre', async (event, nombre) => {
+        try {
+            return await torreRepo.SaveNew(nombre);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveTorre', async (event, idViejo, torre) => {
+        try {
+            return await torreRepo.Save(idViejo, torre);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveTorre por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveTorre', async (event, idArray) => {
+        try {
+            return await torreRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveTorre por:   " + error);
+            return 0;
+        }
+    });
+    
 
     // Jornadas
     ipcMain.handle('GetAllJornadas', async () => {
@@ -108,6 +141,38 @@ function RegistrarIPC() {
             return [];
         }
     });
+    ipcMain.handle('GetJornadaByID', async (event, id) => {
+        try {
+            return await jornadaRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewJornada', async (event, jornada) => {
+        try {
+            return await jornadaRepo.SaveNew(jornada);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SaveJornada', async (event, idViejo, jornada) => {
+        try {
+            return await jornadaRepo.Save(idViejo, jornada);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveJornada por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemoveJornada', async (event, idArray) => {
+        try {
+            return await jornadaRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemoveJornada por:   " + error);
+            return 0;
+        }
+    });
 
     // Programas
     ipcMain.handle('GetAllProgramas', async () => {
@@ -116,6 +181,38 @@ function RegistrarIPC() {
         } catch (error) {
             console.log("error en electron ipcMainProgramas por: " + error);
             return [];
+        }
+    });
+    ipcMain.handle('GetProgramaByID', async (event, id) => {
+        try {
+            return await programaRepo.GetById(id);
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            return {};
+        }
+    });
+    ipcMain.handle('SaveNewPrograma', async (event, programa) => {
+        try {
+            return await programaRepo.SaveNew(programa);
+        } catch (error) {
+            console.log("Error en ipcMain  SaveNew por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('SavePrograma', async (event, idViejo, programa) => {
+        try {
+            return await programaRepo.Save(idViejo, programa);
+        } catch (error) {
+            console.log("Error en ipcMain  SavePrograma por:   " + error);
+            return 0;
+        }
+    });
+    ipcMain.handle('RemovePrograma', async (event, idArray) => {
+        try {
+            return await programaRepo.Remove(idArray);
+        } catch (error) {
+            console.log("Error en ipcMain  RemovePrograma por:   " + error);
+            return 0;
         }
     });
 

@@ -14,37 +14,59 @@ class JornadaRepo {
         });
     }
 
-    // GetById(id) {
-    //     let jornadaAux = null;
-    //     jornadas.forEach((jornada) => {
-    //         if (jornada.id === id) jornadaAux = jornada;
-    //     });
-    //     return jornadaAux;
-    // }
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM jornadas WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
+    }
 
-    // SaveNew(jornada) {
-    //     jornadas.push(jornada);
-    // }
+    async SaveNew(jornada) {
+        const {tipo, franjaDisponibilidad} = jornada;
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES (?, ?)";
 
-    // Save(idViejo, jornada) {
-    //     //actualizar
-    //     let jornadaIndex = jornadas.findIndex(e => e.id === idViejo);
-    //     jornadas[jornadaIndex] = jornada;
-    // }
+            this.db.run(query, [tipo, franjaDisponibilidad], function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                }
+            });
+        });
+    }
 
-    // //Se trabaja con array de ids a eliminar.
-    // Remove(idArray) {
-    //      //Se recogen los index para hacer splice a la lista
-    //      const arrayIndex = [];
-    //      jornadas.forEach((jornada, index) => {
-    //          if (idArray.includes(jornada.id)) arrayIndex.push(index);
-    //      });
-    //      console.log(arrayIndex);
-    //      arrayIndex.forEach((indexJornada, index) => {
-    //          //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-    //          indexJornada = indexJornada - index;
-    //          jornadas.splice(indexJornada, 1);
-    //      });
-    // }
+    async Save(idViejo, jornada) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE jornadas SET tipo = ?, franjaDisponibilidad = ? WHERE id = ?";
+            const { tipo, franjaDisponibilidad } = jornada; // Desestructuración del objeto torre
+
+            this.db.run(query, [tipo, franjaDisponibilidad, idViejo], function (error) {
+                if (error) reject(error);
+                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+            });
+        });
+    }
+
+    //Se trabaja con array de ids a eliminar.
+    async Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM jornadas WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
+    }
 }
 module.exports = JornadaRepo;

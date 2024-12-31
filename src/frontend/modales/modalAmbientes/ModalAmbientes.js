@@ -29,7 +29,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const [nombre, setNombre] = useState(nombreInicial);
     const capacidadInicial = objConsulta.capacidad && objConsulta.capacidad;
     const [capacidad, setCapacidad] = useState(capacidadInicial);
-    const franjaInicial = objConsulta.franjaDisponibilidad && objConsulta.franjaDisponibilidad;
+    const franjaInicial = objConsulta.franjaDisponibilidad && 
+        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim()));
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [ambiente, setAmbiente] = useState({});
 

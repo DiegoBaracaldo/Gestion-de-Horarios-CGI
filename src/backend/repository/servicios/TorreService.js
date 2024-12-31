@@ -6,7 +6,7 @@ class TorreServicio {
     }
 
     async CargarLista() {
-        console.log("cargando lista...");
+        console.log("cargando lista de torres...");
         try {
           return await window.electron.GetAllTorres();
         } catch (error) {
@@ -15,25 +15,45 @@ class TorreServicio {
         }
     }
 
-    // GuardarTorre(torre){
-    //     const repo = new TorreRepo();
-    //     repo.SaveNew(torre);
-    // }
+    async GuardarTorre(nombreTorre){
+        console.log("guardando torre...");
+        try {
+          return await window.electron.SaveNewTorre(nombreTorre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
+    }
 
-    // CargarTorre(idTorre){
-    //     const repo = new TorreRepo();
-    //     return repo.GetById(idTorre);
-    // }
+    async CargarTorre(idTorre){
+        console.log("Cargando torre...");
+        try {
+          return await window.electron.GetTorreByID(idTorre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return {};
+        }
+    }
 
-    // ActualizarTorre (idViejo, torre){
-    //     const repo = new TorreRepo();
-    //     repo.Save(idViejo, torre);
-    // }
-    
-    // EliminarTorre(listaIDs){
-    //     const repo = new TorreRepo();
-    //     repo.Remove(listaIDs);
-    // }
+    async ActualizarTorre (idViejo, torre){
+        console.log("Actualizando torre...");
+        try {
+          return await window.electron.SaveTorre(idViejo, torre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
+    }
+
+    async EliminarTorre(listaIDs){
+        console.log("Eliminando torre...");
+        try {
+          return await window.electron.RemoveTorre(listaIDs);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
+    }
 }
 
 

@@ -7,6 +7,9 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     esEdicion
 }) => {
 
+    useEffect(() => {
+        console.log(franjasOcupadasProp);
+    }, [franjasOcupadasProp]);
 
     const [matrizCeldasFranja, setMatrizCeldasFranja] = useState(ValorInicialMatriz());
     const [classCeldaHora, setClassCeldaHora] = useState('celdaHora');

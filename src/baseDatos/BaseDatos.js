@@ -22,8 +22,13 @@ class ConexionBD {
                     console.error("Error al verificar tablas!", err);
                     reject(err);
                 } else {
-                    if(fila) resolve(true);
-                    else resolve(false);
+                    if (fila) {
+                        resolve(true);
+                    }
+                    else {
+                        this.CrearBaseDatos();
+                        resolve(false);
+                    }
                 }
             });
         });

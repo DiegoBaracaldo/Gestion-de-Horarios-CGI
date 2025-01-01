@@ -1,4 +1,3 @@
-import InstructorRepo from "../repositorios/InstructorRepo"
 
 class InstructorServicio {
 
@@ -6,30 +5,64 @@ class InstructorServicio {
 
     }
 
-    CargarLista() {
-        const repo = new InstructorRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneInstructor();
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        return 0;
+      }
     }
 
-    GuardarInstructor(instructor){
-        const repo = new InstructorRepo();
-        repo.SaveNew(instructor);
+    async CargarLista() {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllInstructores();
+        } catch (error) {
+          console.log("error en servicio instructor por: ", error);
+          return [];
+        }
     }
 
-    CargarInstructor(idIstructor){
-        const repo = new InstructorRepo();
-        return repo.GetById(idIstructor);
+    async GuardarInstructor(instructor){
+      console.log("guardando instructor...");
+      try {
+        return await window.electron.SaveNewInstructor(instructor);
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        return 0;
+      }
     }
 
-    ActualizarInstructor(idViejo, instructor){
-        const repo = new InstructorRepo();
-        repo.Save(idViejo, instructor);
+    async CargarInstructor(id){
+      console.log("Cargando instructor...");
+      try {
+        return await window.electron.GetInstructorByID(id);
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        return {};
+      }
     }
 
-    ElimarInstructores(listaIDs){
-        const repo = new InstructorRepo();
-        repo.Remove(listaIDs);
+    async ActualizarInstructor(idViejo, instructor){
+      console.log("Actualizando instructor...");
+      try {
+        return await window.electron.SaveInstructor(idViejo, instructor);
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        return 0;
+      }
+    }
+
+    async EliminarInstructor(listaIDs){
+      console.log("Eliminando instructor...");
+      try {
+        return await window.electron.RemoveInstructor(listaIDs);
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        return 0;
+      }
     }
 }
 

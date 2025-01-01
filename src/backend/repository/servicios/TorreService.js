@@ -1,4 +1,3 @@
-import TorreRepo from "../repositorios/TorreRepo"
 
 class TorreServicio {
 
@@ -6,30 +5,64 @@ class TorreServicio {
 
     }
 
-    CargarLista() {
-        const repo = new TorreRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneTorre();
+      } catch (error) {
+        console.log("error en servicio torre por: ", error);
+        return 0;
+      }
     }
 
-    GuardarTorre(torre){
-        const repo = new TorreRepo();
-        repo.SaveNew(torre);
+    async CargarLista() {
+        console.log("cargando lista de torres...");
+        try {
+          return await window.electron.GetAllTorres();
+        } catch (error) {
+          console.log("error en crud torres por: ", error);
+          return [];
+        }
     }
 
-    CargarTorre(idTorre){
-        const repo = new TorreRepo();
-        return repo.GetById(idTorre);
+    async GuardarTorre(nombreTorre){
+        console.log("guardando torre...");
+        try {
+          return await window.electron.SaveNewTorre(nombreTorre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
     }
 
-    ActualizarTorre (idViejo, torre){
-        const repo = new TorreRepo();
-        repo.Save(idViejo, torre);
+    async CargarTorre(idTorre){
+        console.log("Cargando torre...");
+        try {
+          return await window.electron.GetTorreByID(idTorre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return {};
+        }
     }
-    
-    EliminarTorre(listaIDs){
-        const repo = new TorreRepo();
-        repo.Remove(listaIDs);
+
+    async ActualizarTorre (idViejo, torre){
+        console.log("Actualizando torre...");
+        try {
+          return await window.electron.SaveTorre(idViejo, torre);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
+    }
+
+    async EliminarTorre(listaIDs){
+        console.log("Eliminando torre...");
+        try {
+          return await window.electron.RemoveTorre(listaIDs);
+        } catch (error) {
+          console.log("error en servicio torres por: ", error);
+          return 0;
+        }
     }
 }
 

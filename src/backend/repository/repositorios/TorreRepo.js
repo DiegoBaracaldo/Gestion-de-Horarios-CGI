@@ -1,46 +1,82 @@
-import { torres } from "../../mocks/MockTorresRepo";
 
-class TorreRepo{
+class TorreRepo {
 
-    constructor(){
-
+    constructor(db) {
+        this.db = db;
     }
 
-    GetAll(){
-        return torres;
-    }
-
-    GetById(id){
-        let torreAux = null;
-        torres.forEach((torre) => {
-            if(torre.id === id) torreAux = torre;
+    async AtLeastOne(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM torres LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if(err) reject(err);
+                else resolve(fila.hasRecords);
+            });
         });
-        return torreAux;
     }
 
-    SaveNew(torre){
-        torres.push(torre);
+    async GetAll() {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM torres";
+            this.db.all(query, [], (error, filas) => {
+                if (error) reject(error);
+                else resolve(filas);
+            });
+        });
     }
 
-    Save(idViejo, torre){
-            //actualizar
-            let torreIndex = torres.findIndex(e => e.id === idViejo);
-            torres[torreIndex] = torre;
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM torres WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
+    }
+
+    async SaveNew(nombre) {
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO torres (nombre) VALUES (?)";
+
+            this.db.run(query, [nombre], function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                }
+            });
+        });
+    }
+
+    async Save(idViejo, torre) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE torres SET nombre = ? WHERE id = ?";
+            const { nombre } = torre; // Desestructuración del objeto torre
+
+            this.db.run(query, [nombre, idViejo], function (error) {
+                if (error) reject(error);
+                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+            });
+        });
     }
 
     //Se trabaja con array de ids a eliminar.
-    Remove(idArray){
-         //Se recogen los index para hacer splice a la lista
-         const arrayIndex = [];
-         torres.forEach((torre, index) => {
-             if (idArray.includes(torre.id)) arrayIndex.push(index);
-         });
-         console.log(arrayIndex);
-         arrayIndex.forEach((indexTorre, index) => {
-             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-             indexTorre = indexTorre - index;
-             torres.splice(indexTorre, 1);
-         });
+    async Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM torres WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
     }
 }
-export default TorreRepo;
+module.exports = TorreRepo;

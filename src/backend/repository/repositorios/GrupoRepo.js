@@ -1,46 +1,102 @@
-import { grupos } from "../../mocks/MockGruposRepo";
 
 class GrupoRepo {
 
-    constructor() {
-
+    constructor(db) {
+        this.db = db;
     }
 
-    GetAll() {
-        return grupos;
-    }
+    async GetAll() {
+        return new Promise((resolve, reject) => {
+            const query =
+                "SELECT " +
+                "grupos.*, " +
+                "jornadas.tipo AS jornada, " +
+                "jornadas.franjaDisponibilidad AS franjaJornada, " +
+                "instructores.nombre AS nombreResponsable, " +
+                "programas.nombre AS nombrePrograma " +
+                "FROM " +
+                "grupos " +
+                "JOIN " +
+                "jornadas ON grupos.idJornada = jornadas.id " +
+                "JOIN " +
+                "instructores ON grupos.idResponsable = instructores.id " +
+                "JOIN " +
+                "programas ON grupos.idPrograma = programas.id ";
 
-    GetById(id) {
-        let grupoAux = null;
-        grupos.forEach((grupo) => {
-            if (grupo.id === id) grupoAux = grupo;
+            this.db.all(query, [], (err, filas) => {
+                if (err) reject(err);
+                else resolve(filas);
+            });
         });
-        return grupoAux;
     }
 
-    SaveNew(grupo) {
-        grupos.push(grupo);
+    async GetById(id) {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT * FROM grupos WHERE id = ?";
+            this.db.get(query, [id], (error, fila) => {
+                if (error) reject(error);
+                else resolve(fila);
+            });
+        });
     }
 
-    Save(idViejo, grupo) {
-        //actualizar
-        let grupoIndex = grupos.findIndex(e => e.id === idViejo);
-        grupos[grupoIndex] = grupo;
+    async SaveNew(grupo) {
+        const { id, idPrograma, idResponsable, codigoGrupo, idJornada,
+            cantidadAprendices, esCadenaFormacion } = grupo;
+        return new Promise((resolve, reject) => {
+            const query = "INSERT INTO grupos " +
+                "(id, idPrograma, idResponsable, codigoGrupo, idJornada, cantidadAprendices, esCadenaFormacion) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            this.db.run(query,
+                [id, idPrograma, idResponsable, codigoGrupo, idJornada,
+                    cantidadAprendices, esCadenaFormacion],
+                function (error) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                    }
+                });
+        });
+    }
+
+    async Save(idViejo, grupo) {
+        return new Promise((resolve, reject) => {
+            const query = "UPDATE grupos SET " +
+                "id = ?, idPrograma = ?, " +
+                "idResponsable = ?, codigoGrupo = ?, " +
+                "idJornada = ?, cantidadAprendices = ?, esCadenaFormacion = ?" +
+                "WHERE id = ?";
+            const { id, idPrograma, idResponsable, codigoGrupo, idJornada,
+                cantidadAprendices, esCadenaFormacion } = grupo;
+
+            this.db.run(query,
+                [id, idPrograma, idResponsable, codigoGrupo, idJornada,
+                    cantidadAprendices, esCadenaFormacion, idViejo],
+                function (error) {
+                    if (error) reject(error);
+                    else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                });
+        });
     }
 
     //Se trabaja con array de ids a eliminar.
-    Remove(idArray) {
-         //Se recogen los index para hacer splice a la lista
-         const arrayIndex = [];
-         grupos.forEach((grupo, index) => {
-             if (idArray.includes(grupo.id)) arrayIndex.push(index);
-         });
-         console.log(arrayIndex);
-         arrayIndex.forEach((indexGrupo, index) => {
-             //Variable necesaria ya que en cada splice la lista se actualiza y el index ya no coincide
-             indexGrupo = indexGrupo - index;
-             grupos.splice(indexGrupo, 1);
-         });
+    async Remove(idArray) {
+        return new Promise((resolve, reject) => {
+
+            // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
+            const placeholders = idArray.map(() => '?').join(', ');
+            const query = "DELETE FROM grupos WHERE id IN (" + placeholders + ")";
+
+            this.db.run(query, idArray, function (error) {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                }
+            });
+        });
     }
 }
-export default GrupoRepo;
+module.exports = GrupoRepo;

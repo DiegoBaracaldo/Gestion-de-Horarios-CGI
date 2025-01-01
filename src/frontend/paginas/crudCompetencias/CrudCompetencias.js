@@ -20,7 +20,7 @@ const CrudCompetencias = () => {
     const [programa, setPrograma] = useState({});
     useEffect(() => {
         if(Object.keys(programa).length > 0){
-            setListaObjetos([...CargarLista()]);
+            CargarLista();
             setEsconderBusqueda(false);
             setNombrePrograma(programa.nombre);
         }else{
@@ -28,28 +28,41 @@ const CrudCompetencias = () => {
         }
     }, [programa]);
 
-    const CargarLista = () => {
-        return new CompetenciaServicio().CargarLista(programa.id);
+    const CargarLista = async () => {
+        console.log("cargando lista...");
+        try {
+          setListaObjetos(await new CompetenciaServicio().CargarLista(programa.id));
+        } catch (error) {
+          console.log("error en crud competencias por: ", error);
+          setListaObjetos([]);
+        }
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-    const [listaObjetos, setListaObjetos] = useState(CargarLista);
-    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaObjetos, setListaObjetos] = useState([]);
+    const [listaFiltrada, setListaFiltrada] = useState([]);
     const [listaAdaptada, setListaAdaptada] = useState([]);
     const [esconderBusqueda, setEsconderBusqueda] = useState(true);
     const [btnAgregarOff, setBtnAgregarOff] = useState(true);
+
+    useEffect(() => {
+        CargarLista();
+    }, []);
 
     useEffect(() => {
         setListaFiltrada(listaObjetos);
     }, [listaObjetos]);
 
 
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
+
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
         listaFiltrada &&
-            listaFiltrada.map((element) => {
+            listaFiltrada.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
                 objetoAux.descripcion = element.descripcion;
@@ -77,7 +90,7 @@ const CrudCompetencias = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        setTimeout(Filtrar, "50");
+        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     /////////////////////////////////////////////////////
 
@@ -113,24 +126,26 @@ const CrudCompetencias = () => {
         setAbrirRegistro(false);
         setAbrirConsulta(false);
         setCompetenciaConsultada({});
-        setListaFiltrada(CargarLista());
+        CargarLista();
     }
 
-    function EliminarCompetencias(){
-        const competenciaServicio = new CompetenciaServicio();
-        const listaAuxID = listaSelecciones.map(comp => comp.id);
-        competenciaServicio.EliminarCompetencia(listaAuxID);
+    async function EliminarCompetencias(){
+        const confirmar = window.confirm("¿Confirma que desea eliminar los competencias seleccionados?");
+        if (confirmar) {
+          const servicioCompetencia = new CompetenciaServicio();
+          const auxListaID = listaSelecciones.map(competencia => parseInt(competencia.id.toString()));
+          const respuesta = await servicioCompetencia.EliminarCompetencia(auxListaID);
+          alert(respuesta !== 0 ? ("Competencias eliminadas satisfactoriamente!: ")
+            : ("Error al eliminar las competencias!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     const OnClicDestructivo = () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar las competencias seleccionadas?");
-        if(confirmar){
-          EliminarCompetencias();
-          alert("Competencias eliminadas satisfactoriamente!");
-          setListaFiltrada([...CargarLista()]);
-        }else{
-          return null;
-        }
+        EliminarCompetencias();
+        setVaciarListaSelecc(true);
     }
 
     return (
@@ -142,7 +157,7 @@ const CrudCompetencias = () => {
                 seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} onClicPositivo={AbrirRegistro}
                 clicFila={AbrirConsulta} datosJson={esconderBusqueda ? null : listaAdaptada}
                 subtitulos={subs} 
-                onCLicDestructivo={OnClicDestructivo}/>
+                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

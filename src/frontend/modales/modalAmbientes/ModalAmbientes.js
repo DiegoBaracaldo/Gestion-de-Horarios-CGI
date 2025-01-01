@@ -12,9 +12,7 @@ import TorreServicio from '../../../backend/repository/servicios/TorreService';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
-    const CargarTorreInicial = () => {
-        return new TorreServicio().CargarTorre(objConsulta.idTorre) || {};
-    }
+
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
@@ -22,36 +20,49 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     //Manejar modal de horario
     const [isOpenFranjaHoraria, setIsOpenFranjaHoraria] = useState(false);
     const [seleccTorre, setSeleccTorre] = useState(false);
-    const torreInicial = CargarTorreInicial();
+    let torreInicial = {};
     const [torre, setTorre] = useState(torreInicial);
 
-    const nombreInicial = objConsulta.nombre && objConsulta.nombre;
+    useEffect(() => {
+        if(abrirConsulta) CargarTorreInicial();
+    }, []);
+
+    const CargarTorreInicial = async () => {
+        try {
+            torreInicial = await new TorreServicio().CargarTorre(objConsulta.idTorre);
+            setTorre(torreInicial);
+        } catch (error) {
+            console.log("Error al obtener torre del ambiente por: ", error);
+        }
+    }
+
+    const nombreInicial = objConsulta.nombre || '';
     const [nombre, setNombre] = useState(nombreInicial);
-    const capacidadInicial = objConsulta.capacidad && objConsulta.capacidad;
+    const capacidadInicial = objConsulta.capacidad || '';
     const [capacidad, setCapacidad] = useState(capacidadInicial);
-    const franjaInicial = objConsulta.franjaDisponibilidad && objConsulta.franjaDisponibilidad;
+    const franjaInicial = objConsulta.franjaDisponibilidad &&
+        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [ambiente, setAmbiente] = useState({});
 
     //Es el id del objeto que se carga al iniciar el modal en modo consulta para pode editarlo
     //aún si se edita su id.
-    const idViejo = objConsulta && objConsulta.id;
+    const idViejo = objConsulta.id || '';
 
     useEffect(() => {
         if (Object.keys(ambiente).length > 0) {
-            if (!seActivoEdicion) {
-                const ambienteServicio = new AmbienteServicio();
-                ambienteServicio.GuardarAmbiente(ambiente);
-                alert("Ambiente guardado correctamente!");
-                onCloseProp && onCloseProp();
-            } else {
-                const ambienteServicio = new AmbienteServicio();
-                ambienteServicio.ActualizarAmbiente(idViejo, ambiente);
-                alert("Ambiente actualizado correctamente!");
-                onCloseProp && onCloseProp();
-            }
+            Registrar();
         }
     }, [ambiente]);
+
+    async function Registrar() {
+        const ambienteServicio = new AmbienteServicio();
+        const respuesta = seActivoEdicion ?
+            await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
+            await ambienteServicio.GuardarAmbiente(ambiente);
+        alert(respuesta !== 0 ? ("Operación EXITOSA!") : ("Operación FALLIDA!"));
+        onCloseProp && onCloseProp();
+    }
 
     const [torreNombre, setTorreNombre] = useState('Seleccionar torre...');
 
@@ -81,15 +92,12 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }
 
     const FormarObjAmbiente = () => {
-        const ambienteAux = new Ambiente(
-            Math.floor(Math.random() * 900) + 100,
-            FormatearNombre(nombre),
-            torre.id,
-            capacidad,
-            franjaDisponibilidad,
-            "2024-12-07T11:10:00",
-            torre.nombre
-        );
+        const ambienteAux = {
+            nombre: FormatearNombre(nombre),
+            idTorre: torre.id,
+            capacidad: Number(capacidad),
+            franjaDisponibilidad: franjaDisponibilidad.toString()
+        };
         setAmbiente(ambienteAux);
     }
 
@@ -98,9 +106,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
             ...objConsulta,
             nombre: FormatearNombre(nombre),
             idTorre: torre.id,
-            capacidad: capacidad,
-            franjaDisponibilidad: franjaDisponibilidad,
-            nombreTorre: torre.nombre
+            capacidad: Number(capacidad),
+            franjaDisponibilidad: franjaDisponibilidad.toString()
         });
     }
 
@@ -124,7 +131,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         return bandera;
     }
 
-    function ReiniciarValores(){
+    function ReiniciarValores() {
         setNombre(nombreInicial);
         setTorre(torreInicial);
         setCapacidad(capacidadInicial);
@@ -132,11 +139,11 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }
 
     useEffect(() => {
-        if(!seActivoEdicion)ReiniciarValores();
+        if (!seActivoEdicion) ReiniciarValores();
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}

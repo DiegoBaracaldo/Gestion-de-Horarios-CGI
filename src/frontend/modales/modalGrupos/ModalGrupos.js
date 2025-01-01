@@ -18,35 +18,59 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    const CargarResponsableInicial = () => {
-        return new InstructorServicio().CargarInstructor(objConsulta.idResponsable) || {};
-    }
-
-    const CargarProgramaInicial = () => {
-        return new ProgramaServicio().CargarPrograma(objConsulta.idPrograma) || {};
-    }
-
-    const CargarJonadaInicial = () => {
-        return new JornadaServicio().CargarJornada(objConsulta.idJornada) || {};
-    }
-
     const [seleccResponsable, setSeleccResponsable] = useState(false);
-    const responsableInicial = CargarResponsableInicial();
+    let responsableInicial = {};
     const [responsable, setResponsable] = useState(responsableInicial);
     const [seleccPrograma, setSeleccPrograma] = useState(false);
-    const programaInicial = CargarProgramaInicial()
+    let programaInicial = {};
     const [programa, setPrograma] = useState(programaInicial);
     const [seleccJornada, setSeleccJornada] = useState(false);
-    const jornadaInicial = CargarJonadaInicial();
+    let jornadaInicial = {};
     const [jornada, setJornada] = useState(jornadaInicial);
-    
-    const fichaInicial = objConsulta.id &&  objConsulta.id;
+
+    const CargarResponsableInicial = async () => {
+        try {
+            responsableInicial = await new InstructorServicio().CargarInstructor(objConsulta.idResponsable);
+            setResponsable(responsableInicial);
+        } catch (error) {
+            console.log("Error al obtener el responsable del grupo por: " + error);
+        }
+    }
+
+    const CargarProgramaInicial = async () => {
+        try {
+            programaInicial = await new ProgramaServicio().CargarPrograma(objConsulta.idPrograma);
+            setPrograma(programaInicial);
+        } catch (error) {
+            console.log("Error al obtener el programa del grupo por: " + error);
+        }
+    }
+
+    const CargarJonadaInicial = async () => {
+        try {
+            jornadaInicial = await new JornadaServicio().CargarJornada(objConsulta.idJornada);
+            setJornada(jornadaInicial);
+        } catch (error) {
+            console.log("Error al obtener la jornada del grupo por: " + error);
+        }
+    }
+
+    useEffect(() => {
+        if(objConsulta && Object.keys(objConsulta).length > 0){
+            //Si es consulta al inicio y el objeto está lleno
+            CargarResponsableInicial();
+            CargarProgramaInicial();
+            CargarJonadaInicial();
+        }
+    }, []);
+
+    const fichaInicial = objConsulta.id || '';
     const [ficha, setFicha] = useState(fichaInicial);
-    const codigoInicial = objConsulta.codigoGrupo &&  objConsulta.codigoGrupo;
+    const codigoInicial = objConsulta.codigoGrupo || '';
     const [codigoGrupo, setCodigoGrupo] = useState(codigoInicial);
-    const aprendicesInicial = objConsulta.cantidadAprendices &&  objConsulta.cantidadAprendices;
+    const aprendicesInicial = objConsulta.cantidadAprendices || '';
     const [cantidadAprendices, setCantidadAprendices] = useState(aprendicesInicial);
-    const esCadenaInicial = objConsulta.esCadenaFormacion &&  objConsulta.esCadenaFormacion;
+    const esCadenaInicial = (objConsulta.esCadenaFormacion === 1 ? true : false) || '';
     const [esCadena, setEsCadena] = useState(esCadenaInicial);
     const [grupo, setGrupo] = useState({});
 
@@ -55,37 +79,40 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     const [responsableNombre, setResponsableNombre] = useState("Seleccionar Responsable...");
 
     useEffect(() => {
-        if(Object.keys(grupo).length > 0){
-            const servicioGrupo = new GrupoServicio();
-            if(abrirConsulta){
-                servicioGrupo.ActualizarGrupo(fichaInicial, grupo);
-                alert("Grupo actualizado correctamente!");
-            }else{
-                servicioGrupo.GuardarGrupo(grupo);
-                alert("Grupo guardado correctamente!");
-            }
-            onCloseProp && onCloseProp();
+        if (Object.keys(grupo).length > 0) {
+            Registrar();
         }
     }, [grupo]);
+
+    async function Registrar() {
+        const servicioGrupo = new GrupoServicio();
+        const respuesta = abrirConsulta ?
+            await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
+            : await servicioGrupo.GuardarGrupo(grupo);
+        alert(respuesta !== 0 ? ("Operación EXITOSA!") :  ("Operación FALLIDA!") );
+        onCloseProp && onCloseProp();
+    }
 
     useEffect(() => {
         Object.keys(programa).length > 0 && setProgramaNombre(programa.nombre);
     }, [programa]);
+
     useEffect(() => {
         Object.keys(jornada).length > 0 && setJornadaNombre(jornada.tipo);
     }, [jornada]);
+
     useEffect(() => {
         Object.keys(responsable).length > 0 && setResponsableNombre(responsable.nombre);
     }, [responsable]);
 
     const ManjearChecksRadio = (e) => {
         const valor = e.target.value;
-        if(valor === 'si') setEsCadena(true);
-        else if(valor === 'no') setEsCadena(false);
+        if (valor === 'si') setEsCadena(true);
+        else if (valor === 'no') setEsCadena(false);
     }
 
     const ManejarCantidadAprendices = (texto) => {
-        if(texto.length > 2) setCantidadAprendices(texto.substring(0,2));
+        if (texto.length > 2) setCantidadAprendices(texto.substring(0, 2));
         else setCantidadAprendices(texto);
     }
 
@@ -94,45 +121,41 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         const idPrograma = programa.id;
         const idResponsable = responsable.id;
         const idJornada = jornada.id;
-            if(!idPrograma || !idPrograma || !idPrograma.toString().trim() || !SoloNumeros(idPrograma)){
-                alert("Selección incorrecta de programa académico!");
-                setPrograma({});
-            }
-            else if(!ficha || !ficha.toString().trim() || !HastaCincuenta(ficha) || !SoloNumeros(ficha)){
-                alert("Número de ficha incorrecto!");
-                setFicha('');
-            }else if(!codigoGrupo || !codigoGrupo.toString().trim() || !HastaCien(codigoGrupo) || !AlfaNumericaSinEspacio(codigoGrupo)){
-                alert("Código de grupo incorrecto");
-                setCodigoGrupo('');
-            }else if(!idResponsable || !idResponsable.toString().trim() || !SoloNumeros(idResponsable)){
-                alert("Selección incorrecta de instructor responsable!");
-                setResponsable({});
-            }else if(!idJornada || !idJornada.toString().trim() || !SoloNumeros(idJornada)){
-                alert("Selección de jornada incorrecta!");
-                setJornada('');
-            }else if(!cantidadAprendices.toString().trim() || !HastaDos(cantidadAprendices) || !SoloNumeros(cantidadAprendices)){
-                alert("Cantidad de aprendices incorrecta!");
-                setCantidadAprendices('');
-            }else{
-                bandera = true;
-            }
+        if (!idPrograma || !idPrograma || !idPrograma.toString().trim() || !SoloNumeros(idPrograma)) {
+            alert("Selección incorrecta de programa académico!");
+            setPrograma({});
+        }
+        else if (!ficha || !ficha.toString().trim() || !HastaCincuenta(ficha) || !SoloNumeros(ficha)) {
+            alert("Número de ficha incorrecto!");
+            setFicha('');
+        } else if (!codigoGrupo || !codigoGrupo.toString().trim() || !HastaCien(codigoGrupo) || !AlfaNumericaSinEspacio(codigoGrupo)) {
+            alert("Código de grupo incorrecto");
+            setCodigoGrupo('');
+        } else if (!idResponsable || !idResponsable.toString().trim() || !SoloNumeros(idResponsable)) {
+            alert("Selección incorrecta de instructor responsable!");
+            setResponsable({});
+        } else if (!idJornada || !idJornada.toString().trim() || !SoloNumeros(idJornada)) {
+            alert("Selección de jornada incorrecta!");
+            setJornada('');
+        } else if (!cantidadAprendices.toString().trim() || !HastaDos(cantidadAprendices) || !SoloNumeros(cantidadAprendices)) {
+            alert("Cantidad de aprendices incorrecta!");
+            setCantidadAprendices('');
+        } else {
+            bandera = true;
+        }
         return bandera;
     }
 
     const FormarObjGrupo = () => {
-        const objAux = new Grupo(
-            ficha,
-            programa.id,
-            responsable.id,
-            codigoGrupo.toString().trim(),
-            jornada.id,
-            cantidadAprendices,
-            esCadena,
-            "2024-12-07T14:55:00",
-            programa.nombre.toString().trim(),
-            jornada.tipo.toString().trim(),
-            responsable.nombre.toString().trim()
-        );
+        const objAux = {
+            id: ficha,
+            idPrograma: programa.id,
+            idResponsable: responsable.id,
+            codigoGrupo: codigoGrupo,
+            idJornada: jornada.id,
+            cantidadAprendices: Number(cantidadAprendices),
+            esCadenaFormacion: esCadena
+        };
         setGrupo(objAux);
     }
 
@@ -146,19 +169,19 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             codigoGrupo: codigoGrupo,
             idJornada: jornada.id,
             jornada: jornada.tipo,
-            cantidadAprendices: cantidadAprendices,
+            cantidadAprendices: Number(cantidadAprendices),
             esCadenaFormacion: esCadena
         });
     }
 
     const RegistrarGrupo = () => {
-        if(ValidarObjGrupo()){
-            if(abrirConsulta) ObjGrupoActualizado();
+        if (ValidarObjGrupo()) {
+            if (abrirConsulta) ObjGrupoActualizado();
             else FormarObjGrupo();
         }
     }
 
-    function ReiniciarValores(){
+    function ReiniciarValores() {
         setPrograma(programaInicial);
         setFicha(fichaInicial);
         setCodigoGrupo(codigoInicial);
@@ -169,11 +192,11 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     }
 
     useEffect(() => {
-        if(!seActivoEdicion)ReiniciarValores();
+        if (!seActivoEdicion) ReiniciarValores();
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}
@@ -187,12 +210,12 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
                 <section>
                     <label>ficha: </label>
                     <input type='number' disabled={inputsOff} value={ficha}
-                    onChange={(e) => setFicha(e.target.value)}/>
+                        onChange={(e) => setFicha(e.target.value)} />
                 </section>
                 <section>
                     <label>código grupo: </label>
                     <input maxLength={100} disabled={inputsOff} value={codigoGrupo}
-                    onChange={(e) => setCodigoGrupo(e.target.value)}/>
+                        onChange={(e) => setCodigoGrupo(e.target.value)} />
                 </section>
                 <section>
                     <label>responsable: </label>
@@ -202,45 +225,45 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
                 <section>
                     <label>jornada: </label>
                     <button disabled={inputsOff} onClick={() => setSeleccJornada(true)}
-                        >{jornadaNombre}</button>
+                    >{jornadaNombre}</button>
                 </section>
                 <section>
                     <label >número de aprendices: </label>
                     <input disabled={inputsOff} type='number'
-                        title='cantidad de estudiantes en el grupo (número de dos dígitos)' 
-                        value={cantidadAprendices} onChange={(e) => ManejarCantidadAprendices(e.target.value)}/>
+                        title='cantidad de estudiantes en el grupo (número de dos dígitos)'
+                        value={cantidadAprendices} onChange={(e) => ManejarCantidadAprendices(e.target.value)} />
                 </section>
                 <section>
                     <label >es cadena de formación: </label>
                     <div className='contRadios'>
                         <label>
-                            si<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' 
-                            value="si" checked={esCadena} onChange={ManjearChecksRadio}/>
+                            si<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks'
+                                value="si" checked={esCadena} onChange={ManjearChecksRadio} />
                         </label>
                         <label>
-                            no<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks' 
-                            value="no" checked={!esCadena} onChange={ManjearChecksRadio}/>
+                            no<input disabled={inputsOff} type='radio' name='esCadenaFormacionChecks'
+                                value="no" checked={!esCadena} onChange={ManjearChecksRadio} />
                         </label>
                     </div>
                 </section>
             </div>
             {
-                seleccResponsable ? <CrudInstructores modoSeleccion={true} 
-                onClose={() => setSeleccResponsable(false)}
-                responsableSeleccionado={(r) => setResponsable(r)}/> 
-                : null
+                seleccResponsable ? <CrudInstructores modoSeleccion={true}
+                    onClose={() => setSeleccResponsable(false)}
+                    responsableSeleccionado={(r) => setResponsable(r)} />
+                    : null
             }
             {
                 seleccPrograma ? <CrudPrograma modoSeleccion={true}
-                onClose={() => setSeleccPrograma(false)}
-                programaSeleccionado={(p) => setPrograma(p)}/>
-                :null
+                    onClose={() => setSeleccPrograma(false)}
+                    programaSeleccionado={(p) => setPrograma(p)} />
+                    : null
             }
             {
                 seleccJornada ? <CrudJornadas modoSeleccion={true}
-                onClose={() => setSeleccJornada(false)}
-                jornadaSeleccionada={(j) => setJornada(j)}/>
-                :null
+                    onClose={() => setSeleccJornada(false)}
+                    jornadaSeleccionada={(j) => setJornada(j)} />
+                    : null
             }
         </ModalGeneral>
     );

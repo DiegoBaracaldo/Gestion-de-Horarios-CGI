@@ -1,4 +1,3 @@
-import JornadaRepo from "../repositorios/JornadaRepo"
 
 class JornadaServicio {
 
@@ -6,30 +5,64 @@ class JornadaServicio {
 
     }
 
-    CargarLista() {
-        const repo = new JornadaRepo();
-        if (repo.GetAll()) return repo.GetAll();
-        else return null;
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneJornada();
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
     }
 
-    GuardarJornada(jornada){
-        const repo = new JornadaRepo();
-        repo.SaveNew(jornada);
+    async CargarLista() {
+        console.log("cargando lista...");
+        try {
+          return await window.electron.GetAllJornadas();
+        } catch (error) {
+          console.log("error en crud jornadas por: ", error);
+          return [];
+        }
     }
 
-    CargarJornada(id){
-        const repo = new JornadaRepo();
-        return repo.GetById(id);
+    async GuardarJornada(jornada){
+      console.log("guardando jornada...");
+      try {
+        return await window.electron.SaveNewJornada(jornada);
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
     }
 
-    ActualizarJornada(idViejo, jornada){
-        const repo = new JornadaRepo();
-        repo.Save(idViejo, jornada);
+    async CargarJornada(id){
+      console.log("Cargando jornada...");
+      try {
+        return await window.electron.GetJornadaByID(id);
+      } catch (error) {
+        console.log("error en servicio jornadas por: ", error);
+        return {};
+      }
     }
 
-    EliminarJornada(listaIDs){
-        const repo = new JornadaRepo();
-        repo.Remove(listaIDs);
+    async ActualizarJornada(idViejo, jornada){
+      console.log("Actualizando jornada...");
+      try {
+        return await window.electron.SaveJornada(idViejo, jornada);
+      } catch (error) {
+        console.log("error en servicio jornadas por: ", error);
+        return 0;
+      }
+    }
+
+    async EliminarJornada(listaIDs){
+      console.log("Eliminando jornada...");
+      try {
+        return await window.electron.RemoveJornada(listaIDs);
+      } catch (error) {
+        console.log("error en servicio jornada por: ", error);
+        return 0;
+      }
     }
 }
 

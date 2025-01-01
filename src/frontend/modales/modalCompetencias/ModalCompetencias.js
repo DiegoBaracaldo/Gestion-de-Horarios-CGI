@@ -12,27 +12,28 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     const [inputsOff, setInputsOff] = useState(false);
     const [seActivoEdicion, setSeActivoEdicion] = useState(false);
 
-    const codigoInicial = objConsulta.id && objConsulta.id;
+    const codigoInicial = objConsulta.id || '';
     const [codigo, setCodigo] = useState(codigoInicial);
-    const descripcionInicial = objConsulta.descripcion && objConsulta.descripcion;
+    const descripcionInicial = objConsulta.descripcion || '';
     const [descripcion, setDescripcion] = useState(descripcionInicial);
-    const horasInicial = objConsulta.horasRequeridas && objConsulta.horasRequeridas;
+    const horasInicial = objConsulta.horasRequeridas || '';
     const [horas, setHoras] = useState(horasInicial);
     const [competencia, setCompetencia] = useState({});
 
     useEffect(() => {
         if(Object.keys(competencia).length > 0){
-            const competenciaService = new CompetenciaServicio();
-            if(abrirConsulta){
-                competenciaService.ActualizarCompetencia(codigoInicial, competencia);
-                alert("Competencia actualizada correctamente!");
-            }else{
-                competenciaService.GuardarCompetencia(competencia);
-                alert("Competencia guardada correctamente!");
-            }
-            onCloseProp && onCloseProp();
+            Registrar();
         }
-    });
+    }, [competencia]);
+
+    async function Registrar(){
+        const competenciaService = new CompetenciaServicio();
+        const respuesta = abrirConsulta ?
+        await competenciaService.ActualizarCompetencia(codigoInicial, competencia) :
+        await competenciaService.GuardarCompetencia(competencia);
+        alert(respuesta !== 0 ? ("Operación EXITOSA!") : ("Operación FALLIDA!"));
+        onCloseProp && onCloseProp();
+    }
 
     const ValidarObjCompetencia = () => {
         let bandera = false;
@@ -54,14 +55,12 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     }
 
     const FormarObjCompetencia = () => {
-        const competencia = new Competencia(
-            codigo,
-            programa.id,
-            FormatearDescripcion(descripcion),
-            horas,
-            "2024-12-07T14:55:00",
-            programa.nombre
-        );
+        const competencia = {
+            id: codigo,
+            idPrograma: programa.id,
+            descripcion: FormatearDescripcion(descripcion),
+            horasRequeridas: Number(horas)
+        };
         setCompetencia(competencia);
     }
 
@@ -70,9 +69,8 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
             ...objConsulta,
             id: codigo,
             idPrograma: programa.id,
-            nombrePrograma: programa.nombre,
             descripcion: FormatearDescripcion(descripcion),
-            horasRequeridas: horas
+            horasRequeridas: Number(horas)
         });
     }
 
@@ -99,7 +97,7 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
     }, [seActivoEdicion]);
 
     return (
-        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp && (() => onCloseProp())}
+        <ModalGeneral isOpenRegistro={abrirRegistro} onClose={onCloseProp}
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}

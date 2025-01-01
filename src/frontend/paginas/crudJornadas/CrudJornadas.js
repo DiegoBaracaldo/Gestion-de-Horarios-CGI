@@ -15,19 +15,34 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
   const [jornadaConsultada, setJornadaConsultada] = useState({});
 
-  const CargarLista = () => {
-    return new JornadaServicio().CargarLista();
+
+  const [listaObjetos, setListaObjetos] = useState([]);
+  const [listaFiltrada, setListaFiltrada] = useState([]);
+  const [listaAdaptada, setListaAdaptada] = useState([]);
+
+  const CargarLista = async () => {
+    console.log("cargando lista...");
+    try {
+      setListaObjetos(await new JornadaServicio().CargarLista());
+    } catch (error) {
+      console.log("error en crud jornadas por: ", error);
+      setListaObjetos([]);
+    }
   }
 
-  const [listaObjetos, setListaObjetos] = useState(CargarLista);
-  const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
-  const [listaAdaptada, setListaAdaptada] = useState([]);
+  useEffect(() => {
+    CargarLista();
+  }, []);
+
+  useEffect(() => {
+    setListaFiltrada(listaObjetos);
+  }, [listaObjetos]);
 
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
     const listaAux = [];
     listaFiltrada &&
-      listaFiltrada.map((element) => {
+      listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
         objAux.tipo = element.tipo;
@@ -42,7 +57,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     setAbrirRegistro(false);
     setAbrirConsulta(false);
     setJornadaConsultada({});
-    setListaFiltrada([...CargarLista()]);
+    CargarLista();
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -57,21 +72,21 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     if (modoSeleccion) {
       onClose && onClose();
     } else {
-      const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
-      if(confirmar){
-        EliminarJornadas();
-        alert("Jornadas eliminadas satisfactoriamente!");
-        setListaFiltrada([...CargarLista()]);
-      }else{
-        return null;
-      }
+      EliminarJornadas();
     }
   }
 
-  function EliminarJornadas(){
-    const servicioJornada = new JornadaServicio();
-    const auxListaID = listaSelecciones.map(jornada => jornada.id);
-    servicioJornada.EliminarJornada(auxListaID);
+  async function EliminarJornadas() {
+    const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
+    if (confirmar) {
+      const servicioJornada = new JornadaServicio();
+      const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));
+      const respuesta = await servicioJornada.EliminarJornada(auxListaID);
+      if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
+      else ResultadoOperacion("Error al eliminar las jornadas!");
+    } else {
+      return null;
+    }
   }
 
   const ManejarClickFila = (e) => {
@@ -101,17 +116,21 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   }
 
   function RegistrarJornada() {
-    if(franjaHoraria.length > 0){
+    if (franjaHoraria.length > 0) {
       setAbrirHorario(false);
-      const objFormado = FormarObjetoTorre(FormatearNombre(textoAgregar));
-      const servicioJornada = new JornadaServicio();
-      servicioJornada.GuardarJornada(objFormado);
-      setListaFiltrada([...CargarLista()]);
-      setReiniciarTexto(true);
-    }else{
+      const objFormado = FormarObjeto(FormatearNombre(textoAgregar));
+      GuardarJornada(objFormado);
+    } else {
       alert("Debes establecer un rango horario para la jornada!");
     }
 
+  }
+
+  async function GuardarJornada(objetoFormado) {
+    const servicioJornada = new JornadaServicio;
+    const respuesta = await servicioJornada.GuardarJornada(objetoFormado);
+    ResultadoOperacion(respuesta !== 0 ? ("Éxito al guardar jornada nueva!")
+      : ("Error al guardar jornada nueva!"));
   }
 
   const CancelarRegistro = () => {
@@ -124,17 +143,19 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     reiniciarTexto && setReiniciarTexto(false);
   }, [reiniciarTexto]);
 
-  const FormarObjetoTorre = (tipo) => {
+  const FormarObjeto = (tipo) => {
     const objAux = {};
-    let numeroRandom = Math.floor(Math.random() * 900) + 100;
-    objAux.id = numeroRandom;
     objAux.tipo = tipo;
-    objAux.franjaDisponibilidad = franjaHoraria;
-    objAux.fechaRegistro = "2024-12-07T11:10:00";
+    objAux.franjaDisponibilidad = franjaHoraria.toString();
     return objAux;
   }
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  function ResultadoOperacion(mensaje) {
+    alert(mensaje);
+    CargarLista();
+    setReiniciarTexto(true);
+  }
 
   return (
     <div id='contCrudJornadas' style={modoSeleccion && { zIndex: 10 }}>
@@ -154,13 +175,13 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
 
       {
         abrirConsulta || abrirRegistro ? <ModalJornadas cerrarModal={() => CerrarModal()}
-          abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} objConsulta={jornadaConsultada}/>
+          abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro} objConsulta={jornadaConsultada} />
           : null
       }
       {
         abrirHorario ? <FranjaHoraria onClickDestructivo={CancelarRegistro}
-        onClickPositivo={RegistrarJornada}
-          franjaProp={(f) => setFranjaHoraria(f)}/>
+          onClickPositivo={RegistrarJornada}
+          franjaProp={(f) => setFranjaHoraria(f)} />
           : null
       }
     </div>

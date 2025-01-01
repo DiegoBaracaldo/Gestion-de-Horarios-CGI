@@ -11,23 +11,40 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
-    const CargarLista = () => {
-        return new InstructorServicio().CargarLista();
+    const CargarLista = async () => {
+        console.log("cargando lista...");
+        try {
+          setListaObjetos(await new InstructorServicio().CargarLista());
+        } catch (error) {
+          console.log("error en crud instructores por: ", error);
+          setListaObjetos([]);
+        }
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
     const [listaVacia, setListaVacia] = useState(true);
-    const [listaObjetos, setListaObjetos] = useState(CargarLista);
-    const [listaFiltrada, setListaFiltrada] = useState(listaObjetos);
+    const [listaObjetos, setListaObjetos] = useState([]);
+    const [listaFiltrada, setListaFiltrada] = useState([]);
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
     const [instructorConsultado, setInstructorConsultado] = useState({});
+
+    //Para vaciar lista de selecciones al eliminar
+    const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
+
+    useEffect(() => {
+        CargarLista();
+    },[]);
+
+    useEffect(() => {
+        setListaFiltrada(listaObjetos);
+    },[listaObjetos]);
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
         listaFiltrada &&
-            listaFiltrada.map((element) => {
+            listaFiltrada.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
@@ -52,7 +69,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        setTimeout(Filtrar, "50");
+        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     /////////////////////////////////////////////////////
 
@@ -76,7 +93,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         setAbrirRegistro(false);
         setAbrirConsulta(false);
         setInstructorConsultado({});
-        setListaFiltrada(CargarLista());
+        CargarLista();
     }
     /////////////////////////////////////////////////////
 
@@ -84,14 +101,8 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         if(modoSeleccion){
             onClose && onClose();
         }else{
-            const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
-            if(confirmar){
-              EliminarInstructores();
-              alert("Instructores eliminadas satisfactoriamente!");
-              setListaFiltrada([...CargarLista()]);
-            }else{
-              return null;
-            }
+            EliminarInstructores();
+            setVaciarListaSelecc(true);
         }
     }
 
@@ -110,10 +121,18 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         setInstructorConsultado(instructor);
     }
 
-    const EliminarInstructores = () => {
-        const instructoresService =  new InstructorServicio();
-        const listaAux = listaSelecciones.map(instr => instr.id);
-        instructoresService.ElimarInstructores(listaAux);
+    const EliminarInstructores = async () => {
+        const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
+        if (confirmar) {
+          const servicioInstructor = new InstructorServicio();
+          const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
+          const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
+          alert(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
+            : ("Error al eliminar los instructores!"));
+          CargarLista();
+        } else {
+          return null;
+        }
     }
 
     return (
@@ -124,7 +143,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
                 clicFila={r => OnClickFila(r)} datosJson={listaAdaptada}
                 subtitulos={subs} modoSeleccion={modoSeleccion}
-                onCLicDestructivo={OnClickDestructivo}/>
+                onCLicDestructivo={OnClickDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

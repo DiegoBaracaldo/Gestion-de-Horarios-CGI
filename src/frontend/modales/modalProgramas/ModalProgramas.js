@@ -9,23 +9,23 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   const [inputsOff, setInputsOff] = useState(false);
 
   /*****Se recogen los datos para el objeto que será registrado*****/
-  const codigoInicial = objConsulta.id && objConsulta.id;
+  const codigoInicial = objConsulta.id || '';
   const [codigo, setCodigo] = useState(codigoInicial);
-  const nombreInicial = objConsulta.nombre && objConsulta.nombre;
+  const nombreInicial = objConsulta.nombre || '';
   const [nombre, setNombre] = useState(nombreInicial);
   //el texto predeterminado debe coincidir con la opción predeterminada en el SELECT
-  const tipoInicial = objConsulta.tipo && objConsulta.tipo;
+  const tipoInicial = objConsulta.tipo || '';
   const [tipo, setTipo] = useState(tipoInicial);
-  const cantidadTrimestresInicial = objConsulta.cantidadTrimestres && objConsulta.cantidadTrimestres;
+  const cantidadTrimestresInicial = objConsulta.cantidadTrimestres || '';
   const [cantidadTrimestres, setCantidadTrimestres] = useState(cantidadTrimestresInicial);
-  const fechaInicioInicial = objConsulta.fechaInicio && objConsulta.fechaInicio
+  const fechaInicioInicial = objConsulta.fechaInicio || '';
   const [fechaInicio, setFechaInicio] = useState(fechaInicioInicial);
-  const fechaFinInicial = objConsulta.fechaFin && objConsulta.fechaFin;
+  const fechaFinInicial = objConsulta.fechaFin || '';
   const [fechaFin, setFechaFin] = useState(fechaFinInicial);
   const [programa, setPrograma] = useState({});
 
 
-  const idViejo = objConsulta && objConsulta.id;
+  const idViejo = objConsulta.id || '';
 
   function ManejarTopeHoras(texto) {
     if (texto.length > 2) setCantidadTrimestres(texto.substring(0, 2));
@@ -35,18 +35,17 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   //Si el objeto fue formado correctamente para el registro
   useEffect(() => {
     if (Object.keys(programa).length > 0) {
-      const servicioPrograma = new ProgramaServicio();
-      if (abrirConsulta) {
-        servicioPrograma.ActualizarPrograma(idViejo, programa);
-        alert("Programa actualizado correctamente!");
-      } else {
-        servicioPrograma.GuardarPrograma(programa);
-        alert("Programa registrado correctamente!");
-      }
-      cerrarModal && cerrarModal();
+      Registrar();
     }
   }, [programa]);
 
+  async function Registrar() {
+    const servicioPrograma = new ProgramaServicio();
+    const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
+      : await servicioPrograma.GuardarPrograma(programa);
+    alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+    cerrarModal && cerrarModal();
+  }
 
   const RegistrarPrograma = () => {
     //Se hace una validación exahustiva de los datos
@@ -59,23 +58,22 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   const FormarObjPrograma = () => {
     //ojo, hay que formatear los datos necesarios
     const objAux = {};
-    objAux.id = codigo;
+    objAux.id = Number(codigo);
     objAux.tipo = tipo;
     objAux.nombre = FormatearNombre(nombre);
-    objAux.cantidadTrimestres = cantidadTrimestres;
+    objAux.cantidadTrimestres = Number(cantidadTrimestres);
     objAux.fechaInicio = fechaInicio;
     objAux.fechaFin = fechaFin;
-    objAux.fechaRegistro = "2024-12-07T11:10:00";
     setPrograma(objAux);
   }
 
   const ObjProgramaActualizado = () => {
     setPrograma({
       ...programa,
-      id: codigo,
+      id: Number(codigo),
       nombre: FormatearNombre(nombre),
       tipo: tipo,
-      cantidadTrimestres: cantidadTrimestres,
+      cantidadTrimestres: Number(cantidadTrimestres),
       fechaInicio: fechaInicio,
       fechaFin: fechaFin,
     });
@@ -121,7 +119,7 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   return (
     <div>
       <ModalGeneral isOpenRegistro={abrirRegistro} isOpenConsulta={abrirConsulta}
-        onClose={cerrarModal && (() => cerrarModal())}
+        onClose={cerrarModal}
         bloquearInputs={(valor) => setInputsOff(valor)}
         onClickPositivo={RegistrarPrograma}
         edicionActivada={(e) => !e ? ReiniciarValores() : null}

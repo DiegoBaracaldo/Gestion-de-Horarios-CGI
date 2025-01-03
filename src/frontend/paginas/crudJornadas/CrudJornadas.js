@@ -8,6 +8,7 @@ import JornadaServicio from '../../../backend/repository/servicios/JornadaServic
 import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import { useNavigate } from 'react-router-dom'
 
 function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirHorario, setAbrirHorario] = useState(false);
@@ -20,13 +21,17 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [listaAdaptada, setListaAdaptada] = useState([]);
 
+  const [vaciarChecks, setVaciarChecks] = useState(false);
+
+  const navegar = useNavigate();
+
   const CargarLista = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new JornadaServicio().CargarLista());
     } catch (error) {
-      console.log("error en crud jornadas por: ", error);
-      setListaObjetos([]);
+      alert(error);
+      navegar(-1);
     }
   }
 
@@ -79,11 +84,17 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   async function EliminarJornadas() {
     const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
     if (confirmar) {
-      const servicioJornada = new JornadaServicio();
-      const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));
-      const respuesta = await servicioJornada.EliminarJornada(auxListaID);
-      if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
-      else ResultadoOperacion("Error al eliminar las jornadas!");
+      try {
+        const servicioJornada = new JornadaServicio();
+        const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));
+        const respuesta = await servicioJornada.EliminarJornada(auxListaID);
+        if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
+        else ResultadoOperacion("NO se eliminaron las jornadas!");
+      } catch (error) {
+        alert(error);
+      }
+      CargarLista();
+      setVaciarChecks(true);
     } else {
       return null;
     }
@@ -171,6 +182,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
         onClickDestructivo={OnClickDestructivo}
         agregar={(t) => setTextoAgregar(t)}
         reiniciarTextoAgregar={reiniciarTexto}
+        vaciarChecks={vaciarChecks}
       />
 
       {

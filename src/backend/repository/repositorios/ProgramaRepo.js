@@ -9,7 +9,7 @@ class ProgramaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM programas LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err);
+                if(err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -19,7 +19,7 @@ class ProgramaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM programas";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -29,7 +29,7 @@ class ProgramaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM programas WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
@@ -44,9 +44,9 @@ class ProgramaRepo {
 
             this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin], function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                    resolve(this.changes);
                 }
             });
         });
@@ -59,8 +59,8 @@ class ProgramaRepo {
             const {id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin} = programa; // Desestructuración del objeto torre
 
             this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -75,9 +75,9 @@ class ProgramaRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

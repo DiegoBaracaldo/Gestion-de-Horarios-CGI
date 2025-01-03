@@ -9,7 +9,7 @@ class InstructorRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM instructores LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err);
+                if(err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -19,7 +19,7 @@ class InstructorRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM instructores";
             this.db.all(query, [], (error, filas) => {
-                if(error) reject(error);
+                if(error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -29,7 +29,7 @@ class InstructorRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM instructores WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
@@ -44,9 +44,9 @@ class InstructorRepo {
 
             this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad], function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                    resolve(this.changes); 
                 }
             });
         });
@@ -62,8 +62,8 @@ class InstructorRepo {
             const {id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad} = instructor; // Desestructuración del objeto torre
 
             this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -78,9 +78,9 @@ class InstructorRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

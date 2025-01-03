@@ -24,7 +24,7 @@ class GrupoRepo {
                 "programas ON grupos.idPrograma = programas.id ";
 
             this.db.all(query, [], (err, filas) => {
-                if (err) reject(err);
+                if (err) reject(err.errno);
                 else resolve(filas);
             });
         });
@@ -34,7 +34,7 @@ class GrupoRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM grupos WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
@@ -53,9 +53,9 @@ class GrupoRepo {
                     cantidadAprendices, esCadenaFormacion],
                 function (error) {
                     if (error) {
-                        reject(error);
+                        reject(error.errno);
                     } else {
-                        resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                        resolve(this.changes);
                     }
                 });
         });
@@ -75,8 +75,8 @@ class GrupoRepo {
                 [id, idPrograma, idResponsable, codigoGrupo, idJornada,
                     cantidadAprendices, esCadenaFormacion, idViejo],
                 function (error) {
-                    if (error) reject(error);
-                    else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                    if (error) reject(error.errno);
+                    else resolve(this.changes); // Devuelve el número de filas modificadas
                 });
         });
     }
@@ -91,9 +91,9 @@ class GrupoRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

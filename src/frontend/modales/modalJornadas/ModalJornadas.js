@@ -34,10 +34,14 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
     }, [jornada]);
 
     async function Actualizar() {
-        const servicioJornada = new JornadaServicio();
-        const respuesta = await servicioJornada.ActualizarJornada(idViejo, jornada);
-        alert(respuesta !== 0 ? ("Jornada actualizada correctamente")
-            : ("Jornada actualizada correctamente"));
+        try {
+            const servicioJornada = new JornadaServicio();
+            const respuesta = await servicioJornada.ActualizarJornada(idViejo, jornada);
+            alert(respuesta !== 0 ? ("Jornada actualizada correctamente")
+                : ("NO se actualizó la jornada!"));
+        } catch (error) {
+            alert(error);
+        }
         cerrarModal && cerrarModal();
     }
 

@@ -11,7 +11,7 @@ class JornadaServicio {
         return await window.electron.AtLeastOneJornada();
       } catch (error) {
         console.log("error en servicio jornada por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -21,7 +21,7 @@ class JornadaServicio {
           return await window.electron.GetAllJornadas();
         } catch (error) {
           console.log("error en crud jornadas por: ", error);
-          return [];
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -31,7 +31,7 @@ class JornadaServicio {
         return await window.electron.SaveNewJornada(jornada);
       } catch (error) {
         console.log("error en servicio jornada por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -41,7 +41,7 @@ class JornadaServicio {
         return await window.electron.GetJornadaByID(id);
       } catch (error) {
         console.log("error en servicio jornadas por: ", error);
-        return {};
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -51,7 +51,7 @@ class JornadaServicio {
         return await window.electron.SaveJornada(idViejo, jornada);
       } catch (error) {
         console.log("error en servicio jornadas por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -61,7 +61,7 @@ class JornadaServicio {
         return await window.electron.RemoveJornada(listaIDs);
       } catch (error) {
         console.log("error en servicio jornada por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './ModalGeneral.css';
@@ -23,7 +23,7 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
     }, []);
 
     //Manejar modo edición
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (modoEdicion) {
             bloquearInputs && bloquearInputs(false);
             setTextoPositivo("Registrar");

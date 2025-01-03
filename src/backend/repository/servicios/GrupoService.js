@@ -11,7 +11,7 @@ class GrupoServicio {
             return await window.electron.GetAllGrupos();
         } catch (error) {
             console.log("Error en grupoService por: ", error);
-            return [];
+            throw error.message.split(":")[1].trim();
         }
     }
 
@@ -21,7 +21,7 @@ class GrupoServicio {
           return await window.electron.SaveNewGrupo(grupo);
         } catch (error) {
           console.log("error en servicio grupo por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
       }
   
@@ -31,7 +31,7 @@ class GrupoServicio {
           return await window.electron.GetGrupoByID(id);
         } catch (error) {
           console.log("error en servicio grupo por: ", error);
-          return {};
+          throw error.message.split(":")[1].trim();
         }
       }
   
@@ -41,7 +41,7 @@ class GrupoServicio {
           return await window.electron.SaveGrupo(idViejo, grupo);
         } catch (error) {
           console.log("error en servicio grupo por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
       }
   
@@ -51,7 +51,7 @@ class GrupoServicio {
           return await window.electron.RemoveGrupo(listaIDs);
         } catch (error) {
           console.log("error en servicio grupo por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
       }
 }

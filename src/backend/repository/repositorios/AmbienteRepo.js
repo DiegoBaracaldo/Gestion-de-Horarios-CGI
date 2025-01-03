@@ -1,23 +1,23 @@
 
-class AmbienteRepo{
+class AmbienteRepo {
 
-    constructor(db){
+    constructor(db) {
         this.db = db;
     }
 
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query =
-             "SELECT " + 
-                "ambientes.*, " + 
-                "torres.nombre AS nombreTorre " + 
+                "SELECT " +
+                "ambientes.*, " +
+                "torres.nombre AS nombreTorre " +
                 "FROM " +
                 "ambientes " +
                 "JOIN " +
                 "torres ON ambientes.idTorre = torres.id ";
 
             this.db.all(query, [], (err, filas) => {
-                if(err) reject(err);
+                if (err) reject(err.errno);
                 else resolve(filas);
             });
         });
@@ -27,41 +27,38 @@ class AmbienteRepo{
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM ambientes WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
     }
 
     async SaveNew(ambiente) {
-        const {nombre, idTorre, capacidad, franjaDisponibilidad} = ambiente;
+        const { nombre, idTorre, capacidad, franjaDisponibilidad } = ambiente;
         return new Promise((resolve, reject) => {
-            const query = "INSERT INTO ambientes "+
-            "(nombre, idTorre, capacidad, franjaDisponibilidad) "+
-            "VALUES (?, ?, ?, ?)";
+            const query = "INSERT INTO ambientes " +
+                "(nombre, idTorre, capacidad, franjaDisponibilidad) " +
+                "VALUES (?, ?, ?, ?)";
 
             this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad], function (error) {
-                if (error) {
-                    reject(error);
-                } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
-                }
+                if (error) reject(error.errno);
+                else resolve(this.changes);
             });
         });
     }
 
     async Save(idViejo, ambiente) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE ambientes SET "+
-            "nombre = ?, "+
-            "idTorre = ?, capacidad = ?, " +
-            "franjaDisponibilidad = ?"+
-            "WHERE id = ?";
-            const {nombre, idTorre, capacidad, franjaDisponibilidad} = ambiente; // Desestructuración del objeto torre
+            const query = "UPDATE ambientes SET " +
+                "nombre = ?, " +
+                "idTorre = ?, capacidad = ?, " +
+                "franjaDisponibilidad = ?" +
+                "WHERE id = ?";
+            const { nombre, idTorre, capacidad, franjaDisponibilidad } = ambiente; // Desestructuración del objeto torre
 
             this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -76,9 +73,9 @@ class AmbienteRepo{
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

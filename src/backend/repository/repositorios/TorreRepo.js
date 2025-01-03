@@ -9,7 +9,7 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM torres LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err);
+                if(err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -19,7 +19,7 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM torres";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -29,7 +29,7 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM torres WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
@@ -41,9 +41,9 @@ class TorreRepo {
 
             this.db.run(query, [nombre], function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                    resolve(this.changes); 
                 }
             });
         });
@@ -55,8 +55,8 @@ class TorreRepo {
             const { nombre } = torre; // Desestructuración del objeto torre
 
             this.db.run(query, [nombre, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -71,9 +71,9 @@ class TorreRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

@@ -10,17 +10,20 @@ import ProgramaServicio from '../../../backend/repository/servicios/ProgramaServ
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
+import { useNavigate } from 'react-router-dom';
 
 const CrudGrupos = () => {
 
     const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
+    const navegar = useNavigate();
+
     const CargarLista = async () => {
         try {
             setListaObjetos(await new GrupoServicio().CargarLista());
         } catch (error) {
-            console.log("Error en crud Grupos por: ", error);
-            setListaObjetos([]);
+            alert(error);
+            navegar(-1);
         }
     }
 
@@ -36,7 +39,7 @@ const CrudGrupos = () => {
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
     const [opcionCadena, setOpcionCadena] = useState("ambos");
-    
+
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
 
@@ -113,7 +116,7 @@ const CrudGrupos = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
+        if (listaObjetos.length > 0) setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
 
     const FiltrarCadenaFormacion = () => {
@@ -139,7 +142,7 @@ const CrudGrupos = () => {
     const DefinirGrupoConsultado = (numFicha) => {
         let grupoAux = {};
         listaFiltrada.forEach((grupo) => {
-            if(grupo.id === numFicha) grupoAux = grupo;
+            if (grupo.id === numFicha) grupoAux = grupo;
         });
         setGrupoConsultado(grupoAux);
     }
@@ -196,17 +199,21 @@ const CrudGrupos = () => {
         return respuesta === 0 ? false : true;
     }
 
-    const EliminarGrupos  = async () => {
+    const EliminarGrupos = async () => {
         const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
         if (confirmar) {
-          const servicioGrupo = new GrupoServicio();
-          const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
-          const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
-          alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
-            : ("Error al eliminar los grupos!"));
+            try {
+                const servicioGrupo = new GrupoServicio();
+                const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
+                const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
+                alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
+                    : ("No se eliminaron los grupos!"));
+            } catch (error) {
+                alert(error);
+            }
             CargarLista();
         } else {
-          return null;
+            return null;
         }
     }
 
@@ -237,12 +244,12 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} 
-                onCLicDestructivo={onClicDestructivo}/>
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs}
+                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} objConsulta={grupoConsultado}/>
+                        onCloseProp={() => CerrarModal()} objConsulta={grupoConsultado} />
                     : null
             }
         </div>

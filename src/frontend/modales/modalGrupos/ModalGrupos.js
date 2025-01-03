@@ -28,39 +28,46 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     let jornadaInicial = {};
     const [jornada, setJornada] = useState(jornadaInicial);
 
-    const CargarResponsableInicial = async () => {
+    const ObtenerObjetosRelacionados = async () => {
         try {
-            responsableInicial = await new InstructorServicio().CargarInstructor(objConsulta.idResponsable);
-            setResponsable(responsableInicial);
+            const getPrograma = new ProgramaServicio().CargarPrograma(objConsulta.idPrograma);
+            const getResponsable = new InstructorServicio().CargarInstructor(objConsulta.idResponsable);
+            const getJornada = new JornadaServicio().CargarJornada(objConsulta.idJornada);
+            const listaPromesas = [getPrograma, getResponsable, getJornada]
+
+            const resultado = await Promise.all(listaPromesas);
+            if (VerificarRespuesta(resultado)) {
+                setPrograma(resultado[0]);
+                setResponsable(resultado[1]);
+                setJornada(resultado[2]);
+                return true;
+            } else {
+                console.log("Algún objeto está vacío");
+                return false;
+            }
+
         } catch (error) {
-            console.log("Error al obtener el responsable del grupo por: " + error);
+            console.log("Error al obtener información relacionada del grupo por : " + error);
+            return false;
         }
     }
 
-    const CargarProgramaInicial = async () => {
-        try {
-            programaInicial = await new ProgramaServicio().CargarPrograma(objConsulta.idPrograma);
-            setPrograma(programaInicial);
-        } catch (error) {
-            console.log("Error al obtener el programa del grupo por: " + error);
-        }
-    }
-
-    const CargarJonadaInicial = async () => {
-        try {
-            jornadaInicial = await new JornadaServicio().CargarJornada(objConsulta.idJornada);
-            setJornada(jornadaInicial);
-        } catch (error) {
-            console.log("Error al obtener la jornada del grupo por: " + error);
-        }
+    //Verifica que ninguno de los objetos recibidos esté vacío
+    function VerificarRespuesta(array) {
+        return array.every(objeto => Object.keys(objeto).length > 0);
     }
 
     useEffect(() => {
-        if(objConsulta && Object.keys(objConsulta).length > 0){
+        if (objConsulta && Object.keys(objConsulta).length > 0) {
             //Si es consulta al inicio y el objeto está lleno
-            CargarResponsableInicial();
-            CargarProgramaInicial();
-            CargarJonadaInicial();
+            const ObtenerRespuesta = async () => {
+                const respuesta = await ObtenerObjetosRelacionados();
+                if (!respuesta) {
+                    alert("Error al obtener información del grupo");
+                    onCloseProp && onCloseProp();
+                }
+            }
+            ObtenerRespuesta();
         }
     }, []);
 
@@ -85,11 +92,15 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     }, [grupo]);
 
     async function Registrar() {
-        const servicioGrupo = new GrupoServicio();
-        const respuesta = abrirConsulta ?
-            await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
-            : await servicioGrupo.GuardarGrupo(grupo);
-        alert(respuesta !== 0 ? ("Operación EXITOSA!") :  ("Operación FALLIDA!") );
+        try {
+            const servicioGrupo = new GrupoServicio();
+            const respuesta = abrirConsulta ?
+                await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
+                : await servicioGrupo.GuardarGrupo(grupo);
+            alert(respuesta !== 0 ? ("Grupo guardado correctamente!") : ("NO se guardó el grupo!"));
+        } catch (error) {
+            alert(error);
+        }
         onCloseProp && onCloseProp();
     }
 

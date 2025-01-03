@@ -3,7 +3,7 @@ import './ListaAvanzada.css';
 
 
 const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccProp,
-    modoSeleccion, vaciarListaSelecc
+    modoSeleccion, vaciarListaSelecc, variableAux
 }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
@@ -29,13 +29,13 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
         setSelecciones(nuevasSelecciones);
         //Luego se almacenan los objetos seleccionados
         const objSeleccionados = [...listaObjetosSelecc];
-        if(seleccNueva){
+        if (seleccNueva) {
             objSeleccionados.push(objeto);
             setListaObjetosSelecc(objSeleccionados);
-        }else{
+        } else {
             //Se saca de la lista si se desmarca
             setListaObjetosSelecc(objSeleccionados.filter(obj => JSON.stringify(obj) !== JSON.stringify(objeto)));
-        } 
+        }
     }
 
 
@@ -43,14 +43,17 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
     //almacenar la información de los index seleccionados en la lista para eliminarlos
     useEffect(() => {
         //le paso la lista a una prop que puede recibirse en un setState en el padre
-        listaSeleccProp && listaSeleccProp(listaObjetosSelecc);
+        if (typeof listaSeleccProp === 'function') {
+            //Paso las selecciones a la prop
+            listaSeleccProp(listaObjetosSelecc);
+        }
     }, [listaObjetosSelecc]);
 
     const SeleccionarTodo = (e) => {
         const valor = e.target.checked;
         setSelecciones(new Array(selecciones.length).fill(valor));
         //Se llena o vacía el array de ids para eliminación 
-        if(valor)setListaObjetosSelecc(datosJson && datosJson);
+        if (valor) setListaObjetosSelecc(datosJson && datosJson);
         else setListaObjetosSelecc([]);
     }
 
@@ -59,8 +62,17 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
     }
 
     useEffect(() => {
-        if(vaciarListaSelecc) setListaObjetosSelecc([]);
+        if (vaciarListaSelecc) {
+            //limpio los selects por haber vaciado las selecciones
+            const auxArray = selecciones.map(() => false);
+            setSelecciones(auxArray);
+        }
     }, [vaciarListaSelecc]);
+
+    //Limpiar los objetos seleccionados al limpiar los select
+    useEffect(() => {
+        if (!selecciones.includes(true)) setListaObjetosSelecc([]);
+    }, [selecciones]);
 
     return (
         <table id='listaAvanzada'>

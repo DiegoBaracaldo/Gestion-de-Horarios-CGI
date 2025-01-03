@@ -40,10 +40,14 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   }, [programa]);
 
   async function Registrar() {
-    const servicioPrograma = new ProgramaServicio();
-    const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
-      : await servicioPrograma.GuardarPrograma(programa);
-    alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+    try {
+      const servicioPrograma = new ProgramaServicio();
+      const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
+        : await servicioPrograma.GuardarPrograma(programa);
+      alert(respuesta !== 0 ? 'Programa guardado correctamente!' : 'NO se guardó el programa!');
+    } catch (error) {
+      alert(error);
+    }
     cerrarModal && cerrarModal();
   }
 

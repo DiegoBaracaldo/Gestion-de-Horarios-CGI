@@ -28,7 +28,7 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const topeHorasInicial = objConsultado.topeHoras || '';
     const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
     const franjaInicial = objConsultado.franjaDisponibilidad &&
-        objConsultado.franjaDisponibilidad .split(',').map(item => Number(item.trim())) || [];
+        objConsultado.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
     const [instructor, setInstructor] = useState({});
 
@@ -39,10 +39,14 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     }, [instructor]);
 
     async function Registrar() {
-        const servicioInstructor = new InstructorServicio();
-        const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
-            : await servicioInstructor.GuardarInstructor(instructor);
-        alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+        try {
+            const servicioInstructor = new InstructorServicio();
+            const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
+                : await servicioInstructor.GuardarInstructor(instructor);
+            alert(respuesta !== 0 ? 'Instructor guardado correctamente!' : 'NO se guardó el instructor!');
+        } catch (error) {
+            alert(error);
+        }
         onCloseProp && onCloseProp();
     }
 
@@ -111,7 +115,7 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
         setInstructor({
             ...objConsultado,
             id: Number(cedula),
-            nombre:FormatearNombre(nombre),
+            nombre: FormatearNombre(nombre),
             correo: correo,
             telefono: telefono,
             especialidad: especialidad,

@@ -8,6 +8,7 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import { useNavigate } from 'react-router-dom';
 
 function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
@@ -21,14 +22,18 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [listaAdaptada, setListaAdaptada] = useState([]);
 
+  const [vaciarChecks, setVaciarChecks] = useState(false);
+
+  const navegar = useNavigate();
+
   //Carga inicial de objetos
   const CargarListaInicial = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new TorreServicio().CargarLista());
     } catch (error) {
-      console.log("error en crud torres por: ", error);
-      setListaObjetos([]);
+      alert(error);
+      navegar(-1);
     }
   }
 
@@ -80,11 +85,17 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   async function EliminarTorres() {
     const confirmar = window.confirm("¿Confirma que desea eliminar las torres seleccionadas?");
     if (confirmar) {
-      const servicioTorre = new TorreServicio();
-      const auxListaID = listaSelecciones.map(torre => parseInt(torre.id.toString()));
-      const respuesta = await servicioTorre.EliminarTorre(auxListaID);
-      if (respuesta !== 0) ResultadoOperacion("Torres eliminadas satisfactoriamente!");
-      else ResultadoOperacion("Error al eliminar las torres!");
+      try {
+        const servicioTorre = new TorreServicio();
+        const auxListaID = listaSelecciones.map(torre => parseInt(torre.id.toString()));
+        const respuesta = await servicioTorre.EliminarTorre(auxListaID);
+        if (respuesta !== 0) ResultadoOperacion("Torres eliminadas satisfactoriamente!");
+        else ResultadoOperacion("NO se eliminaron las torres!");
+      } catch (error) {
+        alert(error);
+      }
+      CargarListaInicial();
+      setVaciarChecks(true);
     } else {
       return null;
     }
@@ -162,6 +173,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
         agregar={(t) => setTextoAgregar(t)}
         onClickPositivo={OnClickPositivo}
         reiniciarTextoAgregar={reiniciarTexto}
+        vaciarChecks={vaciarChecks}
       />
 
       {

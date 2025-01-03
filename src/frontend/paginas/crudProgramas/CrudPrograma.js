@@ -5,6 +5,7 @@ import { mocksBasica } from '../../mocks/mocksTablaBasica'
 import ModalProgramas from '../../modales/modalProgramas/ModalProgramas.js';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
+import { useNavigate } from 'react-router-dom';
 
 function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -13,17 +14,21 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [textoBuscar, setTextoBuscar] = useState('');
   const [filtrarPor, setFiltrarPor] = useState('todos');
 
+  const [vaciarChecks, setVaciarChecks] = useState(false);
+
   useEffect(() => {
     FiltrarPorTipo();
   }, [filtrarPor]);
+
+  const navegar = useNavigate();
 
   const CargarLista = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new ProgramaServicio().CargarLista());
     } catch (error) {
-      console.log("error en crud programas por: ", error);
-      setListaObjetos([]);
+      alert(error);
+      navegar(-1);
     }
   }
 
@@ -131,12 +136,17 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   async function EliminarProgramas() {
     const confirmar = window.confirm("¿Confirma que desea eliminar los programas seleccionados?");
     if (confirmar) {
-      const servicioPrograma = new ProgramaServicio();
-      const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));
-      const respuesta = await servicioPrograma.EliminarPrograma(auxListaID);
-      alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
-        : ("Error al eliminar las programas!"));
+      try {
+        const servicioPrograma = new ProgramaServicio();
+        const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));
+        const respuesta = await servicioPrograma.EliminarPrograma(auxListaID);
+        alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
+          : ("NO se eliminaron los programas!"));
+      } catch (error) {
+        alert(error);
+      }
       CargarLista();
+      setVaciarChecks(true);
     } else {
       return null;
     }
@@ -168,6 +178,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
         seleccFiltro={(t) => setFiltrarPor(t)}
         modoSeleccion={modoSeleccion}
         onClickDestructivo={OnClickDestructivo}
+        vaciarChecks={vaciarChecks}
       />
       {
         abrirConsulta || abrirRegistro ?

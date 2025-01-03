@@ -9,4 +9,7 @@
         border-radius: 12px;
         background-color: #FBFBE2;
     }
+    .btnSeleccPrograma:hover{
+        background-color: #E0E0A8;
+    }
 }

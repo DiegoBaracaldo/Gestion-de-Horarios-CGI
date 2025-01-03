@@ -6,18 +6,21 @@ import ModalInstructores from '../../modales/modalInstructores/ModalInstructores
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { mockInstructoresTres } from '../../mocks/MocksInstructores';
+import { useNavigate } from 'react-router-dom';
 
 const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => {
 
     const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
+
+    const navegar = useNavigate();
 
     const CargarLista = async () => {
         console.log("cargando lista...");
         try {
           setListaObjetos(await new InstructorServicio().CargarLista());
         } catch (error) {
-          console.log("error en crud instructores por: ", error);
-          setListaObjetos([]);
+          alert(error);
+          navegar(-1);
         }
     }
 
@@ -31,6 +34,9 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
+
+    //Variable para indicar la cantidad de horas asignadas de un instructor
+    const [horasAsignadas, setHorasAsignadas] = useState(0);
 
     useEffect(() => {
         CargarLista();
@@ -53,6 +59,10 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);
+        setHorasAsignadas(() => {
+            //Espacio para enviar la cantidad de horas asignadas a la lista CRUD
+            return 10;
+        });
     }, [listaFiltrada]);
 
     //captura de palabras para filtro y búsqueda
@@ -124,11 +134,15 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     const EliminarInstructores = async () => {
         const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
         if (confirmar) {
-          const servicioInstructor = new InstructorServicio();
-          const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
-          const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
-          alert(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
-            : ("Error al eliminar los instructores!"));
+            try {
+                const servicioInstructor = new InstructorServicio();
+                const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
+                const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
+                alert(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
+                  : ("NO se eliminaron los instructores!"));
+            } catch (error) {
+                alert(error);
+            }
           CargarLista();
         } else {
           return null;

@@ -10,7 +10,8 @@ class AmbienteServicio {
           return await window.electron.GetAllAmbientes();
         } catch (error) {
           console.log("error en ambiente service por: ", error);
-          return [];
+          //Devuelve el mensaje dele error deseado
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -20,7 +21,7 @@ class AmbienteServicio {
         return await window.electron.SaveNewAmbiente(ambiente);
       } catch (error) {
         console.log("error en servicio ambiente por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -30,7 +31,7 @@ class AmbienteServicio {
         return await window.electron.GetAmbienteByID(id);
       } catch (error) {
         console.log("error en servicio ambiente por: ", error);
-        return {};
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -40,7 +41,7 @@ class AmbienteServicio {
         return await window.electron.SaveAmbiente(idViejo, ambiente);
       } catch (error) {
         console.log("error en servicio ambiente por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -50,7 +51,7 @@ class AmbienteServicio {
         return await window.electron.RemoveAmbiente(listaIDs);
       } catch (error) {
         console.log("error en servicio ambiente por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 }

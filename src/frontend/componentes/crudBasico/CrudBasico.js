@@ -25,7 +25,8 @@ function CrudBasico({
   seleccFiltro,
   modoSeleccion,
   agregar,
-  reiniciarTextoAgregar
+  reiniciarTextoAgregar,
+  vaciarChecks
 }) {
   const [listaSeleccRecibida, setListaSeleccRecibida] = useState([]);
   const [textoBuscar, setTextoBuscar] = useState('');
@@ -62,7 +63,7 @@ function CrudBasico({
           <div className="tabla">
             <ListaBasica nameList={entidad} datosJson={propiedadTabla} clic={clic}
               listaSeleccProp={(lista) => listaSeleccionada(lista)}
-              modoSeleccion={modoSeleccion} />
+              modoSeleccion={modoSeleccion} vaciarChecks={vaciarChecks}/>
           </div>
         </div>
 

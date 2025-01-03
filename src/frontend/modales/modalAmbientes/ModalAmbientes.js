@@ -9,6 +9,7 @@ import Ambiente from '../../../backend/repository/entidades/Ambiente';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
+import ObtenerErrorSQLite from '../../../baseDatos/ErroresSQLite';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -24,15 +25,22 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const [torre, setTorre] = useState(torreInicial);
 
     useEffect(() => {
-        if(abrirConsulta) CargarTorreInicial();
+        if (abrirConsulta) CargarTorreInicial();
     }, []);
 
     const CargarTorreInicial = async () => {
         try {
-            torreInicial = await new TorreServicio().CargarTorre(objConsulta.idTorre);
-            setTorre(torreInicial);
+            const respuesta = await new TorreServicio().CargarTorre(objConsulta.idTorre);
+            if (typeof respuesta === 'object') {
+                setTorre(respuesta);
+            }
+            else {
+                alert("No se cargó la torre del ambiente en cuestión!");
+                if (typeof onCloseProp === 'function') onCloseProp();
+            }
         } catch (error) {
-            console.log("Error al obtener torre del ambiente por: ", error);
+            alert(error);
+            if (typeof onCloseProp === 'function') onCloseProp();
         }
     }
 
@@ -56,11 +64,18 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }, [ambiente]);
 
     async function Registrar() {
-        const ambienteServicio = new AmbienteServicio();
-        const respuesta = seActivoEdicion ?
-            await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
-            await ambienteServicio.GuardarAmbiente(ambiente);
-        alert(respuesta !== 0 ? ("Operación EXITOSA!") : ("Operación FALLIDA!"));
+        try {
+            const ambienteServicio = new AmbienteServicio();
+            const respuesta = seActivoEdicion ?
+                await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
+                await ambienteServicio.GuardarAmbiente(ambiente);
+            console.log(respuesta);
+            alert(respuesta === 1 ? ("Se guardó correctamente el ambiente!")
+                : ("NO se guardó el ambiente"));
+        } catch (error) {
+            //Este error viene desde el repositorio
+            alert(error);
+        }
         onCloseProp && onCloseProp();
     }
 

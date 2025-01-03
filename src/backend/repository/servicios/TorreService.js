@@ -11,7 +11,7 @@ class TorreServicio {
         return await window.electron.AtLeastOneTorre();
       } catch (error) {
         console.log("error en servicio torre por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -21,7 +21,7 @@ class TorreServicio {
           return await window.electron.GetAllTorres();
         } catch (error) {
           console.log("error en crud torres por: ", error);
-          return [];
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -31,7 +31,7 @@ class TorreServicio {
           return await window.electron.SaveNewTorre(nombreTorre);
         } catch (error) {
           console.log("error en servicio torres por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -41,7 +41,7 @@ class TorreServicio {
           return await window.electron.GetTorreByID(idTorre);
         } catch (error) {
           console.log("error en servicio torres por: ", error);
-          return {};
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -51,7 +51,7 @@ class TorreServicio {
           return await window.electron.SaveTorre(idViejo, torre);
         } catch (error) {
           console.log("error en servicio torres por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -61,7 +61,7 @@ class TorreServicio {
           return await window.electron.RemoveTorre(listaIDs);
         } catch (error) {
           console.log("error en servicio torres por: ", error);
-          return 0;
+          throw error.message.split(":")[1].trim();
         }
     }
 }

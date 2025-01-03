@@ -122,7 +122,8 @@ class ConexionBD {
             capacidad INTEGER NOT NULL,
             franjaDisponibilidad TEXT NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idTorre) REFERENCES torres(id)
+            FOREIGN KEY (idTorre) REFERENCES torres(id),
+            UNIQUE(nombre, idTorre) 
             );
             `
         );
@@ -157,7 +158,8 @@ class ConexionBD {
             descripcion VARCHAR(249) NOT NULL,
             horasRequeridas INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas(id)
+            FOREIGN KEY (idPrograma) REFERENCES programas(id),
+            UNIQUE(idprograma, descripcion)
             );
             `
         );

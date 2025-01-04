@@ -5,6 +5,7 @@ import { SoloNumeros } from '../../../backend/validacion/ValidacionFormato';
 import Competencia from '../../../backend/repository/entidades/Competencia';
 import { FormatearDescripcion } from '../../../backend/formato/FormatoDatos';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
+import Swal from 'sweetalert2';
 
 const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa, objConsulta }) => {
 
@@ -32,9 +33,9 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
             const respuesta = abrirConsulta ?
                 await competenciaService.ActualizarCompetencia(codigoInicial, competencia) :
                 await competenciaService.GuardarCompetencia(competencia);
-            alert(respuesta !== 0 ? ("Competencia guardada correctamente!") : ("NO se guardó la competencia!"));
+            Swal.fire(respuesta !== 0 ? ("Competencia guardada correctamente!") : ("NO se guardó la competencia!"));
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
         }
 
         onCloseProp && onCloseProp();
@@ -44,14 +45,14 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
         let bandera = false;
         const idPrograma = programa.id || '';
         if (!idPrograma || !idPrograma.toString().trim() || !HastaCincuenta(idPrograma) || !SoloNumeros(idPrograma)) {
-            alert("Programa seleccionado incorrectamente!");
+            Swal.fire("Programa seleccionado incorrectamente!");
         } else if (!codigo || !codigo.toString().trim() || !HastaCincuenta(codigo) || !SoloNumeros(codigo)) {
-            alert("Código de competencia incorrecto!");
+            Swal.fire("Código de competencia incorrecto!");
             setCodigo('');
         } else if (!descripcion || !descripcion.toString().trim() || !HastaDoscientosCuarentaYNueve(descripcion)) {
-            alert("Descripción incorrecta!");
+            Swal.fire("Descripción incorrecta!");
         } else if (!horas || !horas.toString().trim() || !HastaDos(horas) || !SoloNumeros(horas)) {
-            alert("Cantidad de horas incorrecta!");
+            Swal.fire("Cantidad de horas incorrecta!");
         } else {
             bandera = true;
         }

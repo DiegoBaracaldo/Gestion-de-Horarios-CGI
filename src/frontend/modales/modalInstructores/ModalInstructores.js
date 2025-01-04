@@ -7,6 +7,7 @@ import { CamposVacios, EsCorreo, EsTelefono, SoloNumeros, TextoConEspacio } from
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import Swal from 'sweetalert2';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsultado }) => {
 
@@ -43,9 +44,9 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
             const servicioInstructor = new InstructorServicio();
             const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
                 : await servicioInstructor.GuardarInstructor(instructor);
-            alert(respuesta !== 0 ? 'Instructor guardado correctamente!' : 'NO se guardó el instructor!');
+            Swal.fire(respuesta !== 0 ? 'Instructor guardado correctamente!' : 'NO se guardó el instructor!');
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
         }
         onCloseProp && onCloseProp();
     }
@@ -67,32 +68,32 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
         if (franjaDisponibilidad.length > 0) {
             setIsOpenFranjaHoraria(false);
         } else {
-            alert("Debes establecer la disponibilidad horaria del instructor!");
+            Swal.fire("Debes establecer la disponibilidad horaria del instructor!");
         }
     }
 
     const ValidarObjInstructor = () => {
         let bandera = false;
         if (!cedula || !cedula.toString().trim() || !HastaCincuenta(cedula) || !SoloNumeros(cedula)) {
-            alert("Cédula incorrecta!");
+            Swal.fire("Cédula incorrecta!");
             setCedula('');
         } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !TextoConEspacio(nombre)) {
-            alert("Nombre incorrecto!");
+            Swal.fire("Nombre incorrecto!");
             setNombre('');
         } else if (!correo || !correo.toString().trim() || !HastaCien(correo) || !EsCorreo(correo)) {
-            alert("Correo electrónico incorrecto");
+            Swal.fire("Correo electrónico incorrecto");
             setCorreo('');
         } else if (!telefono || !telefono.toString().trim() || !HastaCien(telefono) || !EsTelefono(telefono)) {
-            alert("Teléfono incorrecto");
+            Swal.fire("Teléfono incorrecto");
             setTelefono('');
         } else if (!especialidad || !especialidad.toString().trim() || !HastaCien(especialidad) || !TextoConEspacio(especialidad)) {
-            alert("Especialidad incorrecta");
+            Swal.fire("Especialidad incorrecta");
             setEspecialidad('');
         } else if (!topeHoras || !topeHoras.toString().trim() || !HastaDos(topeHoras) || !SoloNumeros(topeHoras)) {
-            alert("Tope de horas semanales incorrecto");
+            Swal.fire("Tope de horas semanales incorrecto");
             setTopeHoras('');
         } else if (!franjaDisponibilidad.length > 0) {
-            alert("Debes establecer una disponibilidad horaria para el instructor!");
+            Swal.fire("Debes establecer una disponibilidad horaria para el instructor!");
         } else {
             bandera = true;
         }

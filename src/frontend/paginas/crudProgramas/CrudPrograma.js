@@ -6,6 +6,8 @@ import ModalProgramas from '../../modales/modalProgramas/ModalProgramas.js';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm.js';
 
 function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -27,7 +29,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
     try {
       setListaObjetos(await new ProgramaServicio().CargarLista());
     } catch (error) {
-      alert(error);
+      Swal.fire(error);
       navegar(-1);
     }
   }
@@ -134,16 +136,17 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
   }
 
   async function EliminarProgramas() {
-    const confirmar = window.confirm("¿Confirma que desea eliminar los programas seleccionados?");
+    const confirmar = await new SWALConfirm()
+      .ConfirmAlert("¿Confirma que desea eliminar los programas seleccionados?");
     if (confirmar) {
       try {
         const servicioPrograma = new ProgramaServicio();
         const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));
         const respuesta = await servicioPrograma.EliminarPrograma(auxListaID);
-        alert(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
+        Swal.fire(respuesta !== 0 ? ("Programas eliminados satisfactoriamente!: ")
           : ("NO se eliminaron los programas!"));
       } catch (error) {
-        alert(error);
+        Swal.fire(error);
       }
       CargarLista();
       setVaciarChecks(true);

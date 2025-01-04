@@ -6,6 +6,7 @@ import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/Valid
 import { HastaVeintiCinco } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import Swal from 'sweetalert2';
 function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 }) {
     const [inputsOff, setInputsOff] = useState(false);
@@ -37,10 +38,10 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
         try {
             const servicioJornada = new JornadaServicio();
             const respuesta = await servicioJornada.ActualizarJornada(idViejo, jornada);
-            alert(respuesta !== 0 ? ("Jornada actualizada correctamente")
+            Swal.fire(respuesta !== 0 ? ("Jornada actualizada correctamente")
                 : ("NO se actualizó la jornada!"));
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
         }
         cerrarModal && cerrarModal();
     }
@@ -63,22 +64,22 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
         let bandera = false;
         if (!CamposVacios(jornada)) {
             if (!tipo || !tipo.toString().trim() || !HastaVeintiCinco(tipo) || !TextoConEspacio(tipo)) {
-                alert("Tipo de jornada incorrecta, escribe bien!");
+                Swal.fire("Tipo de jornada incorrecta, escribe bien!");
                 setTipo('');
             } else if (!horario.length > 0) {
-                alert("Debes establecer un horario para la jornada!");
+                Swal.fire("Debes establecer un horario para la jornada!");
             } else {
                 bandera = true;
             }
         } else {
-            alert("Datos incorrectos!");
+            Swal.fire("Datos incorrectos!");
         }
         return bandera;
     }
 
     const RegistrarHorarioJornada = () => {
         if (horario.length > 0) setAbrirHorario(false);
-        else alert("Debes establecer un rango hroario para la jornada!");
+        else Swal.fire("Debes establecer un rango hroario para la jornada!");
     }
 
     function ReiniciarValores() {

@@ -11,6 +11,8 @@ import InstructorServicio from '../../../backend/repository/servicios/Instructor
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudGrupos = () => {
 
@@ -22,7 +24,7 @@ const CrudGrupos = () => {
         try {
             setListaObjetos(await new GrupoServicio().CargarLista());
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
             navegar(-1);
         }
     }
@@ -153,23 +155,23 @@ const CrudGrupos = () => {
 
     const AbrirRegistro = () => {
         if (!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico, " +
+            Swal.fire("Debes registrar al menos un programa académico, " +
                 "un instructor y una jornada para proceder");
         } else if (!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico y " +
+            Swal.fire("Debes registrar al menos un programa académico y " +
                 "un instructor para proceder");
         } else if (!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico y " +
+            Swal.fire("Debes registrar al menos un programa académico y " +
                 "una jornada para proceder");
         } else if (!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico para proceder");
+            Swal.fire("Debes registrar al menos un programa académico para proceder");
         } else if (VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un instructor y " +
+            Swal.fire("Debes registrar al menos un instructor y " +
                 "una jornada para proceder");
         } else if (VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un instructor para proceder");
+            Swal.fire("Debes registrar al menos un instructor para proceder");
         } else if (VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos una jornada para proceder");
+            Swal.fire("Debes registrar al menos una jornada para proceder");
         } else {
             setAbrirRegistro(true);
         }
@@ -200,16 +202,17 @@ const CrudGrupos = () => {
     }
 
     const EliminarGrupos = async () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
+        const confirmar = await new SWALConfirm()
+        .ConfirmAlert("¿Confirma que desea eliminar los grupos seleccionados?");
         if (confirmar) {
             try {
                 const servicioGrupo = new GrupoServicio();
                 const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
                 const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
-                alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
+                Swal.fire(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
                     : ("No se eliminaron los grupos!"));
             } catch (error) {
-                alert(error);
+                Swal.fire(error);
             }
             CargarLista();
         } else {

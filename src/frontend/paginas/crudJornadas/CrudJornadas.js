@@ -9,6 +9,8 @@ import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import { useNavigate } from 'react-router-dom'
+import Swal from 'sweetalert2'
+import SWALConfirm from '../../alertas/SWALConfirm'
 
 function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirHorario, setAbrirHorario] = useState(false);
@@ -30,7 +32,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     try {
       setListaObjetos(await new JornadaServicio().CargarLista());
     } catch (error) {
-      alert(error);
+      Swal.fire(error);
       navegar(-1);
     }
   }
@@ -82,7 +84,8 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   }
 
   async function EliminarJornadas() {
-    const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
+    const confirmar = await new SWALConfirm()
+      .ConfirmAlert("¿Confirma que desea eliminar las jornadas seleccionadas?");
     if (confirmar) {
       try {
         const servicioJornada = new JornadaServicio();
@@ -91,7 +94,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
         if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
         else ResultadoOperacion("NO se eliminaron las jornadas!");
       } catch (error) {
-        alert(error);
+        Swal.fire(error);
       }
       CargarLista();
       setVaciarChecks(true);
@@ -119,10 +122,10 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
         setAbrirHorario(true);
       } else {
         setReiniciarTexto(true);
-        alert("Dato incorrecto");
+        Swal.fire("Dato incorrecto");
       }
     } else {
-      alert("Valor inválido");
+      Swal.fire("Valor inválido");
     }
   }
 
@@ -132,7 +135,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       const objFormado = FormarObjeto(FormatearNombre(textoAgregar));
       GuardarJornada(objFormado);
     } else {
-      alert("Debes establecer un rango horario para la jornada!");
+      Swal.fire("Debes establecer un rango horario para la jornada!");
     }
 
   }
@@ -163,7 +166,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   function ResultadoOperacion(mensaje) {
-    alert(mensaje);
+    Swal.fire(mensaje);
     CargarLista();
     setReiniciarTexto(true);
   }

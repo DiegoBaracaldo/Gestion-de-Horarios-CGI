@@ -4,6 +4,7 @@ import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import Swal from 'sweetalert2';
 
 
 function ModalTorres({ cerrarModal, objConsulta }) {
@@ -19,7 +20,7 @@ function ModalTorres({ cerrarModal, objConsulta }) {
         if (respuesta !== 0) ResultadoOperacion("Torre guardada correctamente!");
         else ResultadoOperacion("NO se guardó la torre!");
       } catch (error) {
-        alert(error);
+        Swal.fire(error);
       }
     }
   }
@@ -35,19 +36,19 @@ function ModalTorres({ cerrarModal, objConsulta }) {
     let bandera = false;
     if (!CamposVacios(objConsulta)) {
       if (!nombreTorre || !nombreTorre.toString().trim() || !HastaCien(nombreTorre) || !TextoConEspacio(nombreTorre)) {
-        alert("Nombre incorrecto!");
+        Swal.fire("Nombre incorrecto!");
         setNombreTorre('');
       } else {
         bandera = true;
       }
     } else {
-      alert("Datos incorrectos!");
+      Swal.fire("Datos incorrectos!");
     }
     return bandera;
   }
 
   function ResultadoOperacion(mensaje) {
-    alert(mensaje);
+    Swal.fire(mensaje);
     cerrarModal && cerrarModal();
   }
 

@@ -9,6 +9,8 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { mockCompetenciasTres } from '../../mocks/MocksCompetencias';
 import CrudPrograma from '../crudProgramas/CrudPrograma';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudCompetencias = () => {
 
@@ -37,7 +39,7 @@ const CrudCompetencias = () => {
         try {
             setListaObjetos(await new CompetenciaServicio().CargarLista(programa.id));
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
             navegar(-1);
         }
     }
@@ -134,16 +136,17 @@ const CrudCompetencias = () => {
     }
 
     async function EliminarCompetencias() {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los competencias seleccionados?");
+        const confirmar = await new SWALConfirm()
+        .ConfirmAlert("¿Confirma que desea eliminar los competencias seleccionados?");
         if (confirmar) {
             try {
                 const servicioCompetencia = new CompetenciaServicio();
                 const auxListaID = listaSelecciones.map(competencia => parseInt(competencia.id.toString()));
                 const respuesta = await servicioCompetencia.EliminarCompetencia(auxListaID);
-                alert(respuesta !== 0 ? ("Competencias eliminadas satisfactoriamente!: ")
+                Swal.fire(respuesta !== 0 ? ("Competencias eliminadas satisfactoriamente!: ")
                     : ("Error al eliminar las competencias!"));
             } catch (error) {
-                alert(error);
+                Swal.fire(error);
             }
             CargarLista();
         } else {

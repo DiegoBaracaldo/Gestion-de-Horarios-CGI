@@ -10,6 +10,7 @@ import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import ObtenerErrorSQLite from '../../../baseDatos/ErroresSQLite';
+import Swal from 'sweetalert2';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -35,11 +36,11 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                 setTorre(respuesta);
             }
             else {
-                alert("No se cargó la torre del ambiente en cuestión!");
+                Swal.fire("No se cargó la torre del ambiente en cuestión!");
                 if (typeof onCloseProp === 'function') onCloseProp();
             }
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
             if (typeof onCloseProp === 'function') onCloseProp();
         }
     }
@@ -70,11 +71,11 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                 await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
                 await ambienteServicio.GuardarAmbiente(ambiente);
             console.log(respuesta);
-            alert(respuesta === 1 ? ("Se guardó correctamente el ambiente!")
+            Swal.fire(respuesta === 1 ? ("Se guardó correctamente el ambiente!")
                 : ("NO se guardó el ambiente"));
         } catch (error) {
             //Este error viene desde el repositorio
-            alert(error);
+            Swal.fire(error);
         }
         onCloseProp && onCloseProp();
     }
@@ -89,7 +90,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         if (franjaDisponibilidad.length > 0) {
             setIsOpenFranjaHoraria(false);
         } else {
-            alert("Debes establecer la disponibilidad horaria del aula de clase!");
+            Swal.fire("Debes establecer la disponibilidad horaria del aula de clase!");
         }
     }
 
@@ -130,16 +131,16 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         let bandera = false;
         const idTorre = torre.id;
         if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)) {
-            alert("Nombre Incorrecto");
+            Swal.fire("Nombre Incorrecto");
             setNombre('');
         } else if (!idTorre || !idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)) {
-            alert("Torre incorrecta!");
+            Swal.fire("Torre incorrecta!");
             setTorre({});
         } else if (!capacidad || !capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)) {
-            alert("Capacidad incorrecta");
+            Swal.fire("Capacidad incorrecta");
             setCapacidad('');
         } else if (!franjaDisponibilidad.length > 0) {
-            alert("Debes establecer un rango horario de disponibilidad para el aula de clase!");
+            Swal.fire("Debes establecer un rango horario de disponibilidad para el aula de clase!");
         } else {
             bandera = true;
         }

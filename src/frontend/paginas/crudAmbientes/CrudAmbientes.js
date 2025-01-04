@@ -8,6 +8,8 @@ import AmbienteServicio from '../../../backend/repository/servicios/AmbienteServ
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudAmbientes = () => {
 
@@ -20,7 +22,7 @@ const CrudAmbientes = () => {
             const respuesta = await new AmbienteServicio().CargarLista();
             setListaObjetos(respuesta);
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
             navegar(-1);
         }
     }
@@ -103,7 +105,7 @@ const CrudAmbientes = () => {
 
     const AbrirRegistro = () => {
         VerificarTorres() ? setAbrirRegistro(true) :
-            alert("Debes registrar al menos una torre para poder proceder");
+            Swal.fire("Debes registrar al menos una torre para poder proceder");
     }
 
     const CerrarModal = () => {
@@ -119,17 +121,18 @@ const CrudAmbientes = () => {
     }
 
     const EliminarAmbientes = async () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los ambientes seleccionados?");
+        const confirmar = await new SWALConfirm()
+            .ConfirmAlert("¿Confirma que desea eliminar los ambientes seleccionados?");
         if (confirmar) {
             try {
                 const servicioAmbiente = new AmbienteServicio();
                 const auxListaID = listaSelecciones.map(ambiente => parseInt(ambiente.id.toString()));
                 const respuesta = await servicioAmbiente.EliminarAmbiente(auxListaID);
                 console.log(respuesta);
-                alert(respuesta !== 0 ? ("Ambientes eliminados satisfactoriamente!: ")
+                Swal.fire(respuesta !== 0 ? ("Ambientes eliminados satisfactoriamente!")
                     : ("Los ambientes no se eliminaron!"));
             } catch (error) {
-                alert(error);
+                Swal.fire(error);
             }
             CargarLista();
         } else {
@@ -141,9 +144,9 @@ const CrudAmbientes = () => {
         EliminarAmbientes();
         setVaciarListaSelecc(true);
     }
-    
+
     useEffect(() => {
-        if(vaciarListaSelecc) setVaciarListaSelecc(false);
+        if (vaciarListaSelecc) setVaciarListaSelecc(false);
     }, [vaciarListaSelecc]);
 
     return (

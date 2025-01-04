@@ -11,6 +11,7 @@ import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+import Swal from 'sweetalert2';
 
 const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -63,7 +64,7 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             const ObtenerRespuesta = async () => {
                 const respuesta = await ObtenerObjetosRelacionados();
                 if (!respuesta) {
-                    alert("Error al obtener información del grupo");
+                    Swal.fire("Error al obtener información del grupo");
                     onCloseProp && onCloseProp();
                 }
             }
@@ -97,9 +98,9 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             const respuesta = abrirConsulta ?
                 await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
                 : await servicioGrupo.GuardarGrupo(grupo);
-            alert(respuesta !== 0 ? ("Grupo guardado correctamente!") : ("NO se guardó el grupo!"));
+            Swal.fire(respuesta !== 0 ? ("Grupo guardado correctamente!") : ("NO se guardó el grupo!"));
         } catch (error) {
-            alert(error);
+            Swal.fire(error);
         }
         onCloseProp && onCloseProp();
     }
@@ -133,23 +134,23 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         const idResponsable = responsable.id;
         const idJornada = jornada.id;
         if (!idPrograma || !idPrograma || !idPrograma.toString().trim() || !SoloNumeros(idPrograma)) {
-            alert("Selección incorrecta de programa académico!");
+            Swal.fire("Selección incorrecta de programa académico!");
             setPrograma({});
         }
         else if (!ficha || !ficha.toString().trim() || !HastaCincuenta(ficha) || !SoloNumeros(ficha)) {
-            alert("Número de ficha incorrecto!");
+            Swal.fire("Número de ficha incorrecto!");
             setFicha('');
         } else if (!codigoGrupo || !codigoGrupo.toString().trim() || !HastaCien(codigoGrupo) || !AlfaNumericaSinEspacio(codigoGrupo)) {
-            alert("Código de grupo incorrecto");
+            Swal.fire("Código de grupo incorrecto");
             setCodigoGrupo('');
         } else if (!idResponsable || !idResponsable.toString().trim() || !SoloNumeros(idResponsable)) {
-            alert("Selección incorrecta de instructor responsable!");
+            Swal.fire("Selección incorrecta de instructor responsable!");
             setResponsable({});
         } else if (!idJornada || !idJornada.toString().trim() || !SoloNumeros(idJornada)) {
-            alert("Selección de jornada incorrecta!");
+            Swal.fire("Selección de jornada incorrecta!");
             setJornada('');
         } else if (!cantidadAprendices.toString().trim() || !HastaDos(cantidadAprendices) || !SoloNumeros(cantidadAprendices)) {
-            alert("Cantidad de aprendices incorrecta!");
+            Swal.fire("Cantidad de aprendices incorrecta!");
             setCantidadAprendices('');
         } else {
             bandera = true;

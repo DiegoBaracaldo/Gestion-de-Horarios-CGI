@@ -7,6 +7,8 @@ import InstructorServicio from '../../../backend/repository/servicios/Instructor
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import { mockInstructoresTres } from '../../mocks/MocksInstructores';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => {
 
@@ -19,7 +21,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
         try {
           setListaObjetos(await new InstructorServicio().CargarLista());
         } catch (error) {
-          alert(error);
+          Swal.fire(error);
           navegar(-1);
         }
     }
@@ -132,16 +134,17 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     }
 
     const EliminarInstructores = async () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los instructores seleccionados?");
+        const confirmar = await new SWALConfirm()
+        .ConfirmAlert("¿Confirma que desea eliminar los instructores seleccionados?");
         if (confirmar) {
             try {
                 const servicioInstructor = new InstructorServicio();
                 const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
                 const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
-                alert(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
+                Swal.fire(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
                   : ("NO se eliminaron los instructores!"));
             } catch (error) {
-                alert(error);
+                Swal.fire(error);
             }
           CargarLista();
         } else {

@@ -5,10 +5,12 @@ import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import ModalTorres from '../../modales/modalTorres/ModalTorres';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
-import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { AlfaNumericaConEspacio, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
@@ -32,7 +34,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
     try {
       setListaObjetos(await new TorreServicio().CargarLista());
     } catch (error) {
-      alert(error);
+      Swal.fire(error);
       navegar(-1);
     }
   }
@@ -83,7 +85,8 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   async function EliminarTorres() {
-    const confirmar = window.confirm("¿Confirma que desea eliminar las torres seleccionadas?");
+    const confirmar = await new SWALConfirm()
+      .ConfirmAlert("¿Confirma que desea eliminar las torres seleccionadas?");
     if (confirmar) {
       try {
         const servicioTorre = new TorreServicio();
@@ -92,7 +95,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
         if (respuesta !== 0) ResultadoOperacion("Torres eliminadas satisfactoriamente!");
         else ResultadoOperacion("NO se eliminaron las torres!");
       } catch (error) {
-        alert(error);
+        Swal.fire(error);
       }
       CargarListaInicial();
       setVaciarChecks(true);
@@ -120,14 +123,17 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   function RegistrarTorre() {
     if (textoAgregar) {
-      if (textoAgregar && textoAgregar.toString().trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)) {
+      if (textoAgregar
+        && textoAgregar.toString().trim()
+        && HastaCien(textoAgregar)
+        && AlfaNumericaConEspacio(textoAgregar)) {
         GuardarTorre(FormatearNombre(textoAgregar));
       } else {
-        alert("Dato incorrecto");
+        Swal.fire("Dato incorrecto");
         setReiniciarTexto(true);
       }
     } else {
-      alert("Valor inválido");
+      Swal.fire("Valor inválido");
     }
   }
 
@@ -143,7 +149,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   useEffect(() => {
-    if(reiniciarTexto) setReiniciarTexto(false);
+    if (reiniciarTexto) setReiniciarTexto(false);
   }, [reiniciarTexto]);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,7 +163,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   function ResultadoOperacion(mensaje) {
     CargarListaInicial();
     setReiniciarTexto(true);
-    alert(mensaje);
+    Swal.fire(mensaje);
   }
 
   return (

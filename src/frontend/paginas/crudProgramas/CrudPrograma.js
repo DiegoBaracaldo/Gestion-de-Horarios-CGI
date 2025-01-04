@@ -61,7 +61,7 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
 
   const AdaptarLista = (listaRecibida) => {
     const listaAux = [];
-    listaRecibida &&
+    Array.isArray(listaFiltrada) &&
       listaRecibida.forEach(element => {
         const objAux = {};
         objAux.id = element.id;

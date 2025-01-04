@@ -16,9 +16,7 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
         const ManejarEnter = (event) => {
             if(event.key === 'Enter' && (modoEdicion || isOpenRegistro)) onClickPositivo && onClickPositivo();
         }
-
         document.addEventListener('keydown', ManejarEnter);
-
         return () => document.removeEventListener('keydown', ManejarEnter);
     }, []);
 

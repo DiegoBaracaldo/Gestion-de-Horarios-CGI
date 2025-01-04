@@ -53,6 +53,10 @@
     tbody{
       overflow: auto;
     }
+    
+    .columnCheck {
+      width: 40px;
+  }
   }
 
   #listaBasicaContInterno{

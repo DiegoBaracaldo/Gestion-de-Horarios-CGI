@@ -46,7 +46,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
     const listaAux = [];
-    listaFiltrada &&
+    Array.isArray(listaFiltrada) &&
       listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;

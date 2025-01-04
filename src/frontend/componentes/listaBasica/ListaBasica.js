@@ -10,12 +10,13 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
     useEffect(() => {
         if (vaciarChecks) {
             setIsChecked(false);
+            SeleccsMultiples(false);
         }
     }, [vaciarChecks]);
 
-    useEffect(() => {
-        SeleccsMultiples(isChecked);
-    }, [isChecked]);
+    // useEffect(() => {
+    //     SeleccsMultiples(isChecked);
+    // }, [isChecked]);
 
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
@@ -27,7 +28,8 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
 
     // Maneja el cambio del checkbox en el encabezado
     const handleChange = () => {
-        setIsChecked(!isChecked);
+        const valor = isChecked;
+        SeleccsMultiples(!valor);
     };
 
     //Modificar selects a partir de manejar selección de todos
@@ -68,6 +70,13 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
         });
         //le paso la lista a una prop que puede recibirse en un setState en el padre
         listaSeleccProp && listaSeleccProp(arraySelecciones);
+        if (selecciones.every(val => val === false)) {
+            setIsChecked(false);
+        } else if (selecciones.every(val => val === true)) {
+            setIsChecked(true);
+        } else {
+            setIsChecked(false);
+        }
     }, [selecciones]);
     return (
         <div id='listaBasicaContInterno'>

@@ -49,7 +49,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   useEffect(() => {
     const listaAux = [];
-    listaFiltrada &&
+    Array.isArray(listaFiltrada) &&
       listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
@@ -132,15 +132,18 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   async function GuardarTorre(nombre) {
-    const servicioTorre = new TorreServicio();
-    const respuesta = await servicioTorre.GuardarTorre(nombre);
-    ResultadoOperacion(respuesta !== 0 ? ("Éxito al guardar torre nueva!")
-      : ("Error al guardar torre nueva!"));
-
+    try {
+      const servicioTorre = new TorreServicio();
+      const respuesta = await servicioTorre.GuardarTorre(nombre);
+      ResultadoOperacion(respuesta !== 0 ? ("Éxito al guardar torre nueva!")
+        : ("NO se guardó la torre nueva!"));
+    } catch (error) {
+      ResultadoOperacion(error);
+    }
   }
 
   useEffect(() => {
-    reiniciarTexto && setReiniciarTexto(false);
+    if(reiniciarTexto) setReiniciarTexto(false);
   }, [reiniciarTexto]);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,9 +155,9 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   function ResultadoOperacion(mensaje) {
-    alert(mensaje);
     CargarListaInicial();
     setReiniciarTexto(true);
+    alert(mensaje);
   }
 
   return (

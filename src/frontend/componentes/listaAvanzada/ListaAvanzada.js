@@ -11,6 +11,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
     const [numColumnas, setNumColumnas] = useState(subtitulos ? subtitulos.length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
+    const [todosSelecc, setTodosSelecc] = useState(false);
     const [listaObjetosSelecc, setListaObjetosSelecc] = useState([]);
 
     useEffect(() => {
@@ -55,6 +56,8 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
         //Se llena o vacía el array de ids para eliminación 
         if (valor) setListaObjetosSelecc(datosJson && datosJson);
         else setListaObjetosSelecc([]);
+        //Se marca o desmarca la casilla de selecc todos
+        setTodosSelecc(valor);
     }
 
     const PedirFuncionalidad = () => {
@@ -71,7 +74,14 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
 
     //Limpiar los objetos seleccionados al limpiar los select
     useEffect(() => {
-        if (!selecciones.includes(true)) setListaObjetosSelecc([]);
+        if (!selecciones.includes(true)) {
+            setListaObjetosSelecc([]);
+            setTodosSelecc(false);
+        } else if (!selecciones.includes(false)) {
+            setTodosSelecc(true);
+        } else {
+            setTodosSelecc(false);
+        }
     }, [selecciones]);
 
     return (
@@ -90,7 +100,8 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                         {
                             modoSeleccion ? null :
                                 <input type='checkbox'
-                                    onChange={SeleccionarTodo} />
+                                    onChange={SeleccionarTodo}
+                                    checked={todosSelecc} />
                         }</td>
                     {
                         subtitulos ?

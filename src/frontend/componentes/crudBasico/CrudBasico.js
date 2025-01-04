@@ -33,7 +33,7 @@ function CrudBasico({
   const [textoAgregar, setTextoAgregar] = useState('');
 
   useEffect(() => {
-    reiniciarTextoAgregar && setTextoAgregar('');
+    if(reiniciarTextoAgregar) setTextoAgregar('');
   }, [reiniciarTextoAgregar]);
 
   useEffect(() => {

@@ -65,7 +65,7 @@ const CrudGrupos = () => {
 
     const AdaptarLista = (listaRecibida) => {
         const listaAux = [];
-        listaRecibida &&
+        Array.isArray(listaFiltrada) &&
             listaRecibida.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;

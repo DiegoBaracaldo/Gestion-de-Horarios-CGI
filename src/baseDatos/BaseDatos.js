@@ -104,7 +104,6 @@ class ConexionBD {
             telefono VARCHAR(100) NOT NULL UNIQUE,
             especialidad VARCHAR(100) NOT NULL,
             disponibilidad BOOLEAN NOT NULL DEFAULT TRUE,
-            esResponsable BOOLEAN NOT NULL DEFAULT FALSE,
             franjaDisponibilidad TEXT NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
             );

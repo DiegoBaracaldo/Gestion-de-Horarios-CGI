@@ -3,7 +3,6 @@ import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
 import './CrudAmbientes.css';
 import { listaMenuAmbientes } from '../ListasMenuFiltro';
 import ModalAmbientes from '../../modales/modalAmbientes/ModalAmbientes';
-import { mockAmbientesTres } from '../../mocks/MocksAmbientes';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';

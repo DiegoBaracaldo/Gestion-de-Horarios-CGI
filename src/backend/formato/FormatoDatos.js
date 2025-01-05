@@ -35,3 +35,6 @@ export function FormatearDescripcion(texto) {
 export function FormatearFecha() {
     //No es necesaria, pues se obtiene en el mismo formato de sql yyyy-mm-dd
 }
+export function FormatearCodigoGrupo(texto){
+    return texto.toUpperCase();
+}

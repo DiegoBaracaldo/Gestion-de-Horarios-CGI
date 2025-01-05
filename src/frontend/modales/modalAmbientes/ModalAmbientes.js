@@ -5,11 +5,9 @@ import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
 import CrudTorres from '../../paginas/crudTorres/CrudTorres';
 import { AlfaNumericaConEspacio, CamposVacios, SoloNumeros, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien, HastaDos, HastaTres } from '../../../backend/validacion/ValidacionCantidadCaracteres';
-import Ambiente from '../../../backend/repository/entidades/Ambiente';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
-import ObtenerErrorSQLite from '../../../baseDatos/ErroresSQLite';
 import Swal from 'sweetalert2';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {

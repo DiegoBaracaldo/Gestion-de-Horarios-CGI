@@ -10,19 +10,20 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => {
+const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado }) => {
 
-    const subs = ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
+    const subs = modoSeleccion ? ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
+    : ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
     const navegar = useNavigate();
 
     const CargarLista = async () => {
         console.log("cargando lista...");
         try {
-          setListaObjetos(await new InstructorServicio().CargarLista());
+            setListaObjetos(await new InstructorServicio().CargarLista());
         } catch (error) {
-          Swal.fire(error);
-          navegar(-1);
+            Swal.fire(error);
+            navegar(-1);
         }
     }
 
@@ -42,11 +43,11 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     useEffect(() => {
         CargarLista();
-    },[]);
+    }, []);
 
     useEffect(() => {
         setListaFiltrada(listaObjetos);
-    },[listaObjetos]);
+    }, [listaObjetos]);
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
@@ -58,6 +59,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
                 objetoAux.nombre = element.nombre;
                 objetoAux.especialidad = element.especialidad;
                 objetoAux.topeHoras = element.topeHoras;
+                if(modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);
@@ -81,7 +83,7 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
+        if (listaObjetos.length > 0) setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     /////////////////////////////////////////////////////
 
@@ -109,20 +111,20 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
     }
     /////////////////////////////////////////////////////
 
-    const OnClickDestructivo =  () => {
-        if(modoSeleccion){
+    const OnClickDestructivo = () => {
+        if (modoSeleccion) {
             onClose && onClose();
-        }else{
+        } else {
             EliminarInstructores();
             setVaciarListaSelecc(true);
         }
     }
 
     const OnClickFila = (r) => {
-        if(modoSeleccion){
+        if (modoSeleccion) {
             responsableSeleccionado && responsableSeleccionado(r);
             onClose();
-        }else{
+        } else {
             DefinirInstructorConsultado(r.id);
             AbrirConsulta();
         }
@@ -135,36 +137,36 @@ const CrudInstructores = ({modoSeleccion, onClose, responsableSeleccionado}) => 
 
     const EliminarInstructores = async () => {
         const confirmar = await new SWALConfirm()
-        .ConfirmAlert("¿Confirma que desea eliminar los instructores seleccionados?");
+            .ConfirmAlert("¿Confirma que desea eliminar los instructores seleccionados?");
         if (confirmar) {
             try {
                 const servicioInstructor = new InstructorServicio();
                 const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));
                 const respuesta = await servicioInstructor.EliminarInstructor(auxListaID);
                 Swal.fire(respuesta !== 0 ? ("Instructores eliminados satisfactoriamente!: ")
-                  : ("NO se eliminaron los instructores!"));
+                    : ("NO se eliminaron los instructores!"));
             } catch (error) {
                 Swal.fire(error);
             }
-          CargarLista();
+            CargarLista();
         } else {
-          return null;
+            return null;
         }
     }
 
     return (
-        <div id='contCrudInstruc' style={modoSeleccion && {zIndex: '10'}}>
+        <div id='contCrudInstruc' style={modoSeleccion && { zIndex: '10' }}>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Instructores"
                 listaMenu={listaMenuIntruct} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
                 clicFila={r => OnClickFila(r)} datosJson={listaAdaptada}
                 subtitulos={subs} modoSeleccion={modoSeleccion}
-                onCLicDestructivo={OnClickDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
+                onCLicDestructivo={OnClickDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalInstructores abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} objConsultado={instructorConsultado}/> :
+                        onCloseProp={() => CerrarModal()} objConsultado={instructorConsultado} /> :
                     null
             }
         </div>

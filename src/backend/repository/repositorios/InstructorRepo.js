@@ -5,11 +5,11 @@ class InstructorRepo {
         this.db = db;
     }
 
-    async AtLeastOne(){
+    async AtLeastOne() {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM instructores LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err.errno);
+                if (err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -17,9 +17,14 @@ class InstructorRepo {
 
     async GetAll() {
         return new Promise((resolve, reject) => {
-            const query = "SELECT * FROM instructores";
+            const query = `
+            SELECT i.*, COUNT(g.idResponsable) AS cantidadGruposACargo
+            FROM instructores i
+            LEFT JOIN grupos g ON i.id = g.idResponsable
+            GROUP BY i.id
+        `;
             this.db.all(query, [], (error, filas) => {
-                if(error) reject(error.errno);
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -36,17 +41,17 @@ class InstructorRepo {
     }
 
     async SaveNew(instructor) {
-        const {id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad} = instructor;
+        const { id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad } = instructor;
         return new Promise((resolve, reject) => {
-            const query = "INSERT INTO instructores "+
-            "(id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) "+
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
+            const query = "INSERT INTO instructores " +
+                "(id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad], function (error) {
                 if (error) {
                     reject(error.errno);
                 } else {
-                    resolve(this.changes); 
+                    resolve(this.changes);
                 }
             });
         });
@@ -54,12 +59,12 @@ class InstructorRepo {
 
     async Save(idViejo, instructor) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE instructores SET "+
-            "id = ?, nombre = ?, "+
-            "topeHoras = ?, correo = ?, " +
-            "telefono = ?, especialidad = ?, franjaDisponibilidad = ?"+
-            "WHERE id = ?";
-            const {id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad} = instructor; // Desestructuración del objeto torre
+            const query = "UPDATE instructores SET " +
+                "id = ?, nombre = ?, " +
+                "topeHoras = ?, correo = ?, " +
+                "telefono = ?, especialidad = ?, franjaDisponibilidad = ?" +
+                "WHERE id = ?";
+            const { id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad } = instructor; // Desestructuración del objeto torre
 
             this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad, idViejo], function (error) {
                 if (error) reject(error.errno);

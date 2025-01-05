@@ -14,11 +14,13 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
     //Registrar con botón Enter
     useEffect(() => {
         const ManejarEnter = (event) => {
-            event.preventDefault(); // Evita que haga algo por defecto
-            event.stopPropagation(); // Evita que se propague el evento
             if (event.key === 'Enter' && (modoEdicion || isOpenRegistro)) {
+                event.preventDefault(); // Evita que haga algo por defecto
+                event.stopPropagation(); // Evita que se propague el evento
                 if (typeof onClickPositivo === 'function') onClickPositivo();
-            }else if(event.key === 'Escape'){
+            } else if (event.key === 'Escape') {
+                event.preventDefault(); // Evita que haga algo por defecto
+                event.stopPropagation(); // Evita que se propague el evento
                 ManejarOnClose();
             }
         }

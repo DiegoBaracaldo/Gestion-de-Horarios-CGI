@@ -12,6 +12,7 @@ import InstructorServicio from '../../../backend/repository/servicios/Instructor
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import Swal from 'sweetalert2';
+import { FormatearCodigoGrupo } from '../../../backend/formato/FormatoDatos';
 
 const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -163,7 +164,7 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             id: ficha,
             idPrograma: programa.id,
             idResponsable: responsable.id,
-            codigoGrupo: codigoGrupo,
+            codigoGrupo: FormatearCodigoGrupo(codigoGrupo),
             idJornada: jornada.id,
             cantidadAprendices: Number(cantidadAprendices),
             esCadenaFormacion: esCadena
@@ -178,7 +179,7 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             idPrograma: programa.id,
             nombrePrograma: programa.nombre,
             idResponsable: responsable.id,
-            codigoGrupo: codigoGrupo,
+            codigoGrupo: FormatearCodigoGrupo(codigoGrupo),
             idJornada: jornada.id,
             jornada: jornada.tipo,
             cantidadAprendices: Number(cantidadAprendices),

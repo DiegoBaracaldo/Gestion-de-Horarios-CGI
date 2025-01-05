@@ -4,20 +4,24 @@ import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import Swal from 'sweetalert2';
 
 
-function ModalTorres({cerrarModal, objConsulta}) {
+function ModalTorres({ cerrarModal, objConsulta }) {
 
   const [nombreTorre, setNombreTorre] = useState(objConsulta.nombre || '');
   const idViejo = objConsulta.id || '';
 
   const ActualizarTorre = async () => {
-    if(ValidarObjTorre()){
-
-      const torreService = new TorreServicio();
-      const respuesta = await torreService.ActualizarTorre(idViejo, ObtenerObjActualizado());
-      if(respuesta !== 0) ResultadoOperacion("Éxito al editar la torre!");
-      else ResultadoOperacion("Torre actualizada con éxito");
+    if (ValidarObjTorre()) {
+      try {
+        const torreService = new TorreServicio();
+        const respuesta = await torreService.ActualizarTorre(idViejo, ObtenerObjActualizado());
+        if (respuesta !== 0) ResultadoOperacion("Torre guardada correctamente!");
+        else ResultadoOperacion("NO se guardó la torre!");
+      } catch (error) {
+        Swal.fire(error);
+      }
     }
   }
 
@@ -30,37 +34,37 @@ function ModalTorres({cerrarModal, objConsulta}) {
 
   const ValidarObjTorre = () => {
     let bandera = false;
-    if(!CamposVacios(objConsulta)){
-      if(!nombreTorre || !nombreTorre.toString().trim() || !HastaCien(nombreTorre) || !TextoConEspacio(nombreTorre)){
-        alert("Nombre incorrecto!");
+    if (!CamposVacios(objConsulta)) {
+      if (!nombreTorre || !nombreTorre.toString().trim() || !HastaCien(nombreTorre) || !TextoConEspacio(nombreTorre)) {
+        Swal.fire("Nombre incorrecto!");
         setNombreTorre('');
-      }else{
+      } else {
         bandera = true;
       }
-    }else{
-      alert("Datos incorrectos!");
+    } else {
+      Swal.fire("Datos incorrectos!");
     }
     return bandera;
   }
-  
-  function ResultadoOperacion(mensaje){
-    alert(mensaje);
+
+  function ResultadoOperacion(mensaje) {
+    Swal.fire(mensaje);
     cerrarModal && cerrarModal();
   }
 
   return (
-    <ModalGeneral  onClose={cerrarModal} isOpenRegistro={true} 
-    onClickPositivo={ActualizarTorre}>
-        <div className='seccCajitasModal'>
+    <ModalGeneral onClose={cerrarModal} isOpenRegistro={true}
+      onClickPositivo={ActualizarTorre}>
+      <div className='seccCajitasModal'>
         <section >
-            <label>
-                Nombre: 
-            </label>
-            <input maxLength={100} value={nombreTorre} 
-            onChange={(e) => setNombreTorre(e.target.value)}/>
-        </section> 
-        </div>
-        
+          <label>
+            Nombre:
+          </label>
+          <input maxLength={100} value={nombreTorre}
+            onChange={(e) => setNombreTorre(e.target.value)} />
+        </section>
+      </div>
+
 
     </ModalGeneral>
   )

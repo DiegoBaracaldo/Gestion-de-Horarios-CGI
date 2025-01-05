@@ -4,11 +4,13 @@ class JornadaRepo {
         this.db = db;
     }
     
+//En  la función de registro múltiple, se debe verificar que no se crucen los horarios aquí en repo
+
     async AtLeastOne(){
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM jornadas LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err);
+                if(err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -18,7 +20,7 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM jornadas";
             this.db.all(query, [], (error, filas) => {
-                if(error) reject(error);
+                if(error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -28,8 +30,18 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM jornadas WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
+            });
+        });
+    }
+
+    async GetAllFranjas(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT franjaDisponibilidad from jornadas";
+            this.db.all(query, [], (error, filas) => {
+                if(error) reject(error);
+                else resolve(filas);
             });
         });
     }
@@ -41,9 +53,9 @@ class JornadaRepo {
 
             this.db.run(query, [tipo, franjaDisponibilidad], function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva torre
+                    resolve(this.changes);
                 }
             });
         });
@@ -55,8 +67,8 @@ class JornadaRepo {
             const { tipo, franjaDisponibilidad } = jornada; // Desestructuración del objeto torre
 
             this.db.run(query, [tipo, franjaDisponibilidad, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -71,9 +83,9 @@ class JornadaRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

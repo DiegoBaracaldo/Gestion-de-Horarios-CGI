@@ -6,6 +6,7 @@ import { CamposVacios, TextoConEspacio } from '../../../backend/validacion/Valid
 import { HastaVeintiCinco } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import Swal from 'sweetalert2';
 function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 }) {
     const [inputsOff, setInputsOff] = useState(false);
@@ -14,14 +15,40 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
 
     const tipoInicial = objConsulta.tipo || '';
     const [tipo, setTipo] = useState(tipoInicial);
-    const horarioInicial =
-        objConsulta.franjaDisponibilidad &&
-        objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
-    const [horario, setHorario] = useState(horarioInicial);
+    //Esta solo está en jornadas, para no cruzar horarios
+    const [horarioEntero,  setHorarioEntero] = useState([]);
+    const horarioInicialEstatico = objConsulta.franjaDisponibilidad &&
+    objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
+    const [horarioInicial, setHorarioInicial] = useState(horarioInicialEstatico);
+    const [horario, setHorario] = useState(horarioInicialEstatico);
+    const [franjasDescartadasAux, setFranjasDescartadasAux]  = useState([]);
     const [jornada, setJornada] = useState({});
     const [primeraCarga, setPrimeraCarga] = useState(true);
 
+    // useEffect(() => {
+    //     console.log(horario);
+    // }, [horario]);
+
     const idViejo = objConsulta.id || '';
+
+    async function CargarHorarioCompleto(){
+        try {
+            const servicioJornada = new JornadaServicio();
+            setHorarioEntero(await servicioJornada.CargarAllFranjas());
+            //return servicioJornada.CargarAllFranjas();
+        } catch (error) {
+            Swal.fire(error);
+            if(typeof cerrarModal ===  'function') cerrarModal();
+        }
+    }
+
+    useEffect(() => {
+        CargarHorarioCompleto();
+    }, []);
+
+    // useEffect(() => {
+    //     console.log(horarioEntero);
+    // }, [horarioEntero]);
 
     const Actualizarjornada = () => {
         setPrimeraCarga(false);
@@ -34,10 +61,14 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
     }, [jornada]);
 
     async function Actualizar() {
-        const servicioJornada = new JornadaServicio();
-        const respuesta = await servicioJornada.ActualizarJornada(idViejo, jornada);
-        alert(respuesta !== 0 ? ("Jornada actualizada correctamente")
-            : ("Jornada actualizada correctamente"));
+        try {
+            const servicioJornada = new JornadaServicio();
+            const respuesta = await servicioJornada.ActualizarJornada(idViejo, jornada);
+            Swal.fire(respuesta !== 0 ? ("Jornada actualizada correctamente")
+                : ("NO se actualizó la jornada!"));
+        } catch (error) {
+            Swal.fire(error);
+        }
         cerrarModal && cerrarModal();
     }
 
@@ -59,28 +90,39 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
         let bandera = false;
         if (!CamposVacios(jornada)) {
             if (!tipo || !tipo.toString().trim() || !HastaVeintiCinco(tipo) || !TextoConEspacio(tipo)) {
-                alert("Tipo de jornada incorrecta, escribe bien!");
+                Swal.fire("Tipo de jornada incorrecta, escribe bien!");
                 setTipo('');
             } else if (!horario.length > 0) {
-                alert("Debes establecer un horario para la jornada!");
+                Swal.fire("Debes establecer un horario para la jornada!");
             } else {
                 bandera = true;
             }
         } else {
-            alert("Datos incorrectos!");
+            Swal.fire("Datos incorrectos!");
         }
         return bandera;
     }
 
     const RegistrarHorarioJornada = () => {
-        if (horario.length > 0) setAbrirHorario(false);
-        else alert("Debes establecer un rango hroario para la jornada!");
+        if (horario.length > 0){
+            setHorarioInicial(horario);
+            setAbrirHorario(false);
+        } 
+        else Swal.fire("Debes establecer un rango hroario para la jornada!");
     }
 
     function ReiniciarValores() {
         setTipo(tipoInicial);
-        setHorario(horarioInicial);
+        setHorarioInicial(horarioInicialEstatico);
+        setHorario(horarioInicialEstatico);
     }
+
+    // const AcomodarHorario = (listaFranjas) => {
+    //     // const listaAux = listaFranjas.filter(numero => {
+    //     //     if(!horarioEntero.includes(numero)) return numero;
+    //     // });
+    //     setHorario(listaFranjas);
+    // }
 
     useEffect(() => {
         if (!edicionActivada) ReiniciarValores();
@@ -104,16 +146,20 @@ function ModalJornadas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
                         Horario:
                     </label>
                     <BotonDispHoraria esDisponibilidad={false} esConsulta={abrirConsulta}
-                        edicionActivada={edicionActivada} onClicHorario={() => setAbrirHorario(true)} />
+                        edicionActivada={edicionActivada} onClicHorario={() => setAbrirHorario(true)} 
+                        horarioSeleccionado={horario.length > 0}/>
                 </section>
             </div>
             {
                 abrirHorario ? <FranjaHoraria onClickDestructivo={() => setAbrirHorario(false)}
                     esConsulta={inputsOff}
-                    franjasOcupadasProp={horario}
+                    franjasOcupadasProp={horarioInicial}
                     esEdicion={edicionActivada}
                     onClickPositivo={RegistrarHorarioJornada}
-                    franjaProp={(f) => setHorario(f)} />
+                    franjaProp={(f) => setHorario(f)} 
+                    horarioCompleto={horarioEntero}
+                    setFranjasDescartadasAux={(f) => setFranjasDescartadasAux(f)}
+                    franjasDescartadasAux={franjasDescartadasAux}/>
                     : null
             }
         </ModalGeneral>

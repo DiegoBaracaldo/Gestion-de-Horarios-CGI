@@ -8,30 +8,52 @@ import JornadaServicio from '../../../backend/repository/servicios/JornadaServic
 import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import { useNavigate } from 'react-router-dom'
+import Swal from 'sweetalert2'
+import SWALConfirm from '../../alertas/SWALConfirm'
 
 function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirHorario, setAbrirHorario] = useState(false);
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [abrirConsulta, setAbrirConsulta] = useState(false);
   const [jornadaConsultada, setJornadaConsultada] = useState({});
+  const [horarioEntero, setHorarioEntero] = useState([]);
 
+  // useEffect(() => {
+  //   console.log(horarioEntero);
+  // }, [horarioEntero]);
+
+  async function CargarHorarioCompleto(){
+    try {
+        const servicioJornada = new JornadaServicio();
+        setHorarioEntero(await servicioJornada.CargarAllFranjas());
+    } catch (error) {
+        Swal.fire(error);
+        if(typeof onClose ===  'function') onClose();
+    }
+}
 
   const [listaObjetos, setListaObjetos] = useState([]);
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [listaAdaptada, setListaAdaptada] = useState([]);
+
+  const [vaciarChecks, setVaciarChecks] = useState(false);
+
+  const navegar = useNavigate();
 
   const CargarLista = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new JornadaServicio().CargarLista());
     } catch (error) {
-      console.log("error en crud jornadas por: ", error);
-      setListaObjetos([]);
+      Swal.fire(error);
+      navegar(-1);
     }
   }
 
   useEffect(() => {
     CargarLista();
+    CargarHorarioCompleto();
   }, []);
 
   useEffect(() => {
@@ -41,7 +63,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
   useEffect(() => {
     const listaAux = [];
-    listaFiltrada &&
+    Array.isArray(listaFiltrada) &&
       listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
@@ -77,13 +99,20 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   }
 
   async function EliminarJornadas() {
-    const confirmar = window.confirm("¿Confirma que desea eliminar las jornadas seleccionadas?");
+    const confirmar = await new SWALConfirm()
+      .ConfirmAlert("¿Confirma que desea eliminar las jornadas seleccionadas?");
     if (confirmar) {
-      const servicioJornada = new JornadaServicio();
-      const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));
-      const respuesta = await servicioJornada.EliminarJornada(auxListaID);
-      if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
-      else ResultadoOperacion("Error al eliminar las jornadas!");
+      try {
+        const servicioJornada = new JornadaServicio();
+        const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));
+        const respuesta = await servicioJornada.EliminarJornada(auxListaID);
+        if (respuesta !== 0) ResultadoOperacion("Jornadas eliminadas satisfactoriamente!");
+        else ResultadoOperacion("NO se eliminaron las jornadas!");
+      } catch (error) {
+        Swal.fire(error);
+      }
+      CargarLista();
+      setVaciarChecks(true);
     } else {
       return null;
     }
@@ -108,10 +137,10 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
         setAbrirHorario(true);
       } else {
         setReiniciarTexto(true);
-        alert("Dato incorrecto");
+        Swal.fire("Dato incorrecto");
       }
     } else {
-      alert("Valor inválido");
+      Swal.fire("Valor inválido");
     }
   }
 
@@ -121,7 +150,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       const objFormado = FormarObjeto(FormatearNombre(textoAgregar));
       GuardarJornada(objFormado);
     } else {
-      alert("Debes establecer un rango horario para la jornada!");
+      Swal.fire("Debes establecer un rango horario para la jornada!");
     }
 
   }
@@ -152,7 +181,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
 
   function ResultadoOperacion(mensaje) {
-    alert(mensaje);
+    Swal.fire(mensaje);
     CargarLista();
     setReiniciarTexto(true);
   }
@@ -171,6 +200,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
         onClickDestructivo={OnClickDestructivo}
         agregar={(t) => setTextoAgregar(t)}
         reiniciarTextoAgregar={reiniciarTexto}
+        vaciarChecks={vaciarChecks}
       />
 
       {
@@ -181,7 +211,10 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       {
         abrirHorario ? <FranjaHoraria onClickDestructivo={CancelarRegistro}
           onClickPositivo={RegistrarJornada}
-          franjaProp={(f) => setFranjaHoraria(f)} />
+          franjaProp={(f) => setFranjaHoraria(f)} 
+          horarioCompleto={horarioEntero}
+          franjasOcupadasProp={[]}
+          franjasDescartadasAux={[]}/>
           : null
       }
     </div>

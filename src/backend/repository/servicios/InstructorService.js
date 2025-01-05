@@ -11,7 +11,7 @@ class InstructorServicio {
         return await window.electron.AtLeastOneInstructor();
       } catch (error) {
         console.log("error en servicio instructor por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -21,7 +21,7 @@ class InstructorServicio {
           return await window.electron.GetAllInstructores();
         } catch (error) {
           console.log("error en servicio instructor por: ", error);
-          return [];
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -31,7 +31,7 @@ class InstructorServicio {
         return await window.electron.SaveNewInstructor(instructor);
       } catch (error) {
         console.log("error en servicio instructor por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -41,7 +41,7 @@ class InstructorServicio {
         return await window.electron.GetInstructorByID(id);
       } catch (error) {
         console.log("error en servicio instructor por: ", error);
-        return {};
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -51,7 +51,7 @@ class InstructorServicio {
         return await window.electron.SaveInstructor(idViejo, instructor);
       } catch (error) {
         console.log("error en servicio instructor por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -61,7 +61,7 @@ class InstructorServicio {
         return await window.electron.RemoveInstructor(listaIDs);
       } catch (error) {
         console.log("error en servicio instructor por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 }

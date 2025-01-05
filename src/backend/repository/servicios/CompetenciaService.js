@@ -10,7 +10,7 @@ class CompetenciaServicio {
           return await window.electron.GetAllCompetencias(idPrograma);
         } catch (error) {
           console.log("error en servicio competencias por: ", error);
-          return [];
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -20,7 +20,7 @@ class CompetenciaServicio {
         return await window.electron.SaveNewCompetencia(competencia);
       } catch (error) {
         console.log("error en servicio competencia por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -30,7 +30,7 @@ class CompetenciaServicio {
         return await window.electron.GetCompetenciaByID(id);
       } catch (error) {
         console.log("error en servicio competencia por: ", error);
-        return {};
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -40,7 +40,7 @@ class CompetenciaServicio {
         return await window.electron.SaveCompetencia(idViejo, competencia);
       } catch (error) {
         console.log("error en servicio competencia por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 
@@ -50,7 +50,7 @@ class CompetenciaServicio {
         return await window.electron.RemoveCompetencia(listaIDs);
       } catch (error) {
         console.log("error en servicio competencia por: ", error);
-        return 0;
+        throw error.message.split(":")[1].trim();
       }
     }
 }

@@ -4,6 +4,7 @@ import { CamposVacios, EsFecha, SoloNumeros, TextoConEspacio } from '../../../ba
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
+import Swal from 'sweetalert2';
 
 function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta }) {
   const [inputsOff, setInputsOff] = useState(false);
@@ -40,10 +41,14 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   }, [programa]);
 
   async function Registrar() {
-    const servicioPrograma = new ProgramaServicio();
-    const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
-      : await servicioPrograma.GuardarPrograma(programa);
-    alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+    try {
+      const servicioPrograma = new ProgramaServicio();
+      const respuesta = abrirConsulta ? await servicioPrograma.ActualizarPrograma(idViejo, programa)
+        : await servicioPrograma.GuardarPrograma(programa);
+      Swal.fire(respuesta !== 0 ? 'Programa guardado correctamente!' : 'NO se guardó el programa!');
+    } catch (error) {
+      Swal.fire(error);
+    }
     cerrarModal && cerrarModal();
   }
 
@@ -82,25 +87,25 @@ function ModalProgramas({ abrirRegistro, abrirConsulta, cerrarModal, objConsulta
   const ValidarObjPrograma = () => {
     let bandera = false;
     if (!codigo || !codigo.toString().trim() || !HastaCincuenta(codigo.toString()) || !SoloNumeros(codigo)) {
-      alert("Código incorrecto");
+      Swal.fire("Código incorrecto");
       setCodigo('');
     } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre.toString()) || !TextoConEspacio(nombre)) {
-      alert("Nombre incorrecto!");
+      Swal.fire("Nombre incorrecto!");
       setNombre('');
     } else if (!tipo || !tipo.toString().trim() || !HastaCincuenta(tipo.toString()) || !TextoConEspacio(tipo)) {
-      alert("Tipo incorrecto");
+      Swal.fire("Tipo incorrecto");
       setTipo('tecnico');
     } else if (!cantidadTrimestres || !cantidadTrimestres.toString().trim() || !HastaDos(cantidadTrimestres.toString()) || !SoloNumeros(cantidadTrimestres)) {
-      alert("Cantidad de trimestres incorrecta");
+      Swal.fire("Cantidad de trimestres incorrecta");
       setCantidadTrimestres('');
     } else if (!fechaInicio || !fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
-      alert("Fecha de inicio incorrecta!");
+      Swal.fire("Fecha de inicio incorrecta!");
       setFechaInicio('');
     } else if (!fechaFin || !fechaFin.toString().trim() || EsFecha(fechaFin)) {
-      alert("Fecha de fin incorrecta!");
+      Swal.fire("Fecha de fin incorrecta!");
       setFechaFin('');
     } else if (fechaFin < fechaInicio) {
-      alert("Fecha final debería ser mayor que fecha inicial!");
+      Swal.fire("Fecha final debería ser mayor que fecha inicial!");
     } else {
       bandera = true;
     }

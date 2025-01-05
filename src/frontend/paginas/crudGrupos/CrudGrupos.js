@@ -10,17 +10,22 @@ import ProgramaServicio from '../../../backend/repository/servicios/ProgramaServ
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudGrupos = () => {
 
     const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
 
+    const navegar = useNavigate();
+
     const CargarLista = async () => {
         try {
             setListaObjetos(await new GrupoServicio().CargarLista());
         } catch (error) {
-            console.log("Error en crud Grupos por: ", error);
-            setListaObjetos([]);
+            Swal.fire(error);
+            navegar(-1);
         }
     }
 
@@ -36,7 +41,7 @@ const CrudGrupos = () => {
     //los siguientes dos hooks son coodependendientes, opcionCadena depende donde este true en checkOpciones
     const [checkOpciones, setCheckOpciones] = useState([false, false, true]);
     const [opcionCadena, setOpcionCadena] = useState("ambos");
-    
+
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
 
@@ -62,7 +67,7 @@ const CrudGrupos = () => {
 
     const AdaptarLista = (listaRecibida) => {
         const listaAux = [];
-        listaRecibida &&
+        Array.isArray(listaFiltrada) &&
             listaRecibida.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
@@ -113,7 +118,7 @@ const CrudGrupos = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        if(listaObjetos.length > 0)setTimeout(Filtrar, "50");
+        if (listaObjetos.length > 0) setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
 
     const FiltrarCadenaFormacion = () => {
@@ -139,7 +144,7 @@ const CrudGrupos = () => {
     const DefinirGrupoConsultado = (numFicha) => {
         let grupoAux = {};
         listaFiltrada.forEach((grupo) => {
-            if(grupo.id === numFicha) grupoAux = grupo;
+            if (grupo.id === numFicha) grupoAux = grupo;
         });
         setGrupoConsultado(grupoAux);
     }
@@ -150,23 +155,23 @@ const CrudGrupos = () => {
 
     const AbrirRegistro = () => {
         if (!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico, " +
+            Swal.fire("Debes registrar al menos un programa académico, " +
                 "un instructor y una jornada para proceder");
         } else if (!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico y " +
+            Swal.fire("Debes registrar al menos un programa académico y " +
                 "un instructor para proceder");
         } else if (!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico y " +
+            Swal.fire("Debes registrar al menos un programa académico y " +
                 "una jornada para proceder");
         } else if (!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un programa académico para proceder");
+            Swal.fire("Debes registrar al menos un programa académico para proceder");
         } else if (VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos un instructor y " +
+            Swal.fire("Debes registrar al menos un instructor y " +
                 "una jornada para proceder");
         } else if (VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            alert("Debes registrar al menos un instructor para proceder");
+            Swal.fire("Debes registrar al menos un instructor para proceder");
         } else if (VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            alert("Debes registrar al menos una jornada para proceder");
+            Swal.fire("Debes registrar al menos una jornada para proceder");
         } else {
             setAbrirRegistro(true);
         }
@@ -196,17 +201,22 @@ const CrudGrupos = () => {
         return respuesta === 0 ? false : true;
     }
 
-    const EliminarGrupos  = async () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los grupos seleccionados?");
+    const EliminarGrupos = async () => {
+        const confirmar = await new SWALConfirm()
+        .ConfirmAlert("¿Confirma que desea eliminar los grupos seleccionados?");
         if (confirmar) {
-          const servicioGrupo = new GrupoServicio();
-          const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
-          const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
-          alert(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
-            : ("Error al eliminar los grupos!"));
+            try {
+                const servicioGrupo = new GrupoServicio();
+                const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));
+                const respuesta = await servicioGrupo.EliminarGrupo(auxListaID);
+                Swal.fire(respuesta !== 0 ? ("Grupos eliminados satisfactoriamente!: ")
+                    : ("No se eliminaron los grupos!"));
+            } catch (error) {
+                Swal.fire(error);
+            }
             CargarLista();
         } else {
-          return null;
+            return null;
         }
     }
 
@@ -237,12 +247,12 @@ const CrudGrupos = () => {
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs} 
-                onCLicDestructivo={onClicDestructivo}/>
+                clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs}
+                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} objConsulta={grupoConsultado}/>
+                        onCloseProp={() => CerrarModal()} objConsulta={grupoConsultado} />
                     : null
             }
         </div>

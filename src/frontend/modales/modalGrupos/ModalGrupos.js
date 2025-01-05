@@ -11,6 +11,7 @@ import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+import Swal from 'sweetalert2';
 
 const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -28,39 +29,46 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     let jornadaInicial = {};
     const [jornada, setJornada] = useState(jornadaInicial);
 
-    const CargarResponsableInicial = async () => {
+    const ObtenerObjetosRelacionados = async () => {
         try {
-            responsableInicial = await new InstructorServicio().CargarInstructor(objConsulta.idResponsable);
-            setResponsable(responsableInicial);
+            const getPrograma = new ProgramaServicio().CargarPrograma(objConsulta.idPrograma);
+            const getResponsable = new InstructorServicio().CargarInstructor(objConsulta.idResponsable);
+            const getJornada = new JornadaServicio().CargarJornada(objConsulta.idJornada);
+            const listaPromesas = [getPrograma, getResponsable, getJornada]
+
+            const resultado = await Promise.all(listaPromesas);
+            if (VerificarRespuesta(resultado)) {
+                setPrograma(resultado[0]);
+                setResponsable(resultado[1]);
+                setJornada(resultado[2]);
+                return true;
+            } else {
+                console.log("Algún objeto está vacío");
+                return false;
+            }
+
         } catch (error) {
-            console.log("Error al obtener el responsable del grupo por: " + error);
+            console.log("Error al obtener información relacionada del grupo por : " + error);
+            return false;
         }
     }
 
-    const CargarProgramaInicial = async () => {
-        try {
-            programaInicial = await new ProgramaServicio().CargarPrograma(objConsulta.idPrograma);
-            setPrograma(programaInicial);
-        } catch (error) {
-            console.log("Error al obtener el programa del grupo por: " + error);
-        }
-    }
-
-    const CargarJonadaInicial = async () => {
-        try {
-            jornadaInicial = await new JornadaServicio().CargarJornada(objConsulta.idJornada);
-            setJornada(jornadaInicial);
-        } catch (error) {
-            console.log("Error al obtener la jornada del grupo por: " + error);
-        }
+    //Verifica que ninguno de los objetos recibidos esté vacío
+    function VerificarRespuesta(array) {
+        return array.every(objeto => Object.keys(objeto).length > 0);
     }
 
     useEffect(() => {
-        if(objConsulta && Object.keys(objConsulta).length > 0){
+        if (objConsulta && Object.keys(objConsulta).length > 0) {
             //Si es consulta al inicio y el objeto está lleno
-            CargarResponsableInicial();
-            CargarProgramaInicial();
-            CargarJonadaInicial();
+            const ObtenerRespuesta = async () => {
+                const respuesta = await ObtenerObjetosRelacionados();
+                if (!respuesta) {
+                    Swal.fire("Error al obtener información del grupo");
+                    onCloseProp && onCloseProp();
+                }
+            }
+            ObtenerRespuesta();
         }
     }, []);
 
@@ -85,11 +93,15 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     }, [grupo]);
 
     async function Registrar() {
-        const servicioGrupo = new GrupoServicio();
-        const respuesta = abrirConsulta ?
-            await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
-            : await servicioGrupo.GuardarGrupo(grupo);
-        alert(respuesta !== 0 ? ("Operación EXITOSA!") :  ("Operación FALLIDA!") );
+        try {
+            const servicioGrupo = new GrupoServicio();
+            const respuesta = abrirConsulta ?
+                await servicioGrupo.ActualizarGrupo(fichaInicial, grupo)
+                : await servicioGrupo.GuardarGrupo(grupo);
+            Swal.fire(respuesta !== 0 ? ("Grupo guardado correctamente!") : ("NO se guardó el grupo!"));
+        } catch (error) {
+            Swal.fire(error);
+        }
         onCloseProp && onCloseProp();
     }
 
@@ -122,23 +134,23 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         const idResponsable = responsable.id;
         const idJornada = jornada.id;
         if (!idPrograma || !idPrograma || !idPrograma.toString().trim() || !SoloNumeros(idPrograma)) {
-            alert("Selección incorrecta de programa académico!");
+            Swal.fire("Selección incorrecta de programa académico!");
             setPrograma({});
         }
         else if (!ficha || !ficha.toString().trim() || !HastaCincuenta(ficha) || !SoloNumeros(ficha)) {
-            alert("Número de ficha incorrecto!");
+            Swal.fire("Número de ficha incorrecto!");
             setFicha('');
         } else if (!codigoGrupo || !codigoGrupo.toString().trim() || !HastaCien(codigoGrupo) || !AlfaNumericaSinEspacio(codigoGrupo)) {
-            alert("Código de grupo incorrecto");
+            Swal.fire("Código de grupo incorrecto");
             setCodigoGrupo('');
         } else if (!idResponsable || !idResponsable.toString().trim() || !SoloNumeros(idResponsable)) {
-            alert("Selección incorrecta de instructor responsable!");
+            Swal.fire("Selección incorrecta de instructor responsable!");
             setResponsable({});
         } else if (!idJornada || !idJornada.toString().trim() || !SoloNumeros(idJornada)) {
-            alert("Selección de jornada incorrecta!");
+            Swal.fire("Selección de jornada incorrecta!");
             setJornada('');
         } else if (!cantidadAprendices.toString().trim() || !HastaDos(cantidadAprendices) || !SoloNumeros(cantidadAprendices)) {
-            alert("Cantidad de aprendices incorrecta!");
+            Swal.fire("Cantidad de aprendices incorrecta!");
             setCantidadAprendices('');
         } else {
             bandera = true;

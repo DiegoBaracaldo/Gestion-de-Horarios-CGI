@@ -9,6 +9,8 @@ import Ambiente from '../../../backend/repository/entidades/Ambiente';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
+import ObtenerErrorSQLite from '../../../baseDatos/ErroresSQLite';
+import Swal from 'sweetalert2';
 
 const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta }) => {
 
@@ -24,15 +26,22 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const [torre, setTorre] = useState(torreInicial);
 
     useEffect(() => {
-        if(abrirConsulta) CargarTorreInicial();
+        if (abrirConsulta) CargarTorreInicial();
     }, []);
 
     const CargarTorreInicial = async () => {
         try {
-            torreInicial = await new TorreServicio().CargarTorre(objConsulta.idTorre);
-            setTorre(torreInicial);
+            const respuesta = await new TorreServicio().CargarTorre(objConsulta.idTorre);
+            if (typeof respuesta === 'object') {
+                setTorre(respuesta);
+            }
+            else {
+                Swal.fire("No se cargó la torre del ambiente en cuestión!");
+                if (typeof onCloseProp === 'function') onCloseProp();
+            }
         } catch (error) {
-            console.log("Error al obtener torre del ambiente por: ", error);
+            Swal.fire(error);
+            if (typeof onCloseProp === 'function') onCloseProp();
         }
     }
 
@@ -40,9 +49,10 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const [nombre, setNombre] = useState(nombreInicial);
     const capacidadInicial = objConsulta.capacidad || '';
     const [capacidad, setCapacidad] = useState(capacidadInicial);
-    const franjaInicial = objConsulta.franjaDisponibilidad &&
+    const franjaInicialEstatica = objConsulta.franjaDisponibilidad &&
         objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
+    const [franjaInicial, setFranjaInicial] = useState(franjaInicialEstatica);
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicialEstatica);
     const [ambiente, setAmbiente] = useState({});
 
     //Es el id del objeto que se carga al iniciar el modal en modo consulta para pode editarlo
@@ -56,11 +66,18 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     }, [ambiente]);
 
     async function Registrar() {
-        const ambienteServicio = new AmbienteServicio();
-        const respuesta = seActivoEdicion ?
-            await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
-            await ambienteServicio.GuardarAmbiente(ambiente);
-        alert(respuesta !== 0 ? ("Operación EXITOSA!") : ("Operación FALLIDA!"));
+        try {
+            const ambienteServicio = new AmbienteServicio();
+            const respuesta = seActivoEdicion ?
+                await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
+                await ambienteServicio.GuardarAmbiente(ambiente);
+            console.log(respuesta);
+            Swal.fire(respuesta === 1 ? ("Se guardó correctamente el ambiente!")
+                : ("NO se guardó el ambiente"));
+        } catch (error) {
+            //Este error viene desde el repositorio
+            Swal.fire(error);
+        }
         onCloseProp && onCloseProp();
     }
 
@@ -72,9 +89,10 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
 
     const RegistrarJornada = () => {
         if (franjaDisponibilidad.length > 0) {
+            setFranjaInicial(franjaDisponibilidad);
             setIsOpenFranjaHoraria(false);
         } else {
-            alert("Debes establecer la disponibilidad horaria del aula de clase!");
+            Swal.fire("Debes establecer la disponibilidad horaria del aula de clase!");
         }
     }
 
@@ -115,16 +133,16 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         let bandera = false;
         const idTorre = torre.id;
         if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !AlfaNumericaConEspacio(nombre)) {
-            alert("Nombre Incorrecto");
+            Swal.fire("Nombre Incorrecto");
             setNombre('');
         } else if (!idTorre || !idTorre || !idTorre.toString().trim() || !SoloNumeros(idTorre)) {
-            alert("Torre incorrecta!");
+            Swal.fire("Torre incorrecta!");
             setTorre({});
         } else if (!capacidad || !capacidad.toString().trim() || !HastaTres(capacidad) || !SoloNumeros(capacidad)) {
-            alert("Capacidad incorrecta");
+            Swal.fire("Capacidad incorrecta");
             setCapacidad('');
         } else if (!franjaDisponibilidad.length > 0) {
-            alert("Debes establecer un rango horario de disponibilidad para el aula de clase!");
+            Swal.fire("Debes establecer un rango horario de disponibilidad para el aula de clase!");
         } else {
             bandera = true;
         }
@@ -135,7 +153,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         setNombre(nombreInicial);
         setTorre(torreInicial);
         setCapacidad(capacidadInicial);
-        setFranjaDisponibilidad(franjaInicial);
+        setFranjaInicial(franjaInicialEstatica);
+        setFranjaDisponibilidad(franjaInicialEstatica);
     }
 
     useEffect(() => {
@@ -171,7 +190,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                     {/* Si no es disponibilidad, es horario, si no es consulta, es resgistro,
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
                     <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
-                        edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)} />
+                        edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)}
+                        horarioSeleccionado={franjaDisponibilidad.length > 0} />
                 </section>
             </div>
             {
@@ -179,7 +199,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                     <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
                         onClickPositivo={RegistrarJornada}
-                        franjasOcupadasProp={franjaDisponibilidad}
+                        franjasOcupadasProp={franjaInicial}
                         esEdicion={seActivoEdicion} />
                     : null
             }

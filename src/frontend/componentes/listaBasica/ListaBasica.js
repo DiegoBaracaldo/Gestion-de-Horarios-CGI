@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoSeleccion }) {
-    const [data, setData] = useState(null);
+function ListaBasica({ nameList, datosJson, clic, listaSeleccProp, modoSeleccion, vaciarChecks }) {
     const [isChecked, setIsChecked] = useState(false);
     const [numFilas, setNumFilas] = useState(0);
     const [selecciones, setSelecciones] = useState([]);
+
+    useEffect(() => {
+        if (vaciarChecks) {
+            setIsChecked(false);
+            SeleccsMultiples(false);
+        }
+    }, [vaciarChecks]);
 
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
@@ -17,10 +23,15 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
 
     // Maneja el cambio del checkbox en el encabezado
     const handleChange = () => {
-        setIsChecked(!isChecked);
-        const nuevasSelecciones = Array(numFilas).fill(!isChecked);
-        setSelecciones(nuevasSelecciones);
+        const valor = isChecked;
+        SeleccsMultiples(!valor);
     };
+
+    //Modificar selects a partir de manejar selección de todos
+    function SeleccsMultiples(valor) {
+        const nuevasSelecciones = Array(numFilas).fill(valor);
+        setSelecciones(nuevasSelecciones);
+    }
 
     // Maneja el cambio de los checkboxes individuales
     const ManejarChecks = (index) => {
@@ -28,23 +39,11 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
         nuevasSelecciones[index] = !nuevasSelecciones[index];
         setSelecciones(nuevasSelecciones);
 
-        const allChecked = nuevasSelecciones.every(val => val === true);
-        setIsChecked(allChecked);
     };
 
     const ClickFila = (e) => {
         clic && clic(e);
     }
-
-    // Consumo de APIs
-    useEffect(() => {
-        if (apiUrl) {
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => setData(data))
-                .catch(error => console.error('Error al consultar datos:', error));
-        }
-    }, [apiUrl]);
 
     //selecciones
     useEffect(() => {
@@ -54,6 +53,13 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
         });
         //le paso la lista a una prop que puede recibirse en un setState en el padre
         listaSeleccProp && listaSeleccProp(arraySelecciones);
+        if (selecciones.every(val => val === false)) {
+            setIsChecked(false);
+        } else if (selecciones.every(val => val === true)) {
+            setIsChecked(true);
+        } else {
+            setIsChecked(false);
+        }
     }, [selecciones]);
     return (
         <div id='listaBasicaContInterno'>
@@ -81,7 +87,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
                                     !modoSeleccion && <input
                                         type='checkbox'
                                         onChange={() => ManejarChecks(index)}
-                                        checked={selecciones[index]}
+                                        checked={selecciones[index] || false}
                                     />
                                 }
                             </td>

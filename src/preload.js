@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('electron', {
     AtLeastOneJornada: () => ipcRenderer.invoke('AtLeastOneJornada'),
     GetAllJornadas: () => ipcRenderer.invoke('GetAllJornadas'),
     GetJornadaByID: (id) => ipcRenderer.invoke('GetJornadaByID', id),
+    GetAllFranjasJornada: () => ipcRenderer.invoke('GetAllFranjasJornada'),
     SaveNewJornada: (jornada) => ipcRenderer.invoke('SaveNewJornada', jornada),
     SaveJornada: (idViejo, jornada) => ipcRenderer.invoke('SaveJornada', idViejo, jornada),
     RemoveJornada: (idArray) => ipcRenderer.invoke('RemoveJornada', idArray),

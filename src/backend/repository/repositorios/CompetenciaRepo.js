@@ -8,7 +8,7 @@ class CompetenciaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE idPrograma = ?";
             this.db.all(query, [idPrograma], (err, filas) => {
-                if(err) reject(err);
+                if(err) reject(err.errno);
                 else resolve(filas);
             });
         });
@@ -18,7 +18,7 @@ class CompetenciaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error);
+                if (error) reject(error.errno);
                 else resolve(fila);
             });
         });
@@ -33,9 +33,9 @@ class CompetenciaRepo {
 
             this.db.run(query, [id, idPrograma, descripcion, horasRequeridas], function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ id: this.lastID }); // Devuelve el ID de la nueva competencia
+                    resolve(this.changes); 
                 }
             });
         });
@@ -51,8 +51,8 @@ class CompetenciaRepo {
             const {id, idPrograma, descripcion, horasRequeridas} = competencia; // Desestructuración del objeto torre
 
             this.db.run(query, [id, idPrograma, descripcion, horasRequeridas, idViejo], function (error) {
-                if (error) reject(error);
-                else resolve({ changes: this.changes }); // Devuelve el número de filas modificadas
+                if (error) reject(error.errno);
+                else resolve(this.changes); // Devuelve el número de filas modificadas
             });
         });
     }
@@ -67,9 +67,9 @@ class CompetenciaRepo {
 
             this.db.run(query, idArray, function (error) {
                 if (error) {
-                    reject(error);
+                    reject(error.errno);
                 } else {
-                    resolve({ changes: this.changes }); // Devuelve el número de filas eliminadas
+                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

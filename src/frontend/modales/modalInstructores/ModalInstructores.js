@@ -7,6 +7,7 @@ import { CamposVacios, EsCorreo, EsTelefono, SoloNumeros, TextoConEspacio } from
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import Swal from 'sweetalert2';
 
 const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsultado }) => {
 
@@ -27,10 +28,15 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const [especialidad, setEspecialidad] = useState(especialidadInicial);
     const topeHorasInicial = objConsultado.topeHoras || '';
     const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
-    const franjaInicial = objConsultado.franjaDisponibilidad &&
-        objConsultado.franjaDisponibilidad .split(',').map(item => Number(item.trim())) || [];
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
+    const franjaInicialEstatica = objConsultado.franjaDisponibilidad &&
+        objConsultado.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
+    const [franjaInicial, setFranjaInicial] = useState(franjaInicialEstatica);
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicialEstatica);
     const [instructor, setInstructor] = useState({});
+
+    useEffect(() => {
+        console.log(franjaDisponibilidad);
+    }, [franjaDisponibilidad]);
 
     useEffect(() => {
         if (Object.keys(instructor).length > 0) {
@@ -39,10 +45,14 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     }, [instructor]);
 
     async function Registrar() {
-        const servicioInstructor = new InstructorServicio();
-        const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
-            : await servicioInstructor.GuardarInstructor(instructor);
-        alert(respuesta !== 0 ? 'Operación EXITOSA!' : 'Operación FALLIDA!');
+        try {
+            const servicioInstructor = new InstructorServicio();
+            const respuesta = abrirConsulta ? await servicioInstructor.ActualizarInstructor(cedulaInicial, instructor)
+                : await servicioInstructor.GuardarInstructor(instructor);
+            Swal.fire(respuesta !== 0 ? 'Instructor guardado correctamente!' : 'NO se guardó el instructor!');
+        } catch (error) {
+            Swal.fire(error);
+        }
         onCloseProp && onCloseProp();
     }
 
@@ -61,34 +71,35 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
 
     const RegistrarJornada = () => {
         if (franjaDisponibilidad.length > 0) {
+            setFranjaInicial(franjaDisponibilidad);
             setIsOpenFranjaHoraria(false);
         } else {
-            alert("Debes establecer la disponibilidad horaria del instructor!");
+            Swal.fire("Debes establecer la disponibilidad horaria del instructor!");
         }
     }
 
     const ValidarObjInstructor = () => {
         let bandera = false;
         if (!cedula || !cedula.toString().trim() || !HastaCincuenta(cedula) || !SoloNumeros(cedula)) {
-            alert("Cédula incorrecta!");
+            Swal.fire("Cédula incorrecta!");
             setCedula('');
         } else if (!nombre || !nombre.toString().trim() || !HastaCien(nombre) || !TextoConEspacio(nombre)) {
-            alert("Nombre incorrecto!");
+            Swal.fire("Nombre incorrecto!");
             setNombre('');
         } else if (!correo || !correo.toString().trim() || !HastaCien(correo) || !EsCorreo(correo)) {
-            alert("Correo electrónico incorrecto");
+            Swal.fire("Correo electrónico incorrecto");
             setCorreo('');
         } else if (!telefono || !telefono.toString().trim() || !HastaCien(telefono) || !EsTelefono(telefono)) {
-            alert("Teléfono incorrecto");
+            Swal.fire("Teléfono incorrecto");
             setTelefono('');
         } else if (!especialidad || !especialidad.toString().trim() || !HastaCien(especialidad) || !TextoConEspacio(especialidad)) {
-            alert("Especialidad incorrecta");
+            Swal.fire("Especialidad incorrecta");
             setEspecialidad('');
         } else if (!topeHoras || !topeHoras.toString().trim() || !HastaDos(topeHoras) || !SoloNumeros(topeHoras)) {
-            alert("Tope de horas semanales incorrecto");
+            Swal.fire("Tope de horas semanales incorrecto");
             setTopeHoras('');
         } else if (!franjaDisponibilidad.length > 0) {
-            alert("Debes establecer una disponibilidad horaria para el instructor!");
+            Swal.fire("Debes establecer una disponibilidad horaria para el instructor!");
         } else {
             bandera = true;
         }
@@ -111,7 +122,7 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
         setInstructor({
             ...objConsultado,
             id: Number(cedula),
-            nombre:FormatearNombre(nombre),
+            nombre: FormatearNombre(nombre),
             correo: correo,
             telefono: telefono,
             especialidad: especialidad,
@@ -130,7 +141,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
         setTelefono(telefonoInicial);
         setEspecialidad(especialidadInicial);
         setTopeHoras(topeHorasInicial);
-        setFranjaDisponibilidad(franjaInicial);
+        setFranjaInicial(franjaInicialEstatica);
+        setFranjaDisponibilidad(franjaInicialEstatica);
     }
 
     useEffect(() => {
@@ -183,7 +195,8 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
                     <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
                         edicionActivada={seActivoEdicion}
-                        onClicHorario={() => setIsOpenFranjaHoraria(true)} />
+                        onClicHorario={() => setIsOpenFranjaHoraria(true)}
+                        horarioSeleccionado={franjaDisponibilidad.length > 0} />
                 </section>
             </div>
             {
@@ -192,7 +205,7 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
                         onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
                         onClickPositivo={RegistrarJornada}
-                        franjasOcupadasProp={franjaDisponibilidad}
+                        franjasOcupadasProp={franjaInicial}
                         esEdicion={seActivoEdicion} />
             }
         </ModalGeneral>

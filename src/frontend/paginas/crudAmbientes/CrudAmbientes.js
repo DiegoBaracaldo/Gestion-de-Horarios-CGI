@@ -7,18 +7,23 @@ import { mockAmbientesTres } from '../../mocks/MocksAmbientes';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudAmbientes = () => {
 
-    const subs = ['id','Ambiente', 'Torre', 'Capacidad de Estudiantes'];
+    const subs = ['id', 'Ambiente', 'Torre', 'Capacidad de Estudiantes'];
+    const navegar = useNavigate();
 
-    const CargarLista = async() => {
+    const CargarLista = async () => {
         console.log("cargando lista...");
         try {
-          setListaObjetos(await new AmbienteServicio().CargarLista());
+            const respuesta = await new AmbienteServicio().CargarLista();
+            setListaObjetos(respuesta);
         } catch (error) {
-          console.log("error en crud ambientes por: ", error);
-          setListaObjetos([]);
+            Swal.fire(error);
+            navegar(-1);
         }
     }
 
@@ -29,7 +34,7 @@ const CrudAmbientes = () => {
     const [listaAdaptada, setListaAdaptada] = useState([]);
 
     const [ambienteConsultado, setAmbienteConsultado] = useState({});
-    
+
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
 
@@ -44,7 +49,7 @@ const CrudAmbientes = () => {
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
     useEffect(() => {
         const listaAux = [];
-        listaFiltrada &&
+        Array.isArray(listaFiltrada) &&
             listaFiltrada.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
@@ -74,7 +79,7 @@ const CrudAmbientes = () => {
     }
     //cada vez que cambia el texto de búsqueda, con DEBOUNCE aplicado
     useEffect(() => {
-        if(listaObjetos.length > 0) setTimeout(Filtrar, "50");
+        if (listaObjetos.length > 0) setTimeout(Filtrar, "50");
     }, [textoBusqueda]);
     //////////////////////////////////////////////////////
 
@@ -86,13 +91,13 @@ const CrudAmbientes = () => {
     }
 
     const DefinirAmbienteConsulta = (nombreAmbiente, nombreTorre) => {
-        const ambiente = listaFiltrada.find((element) => 
+        const ambiente = listaFiltrada.find((element) =>
             element.nombre === nombreAmbiente && element.nombreTorre === nombreTorre);
         setAmbienteConsultado(ambiente);
     }
 
     useEffect(() => {
-        if(Object.keys(ambienteConsultado).length > 0) setAbrirConsulta(true);
+        if (Object.keys(ambienteConsultado).length > 0) setAbrirConsulta(true);
     }, [ambienteConsultado]);
 
     ///////// SECCIÓN DE REGISTRO ///////////////
@@ -100,7 +105,7 @@ const CrudAmbientes = () => {
 
     const AbrirRegistro = () => {
         VerificarTorres() ? setAbrirRegistro(true) :
-            alert("Debes registrar al menos una torre para poder proceder");
+            Swal.fire("Debes registrar al menos una torre para poder proceder");
     }
 
     const CerrarModal = () => {
@@ -114,18 +119,24 @@ const CrudAmbientes = () => {
         const respuesta = await new TorreServicio().ExisteUno();
         return respuesta !== 0 ? true : false;
     }
-    
+
     const EliminarAmbientes = async () => {
-        const confirmar = window.confirm("¿Confirma que desea eliminar los ambientes seleccionados?");
+        const confirmar = await new SWALConfirm()
+            .ConfirmAlert("¿Confirma que desea eliminar los ambientes seleccionados?");
         if (confirmar) {
-          const servicioAmbiente = new AmbienteServicio();
-          const auxListaID = listaSelecciones.map(ambiente => parseInt(ambiente.id.toString()));
-          const respuesta = await servicioAmbiente.EliminarAmbiente(auxListaID);
-          alert(respuesta !== 0 ? ("Ambientes eliminados satisfactoriamente!: ")
-            : ("Error al eliminar los ambientes!"));
-          CargarLista();
+            try {
+                const servicioAmbiente = new AmbienteServicio();
+                const auxListaID = listaSelecciones.map(ambiente => parseInt(ambiente.id.toString()));
+                const respuesta = await servicioAmbiente.EliminarAmbiente(auxListaID);
+                console.log(respuesta);
+                Swal.fire(respuesta !== 0 ? ("Ambientes eliminados satisfactoriamente!")
+                    : ("Los ambientes no se eliminaron!"));
+            } catch (error) {
+                Swal.fire(error);
+            }
+            CargarLista();
         } else {
-          return null;
+            return null;
         }
     }
 
@@ -134,6 +145,10 @@ const CrudAmbientes = () => {
         setVaciarListaSelecc(true);
     }
 
+    useEffect(() => {
+        if (vaciarListaSelecc) setVaciarListaSelecc(false);
+    }, [vaciarListaSelecc]);
+
     return (
         <div id='contCrudAmbientes'>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
@@ -141,12 +156,12 @@ const CrudAmbientes = () => {
                 listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)}
                 clicFila={e => AbrirConsulta(e)} onClicPositivo={AbrirRegistro}
-                datosJson={listaAdaptada} subtitulos={subs} 
-                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
+                datosJson={listaAdaptada} subtitulos={subs}
+                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
-                        onCloseProp={() => CerrarModal()} objConsulta={ambienteConsultado}/> :
+                        onCloseProp={() => CerrarModal()} objConsulta={ambienteConsultado} /> :
                     null
             }
         </div>

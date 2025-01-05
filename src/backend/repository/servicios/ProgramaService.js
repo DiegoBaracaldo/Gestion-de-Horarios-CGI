@@ -12,7 +12,7 @@ class ProgramaServicio {
         return await window.electron.AtLeastOnePrograma();
       } catch (error) {
         console.log("error en servicio programa por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -22,7 +22,7 @@ class ProgramaServicio {
           return await window.electron.GetAllProgramas();
         } catch (error) {
           console.log("error en crud progrmas por: ", error);
-          return [];
+          throw error.message.split(":")[1].trim();
         }
     }
 
@@ -32,7 +32,7 @@ class ProgramaServicio {
         return await window.electron.SaveNewPrograma(programa);
       } catch (error) {
         console.log("error en servicio programa por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -42,7 +42,7 @@ class ProgramaServicio {
         return await window.electron.GetProgramaByID(id);
       } catch (error) {
         console.log("error en servicio programa por: ", error);
-        return {};
+          throw error.message.split(":")[1].trim();
       }
     }
 
@@ -52,7 +52,7 @@ class ProgramaServicio {
         return await window.electron.SavePrograma(idViejo, programa);
       } catch (error) {
         console.log("error en servicio programa por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
   
@@ -62,7 +62,7 @@ class ProgramaServicio {
         return await window.electron.RemovePrograma(listaIDs);
       } catch (error) {
         console.log("error en servicio programa por: ", error);
-        return 0;
+          throw error.message.split(":")[1].trim();
       }
     }
 }

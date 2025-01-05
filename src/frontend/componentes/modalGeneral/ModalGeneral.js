@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './ModalGeneral.css';
@@ -14,16 +14,20 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
     //Registrar con botón Enter
     useEffect(() => {
         const ManejarEnter = (event) => {
-            if(event.key === 'Enter' && (modoEdicion || isOpenRegistro)) onClickPositivo && onClickPositivo();
+            event.preventDefault(); // Evita que haga algo por defecto
+            event.stopPropagation(); // Evita que se propague el evento
+            if (event.key === 'Enter' && (modoEdicion || isOpenRegistro)) {
+                if (typeof onClickPositivo === 'function') onClickPositivo();
+            }else if(event.key === 'Escape'){
+                ManejarOnClose();
+            }
         }
-
         document.addEventListener('keydown', ManejarEnter);
-
         return () => document.removeEventListener('keydown', ManejarEnter);
-    }, []);
+    }, [children]);
 
     //Manejar modo edición
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (modoEdicion) {
             bloquearInputs && bloquearInputs(false);
             setTextoPositivo("Registrar");
@@ -65,7 +69,7 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
 
     const Registrar = () => {
         // lógica para registarr o editar al objeto
-        onClickPositivo && onClickPositivo();
+        if (typeof onClickPositivo === 'function') onClickPositivo();
     }
 
     const ManejarOnClicDestructivo = () => {

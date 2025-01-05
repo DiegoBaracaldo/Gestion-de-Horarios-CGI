@@ -5,9 +5,12 @@ import { mocksBasica } from '../../mocks/mocksTablaBasica';
 import ModalTorres from '../../modales/modalTorres/ModalTorres';
 import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
-import { TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
+import { AlfaNumericaConEspacio, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [abrirEdicion, setAbrirEdicion] = useState(false);
@@ -21,14 +24,18 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   const [listaFiltrada, setListaFiltrada] = useState([]);
   const [listaAdaptada, setListaAdaptada] = useState([]);
 
+  const [vaciarChecks, setVaciarChecks] = useState(false);
+
+  const navegar = useNavigate();
+
   //Carga inicial de objetos
   const CargarListaInicial = async () => {
     console.log("cargando lista...");
     try {
       setListaObjetos(await new TorreServicio().CargarLista());
     } catch (error) {
-      console.log("error en crud torres por: ", error);
-      setListaObjetos([]);
+      Swal.fire(error);
+      navegar(-1);
     }
   }
 
@@ -44,7 +51,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   useEffect(() => {
     const listaAux = [];
-    listaFiltrada &&
+    Array.isArray(listaFiltrada) &&
       listaFiltrada.forEach((element) => {
         const objAux = {};
         objAux.id = element.id;
@@ -78,13 +85,20 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   async function EliminarTorres() {
-    const confirmar = window.confirm("¿Confirma que desea eliminar las torres seleccionadas?");
+    const confirmar = await new SWALConfirm()
+      .ConfirmAlert("¿Confirma que desea eliminar las torres seleccionadas?");
     if (confirmar) {
-      const servicioTorre = new TorreServicio();
-      const auxListaID = listaSelecciones.map(torre => parseInt(torre.id.toString()));
-      const respuesta = await servicioTorre.EliminarTorre(auxListaID);
-      if (respuesta !== 0) ResultadoOperacion("Torres eliminadas satisfactoriamente!");
-      else ResultadoOperacion("Error al eliminar las torres!");
+      try {
+        const servicioTorre = new TorreServicio();
+        const auxListaID = listaSelecciones.map(torre => parseInt(torre.id.toString()));
+        const respuesta = await servicioTorre.EliminarTorre(auxListaID);
+        if (respuesta !== 0) ResultadoOperacion("Torres eliminadas satisfactoriamente!");
+        else ResultadoOperacion("NO se eliminaron las torres!");
+      } catch (error) {
+        Swal.fire(error);
+      }
+      CargarListaInicial();
+      setVaciarChecks(true);
     } else {
       return null;
     }
@@ -109,27 +123,33 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   function RegistrarTorre() {
     if (textoAgregar) {
-      if (textoAgregar && textoAgregar.toString().trim() && HastaCien(textoAgregar) && TextoConEspacio(textoAgregar)) {
+      if (textoAgregar
+        && textoAgregar.toString().trim()
+        && HastaCien(textoAgregar)
+        && AlfaNumericaConEspacio(textoAgregar)) {
         GuardarTorre(FormatearNombre(textoAgregar));
       } else {
-        alert("Dato incorrecto");
+        Swal.fire("Dato incorrecto");
         setReiniciarTexto(true);
       }
     } else {
-      alert("Valor inválido");
+      Swal.fire("Valor inválido");
     }
   }
 
   async function GuardarTorre(nombre) {
-    const servicioTorre = new TorreServicio();
-    const respuesta = await servicioTorre.GuardarTorre(nombre);
-    ResultadoOperacion(respuesta !== 0 ? ("Éxito al guardar torre nueva!")
-      : ("Error al guardar torre nueva!"));
-
+    try {
+      const servicioTorre = new TorreServicio();
+      const respuesta = await servicioTorre.GuardarTorre(nombre);
+      ResultadoOperacion(respuesta !== 0 ? ("Éxito al guardar torre nueva!")
+        : ("NO se guardó la torre nueva!"));
+    } catch (error) {
+      ResultadoOperacion(error);
+    }
   }
 
   useEffect(() => {
-    reiniciarTexto && setReiniciarTexto(false);
+    if (reiniciarTexto) setReiniciarTexto(false);
   }, [reiniciarTexto]);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,9 +161,9 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
   }
 
   function ResultadoOperacion(mensaje) {
-    alert(mensaje);
     CargarListaInicial();
     setReiniciarTexto(true);
+    Swal.fire(mensaje);
   }
 
   return (
@@ -162,6 +182,7 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
         agregar={(t) => setTextoAgregar(t)}
         onClickPositivo={OnClickPositivo}
         reiniciarTextoAgregar={reiniciarTexto}
+        vaciarChecks={vaciarChecks}
       />
 
       {

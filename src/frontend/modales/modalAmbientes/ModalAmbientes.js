@@ -49,9 +49,10 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
     const [nombre, setNombre] = useState(nombreInicial);
     const capacidadInicial = objConsulta.capacidad || '';
     const [capacidad, setCapacidad] = useState(capacidadInicial);
-    const franjaInicial = objConsulta.franjaDisponibilidad &&
+    const franjaInicialEstatica = objConsulta.franjaDisponibilidad &&
         objConsulta.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
-    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicial);
+    const [franjaInicial, setFranjaInicial] = useState(franjaInicialEstatica);
+    const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicialEstatica);
     const [ambiente, setAmbiente] = useState({});
 
     //Es el id del objeto que se carga al iniciar el modal en modo consulta para pode editarlo
@@ -88,6 +89,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
 
     const RegistrarJornada = () => {
         if (franjaDisponibilidad.length > 0) {
+            setFranjaInicial(franjaDisponibilidad);
             setIsOpenFranjaHoraria(false);
         } else {
             Swal.fire("Debes establecer la disponibilidad horaria del aula de clase!");
@@ -151,7 +153,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
         setNombre(nombreInicial);
         setTorre(torreInicial);
         setCapacidad(capacidadInicial);
-        setFranjaDisponibilidad(franjaInicial);
+        setFranjaInicial(franjaInicialEstatica);
+        setFranjaDisponibilidad(franjaInicialEstatica);
     }
 
     useEffect(() => {
@@ -187,7 +190,8 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                     {/* Si no es disponibilidad, es horario, si no es consulta, es resgistro,
                     y la edición activada es para cambiar el texto según se edita o se cancela */}
                     <BotonDispHoraria esDisponibilidad={true} esConsulta={abrirConsulta}
-                        edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)} />
+                        edicionActivada={seActivoEdicion} onClicHorario={() => setIsOpenFranjaHoraria(true)}
+                        horarioSeleccionado={franjaDisponibilidad.length > 0} />
                 </section>
             </div>
             {
@@ -195,7 +199,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                     <FranjaHoraria onClickDestructivo={() => setIsOpenFranjaHoraria(false)}
                         esConsulta={inputsOff} franjaProp={(f) => setFranjaDisponibilidad(f)}
                         onClickPositivo={RegistrarJornada}
-                        franjasOcupadasProp={franjaDisponibilidad}
+                        franjasOcupadasProp={franjaInicial}
                         esEdicion={seActivoEdicion} />
                     : null
             }

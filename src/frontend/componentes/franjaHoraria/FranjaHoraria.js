@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import BotonDestructivo from '../botonDestructivo/BotonDestructivo';
 import BotonPositivo from '../botonPositivo/BotonPositivo';
 import './FranjaHoraria.css';
 
 const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franjasOcupadasProp, esConsulta,
-    esEdicion
+    esEdicion, horarioCompleto, franjasDescartadasAux, setFranjasDescartadasAux
 }) => {
 
-    useEffect(() => {
-        console.log(franjasOcupadasProp);
-    }, [franjasOcupadasProp]);
+    //captura las franjas iniciales
+    let franjasOcupadasIniciales = franjasOcupadasProp;
+    //Captura el horario completo a quitando el propio de la jornada consultada
+
 
     const [matrizCeldasFranja, setMatrizCeldasFranja] = useState(ValorInicialMatriz());
     const [classCeldaHora, setClassCeldaHora] = useState('celdaHora');
@@ -35,11 +36,24 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                 //analizar si la celda está ocupada para pintarla de  rojo e inhabilitarla
                 let celdaOcupada = false;
                 let celdaVerde = false;
-                if(franjasOcupadasProp){
-                    if (esConsulta){
-                        celdaOcupada = franjasOcupadasProp.includes(contadorAlgoritmo);
-                    }else{
-                        celdaVerde =  franjasOcupadasProp.includes(contadorAlgoritmo);
+                if (Array.isArray(franjasOcupadasIniciales)) {
+                    if (esConsulta) {
+                        celdaOcupada = franjasOcupadasIniciales.includes(contadorAlgoritmo);
+                    } else {
+                        //Si es registro o edición se prohiben las franjas ya usadas
+                        //pero se pintan de verde las que le pertenecen al horario en cuestión
+                        if (Array.isArray(horarioCompleto) && Array.isArray(franjasDescartadasAux)) {
+                            //Si le pertenece al horario en cuestión se ponen de verde y no de rojo
+                            celdaVerde = franjasOcupadasIniciales.includes(contadorAlgoritmo);
+                            if (!celdaVerde) {
+                                //SI no, se evalúan en el hroario comppleto depurado para pintar de rojo o no
+
+                                celdaOcupada = horarioCompleto.includes(contadorAlgoritmo)
+                                    && !franjasDescartadasAux.includes(contadorAlgoritmo);
+                            }
+                        } else {
+                            celdaVerde = franjasOcupadasIniciales.includes(contadorAlgoritmo);
+                        }
                     }
                 }
                 const auxDato = {
@@ -59,7 +73,7 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
 
     const ClicCeldaMatriz = (fila, e) => {
         //Solo funciona  si no es consulta
-        if(!esConsulta){
+        if (!esConsulta) {
             const colum = e.target.cellIndex - 1;
             setArrastrando(true); //inciar arrastre
             setInicioArrastrePintado(matrizCeldasFranja[fila][colum].pintadoVerde);
@@ -166,17 +180,36 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     //Para guardar los valores seleccionados
     useEffect(() => {
         const nuevaLista = [];
-        matrizCeldasFranja.forEach(fila => {
-            fila.forEach(celda => {
-                if (celda.pintadoVerde || celda.pintadoRojo) nuevaLista.push(celda.valor);
+        //Si no  se trata de las jornadas
+        if (!Array.isArray(horarioCompleto)) {
+            matrizCeldasFranja.forEach(fila => {
+                fila.forEach(celda => {
+                    if (celda.pintadoVerde || celda.pintadoRojo) nuevaLista.push(celda.valor);
+                });
             });
-        });
+        } else {
+            //SI SI  se trata de las jornadas
+            if (esConsulta) {
+                matrizCeldasFranja.forEach(fila => {
+                    fila.forEach(celda => {
+                        if (celda.pintadoRojo) nuevaLista.push(celda.valor);
+                    });
+                });
+            } else {
+                matrizCeldasFranja.forEach(fila => {
+                    fila.forEach(celda => {
+                        if (celda.pintadoVerde) nuevaLista.push(celda.valor);
+                    });
+                });
+            }
+        }
+
         setFranjas(nuevaLista);
     }, [matrizCeldasFranja]);
 
     //Se pasa la selección de franjas mediante prop al padre
     useEffect(() => {
-        franjaProp && franjaProp(franjas);
+        if (typeof franjaProp === 'function') franjaProp(franjas);
     }, [franjas]);
 
     //Para testear las franjas que se agregan al array
@@ -238,8 +271,22 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
 
     const ManejarCancelar = () => {
         //Para que  no permanezca la selección al cancelar el modal SOLO EN MODO REGISTRO
-        if(!esConsulta && !esEdicion)franjaProp && franjaProp([]);
-        onClickDestructivo();
+        //if(!esConsulta && !esEdicion)franjaProp && franjaProp([]);
+        if (typeof onClickDestructivo === 'function') {
+            franjaProp(franjasOcupadasIniciales);
+            onClickDestructivo();
+        } else {
+            alert("Debes agregar funcionalidad a este componente!");
+        }
+    }
+
+    const ManejarClicPositivo = () => {
+        if (typeof setFranjasDescartadasAux === 'function') {
+            //Si los numeros de la lista inicial ya no están en franjas
+            const listaDescartadas = franjasOcupadasIniciales.filter(franja => !franjas.includes(franja));
+            setFranjasDescartadasAux(listaDescartadas);
+        }
+        if (typeof onClickPositivo === 'function') onClickPositivo();
     }
 
     return (
@@ -278,24 +325,21 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                 </div>
                 {
                     esConsulta ? null :
-                    <div className='contMapaColores'>
-                        <div className='muestraColor muestraColorVerde'></div>
-                        <label> : Franja seleccionada</label>
-                    </div>
+                        <div className='contMapaColores'>
+                            <div className='muestraColor muestraColorVerde'></div>
+                            <label> : Franja seleccionada</label>
+                        </div>
                 }
                 <div className='contBtnPositivo contBtn'>
                     {
                         esConsulta ? null :
                             <BotonPositivo texto="Registrar"
-                                onClick={onClickPositivo ? () => onClickPositivo() :
-                                    () => alert("debes poner funcionalidad al botón positivo!")
-                                } />
+                                onClick={ManejarClicPositivo} />
                     }
                 </div>
                 <div className='contBtnDestructivo contBtn'>
                     <BotonDestructivo texto="Cancelar"
-                        onClick={onClickDestructivo ? ManejarCancelar :
-                            () => alert("debes poner funcionalidad al botón destructivo!")} />
+                        onClick={ManejarCancelar} />
                 </div>
             </div>
         </div>

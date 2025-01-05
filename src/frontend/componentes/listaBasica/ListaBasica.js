@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ListaBasica.css';
 
-function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoSeleccion, vaciarChecks }) {
-    const [data, setData] = useState(null);
+function ListaBasica({ nameList, datosJson, clic, listaSeleccProp, modoSeleccion, vaciarChecks }) {
     const [isChecked, setIsChecked] = useState(false);
     const [numFilas, setNumFilas] = useState(0);
     const [selecciones, setSelecciones] = useState([]);
@@ -13,10 +12,6 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
             SeleccsMultiples(false);
         }
     }, [vaciarChecks]);
-
-    // useEffect(() => {
-    //     SeleccsMultiples(isChecked);
-    // }, [isChecked]);
 
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
@@ -44,23 +39,11 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
         nuevasSelecciones[index] = !nuevasSelecciones[index];
         setSelecciones(nuevasSelecciones);
 
-        //const allChecked = nuevasSelecciones.every(val => val === true);
-        //setIsChecked(allChecked);
     };
 
     const ClickFila = (e) => {
         clic && clic(e);
     }
-
-    // Consumo de APIs
-    useEffect(() => {
-        if (apiUrl) {
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => setData(data))
-                .catch(error => console.error('Error al consultar datos:', error));
-        }
-    }, [apiUrl]);
 
     //selecciones
     useEffect(() => {
@@ -104,7 +87,7 @@ function ListaBasica({ nameList, apiUrl, datosJson, clic, listaSeleccProp, modoS
                                     !modoSeleccion && <input
                                         type='checkbox'
                                         onChange={() => ManejarChecks(index)}
-                                        checked={selecciones[index]}
+                                        checked={selecciones[index] || false}
                                     />
                                 }
                             </td>

@@ -17,7 +17,21 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
   const [abrirRegistro, setAbrirRegistro] = useState(false);
   const [abrirConsulta, setAbrirConsulta] = useState(false);
   const [jornadaConsultada, setJornadaConsultada] = useState({});
+  const [horarioEntero, setHorarioEntero] = useState([]);
 
+  // useEffect(() => {
+  //   console.log(horarioEntero);
+  // }, [horarioEntero]);
+
+  async function CargarHorarioCompleto(){
+    try {
+        const servicioJornada = new JornadaServicio();
+        setHorarioEntero(await servicioJornada.CargarAllFranjas());
+    } catch (error) {
+        Swal.fire(error);
+        if(typeof onClose ===  'function') onClose();
+    }
+}
 
   const [listaObjetos, setListaObjetos] = useState([]);
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -39,6 +53,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
 
   useEffect(() => {
     CargarLista();
+    CargarHorarioCompleto();
   }, []);
 
   useEffect(() => {
@@ -196,7 +211,10 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
       {
         abrirHorario ? <FranjaHoraria onClickDestructivo={CancelarRegistro}
           onClickPositivo={RegistrarJornada}
-          franjaProp={(f) => setFranjaHoraria(f)} />
+          franjaProp={(f) => setFranjaHoraria(f)} 
+          horarioCompleto={horarioEntero}
+          franjasOcupadasProp={[]}
+          franjasDescartadasAux={[]}/>
           : null
       }
     </div>

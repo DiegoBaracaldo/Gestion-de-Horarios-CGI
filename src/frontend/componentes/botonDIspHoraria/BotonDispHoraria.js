@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './BotonDispHoraria.css';
 
 const BotonDispHoraria = ({ disabledProp, hiddenProp, esDisponibilidad, esConsulta,
-    edicionActivada, onClicHorario
+    edicionActivada, onClicHorario, horarioSeleccionado
 }) => {
 
     const [disabledHook, setDisabledHook] = useState(disabledProp);
@@ -58,10 +58,11 @@ const BotonDispHoraria = ({ disabledProp, hiddenProp, esDisponibilidad, esConsul
 
 
     return (
-        <button id="btnDispHoraria" onClick={onClicHorario ? ()  => onClicHorario() :
+        <button id="btnDispHoraria" onClick={typeof onClicHorario === 'function' ? ()  => onClicHorario() :
             ()  => alert("Agregar funcionalidad para abrir horario...!")}
             disabled={disabledHook} hidden={hiddenHook}
-            className={clasesHook}>
+            className={clasesHook}
+            style={{background: `${horarioSeleccionado ? '#CB7766' : '#385C57'}`}}>
             {textoBtn}
         </button>
     );

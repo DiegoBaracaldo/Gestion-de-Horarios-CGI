@@ -166,6 +166,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllFranjasJornada', async() => {
+        try {
+            return await jornadaRepo.GetAllFranjas();
+        } catch (error) {
+            console.log("Error en ipcMain  getById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    } );
     ipcMain.handle('SaveNewJornada', async (event, jornada) => {
         try {
             return await jornadaRepo.SaveNew(jornada);

@@ -4,6 +4,8 @@ class JornadaRepo {
         this.db = db;
     }
     
+//En  la función de registro múltiple, se debe verificar que no se crucen los horarios aquí en repo
+
     async AtLeastOne(){
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM jornadas LIMIT 1) AS hasRecords";
@@ -30,6 +32,16 @@ class JornadaRepo {
             this.db.get(query, [id], (error, fila) => {
                 if (error) reject(error.errno);
                 else resolve(fila);
+            });
+        });
+    }
+
+    async GetAllFranjas(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT franjaDisponibilidad from jornadas";
+            this.db.all(query, [], (error, filas) => {
+                if(error) reject(error);
+                else resolve(filas);
             });
         });
     }

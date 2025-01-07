@@ -5,6 +5,16 @@ class GrupoServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneGrupo();
+      } catch (error) {
+        console.log("error en servicio grupo por: ", error);
+          throw error.message.split(":")[1].trim();
+      }
+    }
+
     async CargarLista() {
         console.log("Cargando lista...");
         try {

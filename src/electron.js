@@ -300,6 +300,14 @@ function RegistrarIPC() {
     });
 
     //Grupos
+    ipcMain.handle('AtLeastOneGrupo', async () => {
+        try {
+            return await grupoRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainGrupos por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllGrupos', async () => {
         try {
             return await grupoRepo.GetAll();
@@ -342,6 +350,14 @@ function RegistrarIPC() {
     });
 
     //Ambientes
+    ipcMain.handle('AtLeastOneAmbiente', async () => {
+        try {
+            return await ambienteRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainAmbientes por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllAmbientes', async () => {
         try {
             return await ambienteRepo.GetAll();
@@ -383,6 +399,14 @@ function RegistrarIPC() {
     });
 
     //Competencias
+    ipcMain.handle('AtLeastOneCompetencia', async () => {
+        try {
+            return await competenciaRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainCompetencias por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllCompetencias', async (event, idPrograma) => {
         try {
             return await competenciaRepo.GetAllByIdPrograma(idPrograma);

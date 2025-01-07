@@ -14,6 +14,7 @@ import CrudGrupos from './frontend/paginas/crudGrupos/CrudGrupos';
 import CrudCompetencias from './frontend/paginas/crudCompetencias/CrudCompetencias';
 import CrudJornadas from './frontend/paginas/crudJornadas/CrudJornadas';
 import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
+import GestionHorario from './frontend/paginas/gestionHorario/GestionHorario';
 
 function App() {
 
@@ -23,6 +24,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Principal/>} />
+          <Route path="/gestionInfo" element={<GestionInformacion/>} />
+          <Route path="/gestionHorario" element={<GestionHorario/>} />
           <Route path="/gestionInfo" element={<GestionInformacion/>} />
           <Route path="/crudInstructores" element={<CrudInstructores/>} />
           <Route path="/crudAmbientes" element={<CrudAmbientes/>} />

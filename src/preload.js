@@ -30,18 +30,21 @@ contextBridge.exposeInMainWorld('electron', {
     SaveInstructor: (idViejo, instructor) => ipcRenderer.invoke('SaveInstructor', idViejo, instructor),
     RemoveInstructor: (idArray) => ipcRenderer.invoke('RemoveInstructor', idArray),
 
+    AtLeastOneGrupo: () => ipcRenderer.invoke('AtLeastOneGrupo'),
     GetAllGrupos: () => ipcRenderer.invoke('GetAllGrupos'),
     GetGrupoByID: (id) => ipcRenderer.invoke('GetGrupoByID', id),
     SaveNewGrupo: (grupo) => ipcRenderer.invoke('SaveNewGrupo', grupo),
     SaveGrupo: (idViejo, grupo) => ipcRenderer.invoke('SaveGrupo', idViejo, grupo),
     RemoveGrupo: (idArray) => ipcRenderer.invoke('RemoveGrupo', idArray),
 
+    AtLeastOneAmbiente: () => ipcRenderer.invoke('AtLeastOneAmbiente'),
     GetAllAmbientes: () => ipcRenderer.invoke('GetAllAmbientes'),
     GetAmbienteByID: (id) => ipcRenderer.invoke('GetAmbienteByID', id),
     SaveNewAmbiente: (ambiente) => ipcRenderer.invoke('SaveNewAmbiente', ambiente),
     SaveAmbiente: (idViejo, ambiente) => ipcRenderer.invoke('SaveAmbiente', idViejo, ambiente),
     RemoveAmbiente: (idArray) => ipcRenderer.invoke('RemoveAmbiente', idArray),
 
+    AtLeastOneCompetencia: () => ipcRenderer.invoke('AtLeastOneCompetencia'),
     GetAllCompetencias: (idPrograma) => ipcRenderer.invoke('GetAllCompetencias', idPrograma),
     GetCompetenciaByID: (id) => ipcRenderer.invoke('GetCompetenciaByID', id),
     SaveNewCompetencia: (competencia) => ipcRenderer.invoke('SaveNewCompetencia', competencia),

@@ -4,6 +4,16 @@ class CompetenciaRepo {
         this.db = db;
     }
 
+    async AtLeastOne(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM competencias LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if(err) reject(err.errno);
+                else resolve(fila.hasRecords);
+            });
+        });
+    }
+
     GetAllByIdPrograma(idPrograma) {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE idPrograma = ?";

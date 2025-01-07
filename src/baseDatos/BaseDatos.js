@@ -36,6 +36,7 @@ class ConexionBD {
 
     CrearBaseDatos() {
         console.log("Creando base de datos...")
+        this.db.run("PRAGMA foreign_keys = ON;"); //Permitir restricciones de delete en llave foránea
         this.CrearTablaTorres();
         this.CrearTablaJornadas();
         this.CrearTablaProgramas();
@@ -121,7 +122,7 @@ class ConexionBD {
             capacidad INTEGER NOT NULL,
             franjaDisponibilidad TEXT NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idTorre) REFERENCES torres(id),
+            FOREIGN KEY (idTorre) REFERENCES torres(id) ON DELETE RESTRICT,
             UNIQUE(nombre, idTorre) 
             );
             `
@@ -140,9 +141,9 @@ class ConexionBD {
             cantidadAprendices INTEGER NOT NULL,
             esCadenaFormacion BOOLEAN NOT NULL DEFAULT FALSE,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas (id),
-            FOREIGN KEY (idResponsable) REFERENCES instructores(id),
-            FOREIGN KEY (idJornada) REFERENCES jornadas(id)
+            FOREIGN KEY (idPrograma) REFERENCES programas (id) ON DELETE RESTRICT,
+            FOREIGN KEY (idResponsable) REFERENCES instructores(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idJornada) REFERENCES jornadas(id) ON DELETE RESTRICT
             );
             `
         );
@@ -157,7 +158,7 @@ class ConexionBD {
             descripcion VARCHAR(249) NOT NULL,
             horasRequeridas INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas(id),
+            FOREIGN KEY (idPrograma) REFERENCES programas(id) ON DELETE RESTRICT,
             UNIQUE(idprograma, descripcion)
             );
             `

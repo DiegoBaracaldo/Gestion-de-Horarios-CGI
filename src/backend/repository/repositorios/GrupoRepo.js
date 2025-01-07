@@ -5,6 +5,16 @@ class GrupoRepo {
         this.db = db;
     }
 
+    async AtLeastOne(){
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM grupos LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if(err) reject(err.errno);
+                else resolve(fila.hasRecords);
+            });
+        });
+    }
+
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query =

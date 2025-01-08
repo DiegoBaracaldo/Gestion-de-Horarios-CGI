@@ -140,6 +140,9 @@ class ConexionBD {
             codigoGrupo VARCHAR(100) NOT NULL UNIQUE,
             cantidadAprendices INTEGER NOT NULL,
             esCadenaFormacion BOOLEAN NOT NULL DEFAULT FALSE,
+            trimestreLectivo INTEGER NOT NULL,
+            fechaInicioTrimestre DATE NOT NULL,
+            fechaFinTrimestre DATE NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (idPrograma) REFERENCES programas (id) ON DELETE RESTRICT,
             FOREIGN KEY (idResponsable) REFERENCES instructores(id) ON DELETE RESTRICT,
@@ -222,12 +225,12 @@ class ConexionBD {
     InsertarGruposMock() {
         this.db.exec(
             `
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (849387, 123456, 123456, 1, 'G100SSTG', 30);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices) VALUES (520949, 123456, 123456, 2, 'G229909UURR', true, 25);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (478302, 234567, 234567, 3, 'G300UURRYE', 20);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (674589, 234567, 234567, 1, 'G488FFGRYY', 35);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices) VALUES (096724, 345678, 345678, 2, 'G577GGFYYR', true, 28);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (263798, 345678, 345678, 3, 'G600IIFFN', 32);
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (849387, 123456, 123456, 1, 'G100SSTG', 30, 3, '2025-01-19', '2025-03-19');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (520949, 123456, 123456, 2, 'G229909UURR', true, 25, 4, '2025-02-15', '2025-04-15');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (478302, 234567, 234567, 3, 'G300UURRYE', 20, 1, '2025-01-24', '2025-03-24');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (674589, 234567, 234567, 1, 'G488FFGRYY', 35, 2, '2025-01-07', '2025-03-07');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (096724, 345678, 345678, 2, 'G577GGFYYR', true, 28, 6, '2025-01-15', '2025-03-15');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (263798, 345678, 345678, 3, 'G600IIFFN', 32, 5, '2025-01-15', '2025-03-15');
             `
         );
     }

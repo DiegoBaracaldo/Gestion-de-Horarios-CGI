@@ -4,7 +4,7 @@ import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHorari
 import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudPrograma from '../../paginas/crudProgramas/CrudPrograma';
 import CrudJornadas from '../../paginas/crudJornadas/CrudJornadas';
-import { AlfaNumericaSinEspacio, CamposVacios, SoloNumeros } from '../../../backend/validacion/ValidacionFormato';
+import { AlfaNumericaSinEspacio, CamposVacios, EsFecha, SoloNumeros } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import Grupo from '../../../backend/repository/entidades/Grupo';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
@@ -79,6 +79,12 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
     const [codigoGrupo, setCodigoGrupo] = useState(codigoInicial);
     const aprendicesInicial = objConsulta.cantidadAprendices || '';
     const [cantidadAprendices, setCantidadAprendices] = useState(aprendicesInicial);
+    const trimestreLectivoInicial = objConsulta.trimestreLectivo || '';
+    const [trimestreLectivo, setTrimestreLectivo] = useState(trimestreLectivoInicial);
+    const fechaInicioInicial = objConsulta.fechaInicioTrimestre || '';
+    const [fechaInicio, setFechaInicio] = useState(fechaInicioInicial);
+    const fechaFinInicial = objConsulta.fechaFinTrimestre || '';
+    const [fechaFin, setFechaFin] = useState(fechaFinInicial);
     const esCadenaInicial = (objConsulta.esCadenaFormacion === 1 ? true : false) || '';
     const [esCadena, setEsCadena] = useState(esCadenaInicial);
     const [grupo, setGrupo] = useState({});
@@ -129,6 +135,11 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         else setCantidadAprendices(texto);
     }
 
+    const ManejarTrimestre = (texto) => {
+        if (texto.length > 2) setTrimestreLectivo(texto.substring(0, 2));
+        else setTrimestreLectivo(texto);
+    }
+
     const ValidarObjGrupo = () => {
         let bandera = false;
         const idPrograma = programa.id;
@@ -153,6 +164,17 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
         } else if (!cantidadAprendices.toString().trim() || !HastaDos(cantidadAprendices) || !SoloNumeros(cantidadAprendices)) {
             Swal.fire("Cantidad de aprendices incorrecta!");
             setCantidadAprendices('');
+        } else if (!trimestreLectivo.toString().trim() || !HastaDos(trimestreLectivo) || !SoloNumeros(trimestreLectivo)) {
+            Swal.fire("Trimestre lectivo incorrecto!!");
+            setTrimestreLectivo('');
+        } else if (!fechaInicio || !fechaInicio.toString().trim() || EsFecha(fechaInicio)) {
+            Swal.fire("Fecha de inicio de trimestre incorrecta!");
+            setFechaInicio('');
+        } else if (!fechaFin || !fechaFin.toString().trim() || EsFecha(fechaFin)) {
+            Swal.fire("Fecha de fin de trimestre incorrecta!");
+            setFechaFin('');
+        } else if (fechaFin < fechaInicio) {
+            Swal.fire("Fecha final debería ser mayor que fecha inicial!");
         } else {
             bandera = true;
         }
@@ -167,7 +189,10 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             codigoGrupo: FormatearCodigoGrupo(codigoGrupo),
             idJornada: jornada.id,
             cantidadAprendices: Number(cantidadAprendices),
-            esCadenaFormacion: esCadena
+            esCadenaFormacion: esCadena,
+            trimestreLectivo: trimestreLectivo,
+            fechaInicioTrimestre: fechaInicio,
+            fechaFinTrimestre: fechaFin
         };
         setGrupo(objAux);
     }
@@ -183,7 +208,10 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
             idJornada: jornada.id,
             jornada: jornada.tipo,
             cantidadAprendices: Number(cantidadAprendices),
-            esCadenaFormacion: esCadena
+            esCadenaFormacion: esCadena,
+            trimestreLectivo: trimestreLectivo,
+            fechaInicioTrimestre: fechaInicio,
+            fechaFinTrimestre: fechaFin
         });
     }
 
@@ -245,6 +273,24 @@ const ModalGrupos = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta })
                     <input disabled={inputsOff} type='number'
                         title='cantidad de estudiantes en el grupo (número de dos dígitos)'
                         value={cantidadAprendices} onChange={(e) => ManejarCantidadAprendices(e.target.value)} />
+                </section>
+                <section>
+                    <label >número de trimestre lectivo: </label>
+                    <input disabled={inputsOff} type='number'
+                        title='trimestre actual que cursa el grupo (número de dos dígitos)'
+                        value={trimestreLectivo} onChange={(e) => ManejarTrimestre(e.target.value)} />
+                </section>
+                <section>
+                    <label >fecha incio trimestre: </label>
+                    <input disabled={inputsOff} type='date'
+                        title='fecha en que inicia el trimestre lectivo del grupo'
+                        value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} />
+                </section>
+                <section>
+                    <label >fecha fin trimestre: </label>
+                    <input disabled={inputsOff} type='date'
+                        title='fecha en que finaliza el trimestre lectivo del grupo'
+                        value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
                 </section>
                 <section>
                     <label >es cadena de formación: </label>

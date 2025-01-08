@@ -8,14 +8,18 @@ import BotonAtrasExclusivo from '../../componentes/botonAtrasExclusivo/BotonAtra
 import BotonProcesos from '../../componentes/botonProcesos/BotonProcesos';
 import './GestionHorario.css';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 const GestionHorario = () => {
 
     const navegar = useNavigate();
+    const [competenciasListas, setCompetenciasListas] = useState(false);
+    const [horarioListo, setHorarioListo] = useState(false);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         VerificarExistenciaEntidades();
+        setCompetenciasListas(VerificarPoolCompetencias());
+        setHorarioListo(VerificarHorario());
     }, []);
 
     async function VerificarExistenciaEntidades() {
@@ -37,17 +41,35 @@ const GestionHorario = () => {
         }
     }
 
+    function VerificarPoolCompetencias(){
+        //función para verificar que las piscinas de competencias de todos los
+        //grupos estén listas.
+        return false;
+    }
+
+    function VerificarHorario(){
+        //función para verificar que el horario esté confirmado
+        return false;
+    }
+
     return (
         <div id='contGestionHorario'>
             <div className='contRutas'>
-                
-            VISTA PARA CREAR HORARIO
-                {/* <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="GESTIÓN DE DATOS PARA CREACIÓN DE HORARIO" />
+                <div className='contBtnRutaInfo'>
+                    <BotonProcesos texto="editar competencias" />
                 </div>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="CREAR HORARIO" />
-                </div> */}
+                    <BotonProcesos texto="editar horario" disabledProp={!competenciasListas}/>
+                </div>
+                <div className='contBtnRutaInfo'>
+                    <BotonProcesos texto="fusionar grupos" disabledProp={!horarioListo} />
+                </div>
+                <div className='contBtnRutaInfo'>
+                    <BotonProcesos texto="horario PDF" disabledProp={!horarioListo} />
+                </div>
+                <div className='contBtnRutaInfo'>
+                    <BotonProcesos texto="Exportar copia de seguridad" disabledProp={!horarioListo} />
+                </div>
             </div>
 
             <div className='contBtnVolverExclu'>

@@ -127,7 +127,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                                 {
                                     Object.values(element).map((valor, index) => (
                                         <td onClick={clickFila ? () => clickFila(element) : PedirFuncionalidad}
-                                            key={index}>{valor}</td>
+                                            key={index} className='columnDato'>{valor}</td>
                                     ))
                                 }
                             </tr>

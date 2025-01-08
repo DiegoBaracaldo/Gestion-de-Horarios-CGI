@@ -6,7 +6,7 @@
     border-collapse: separate;
     border-spacing: 0;
     /* border-collapse: collapse; */
-    table-layout: fixed;
+    /* table-layout: fixed; */
 
     .tituloTabla {
         font-size: 26px;
@@ -35,6 +35,10 @@
         width: 40px;
     }
 
+    .columnDato {
+        max-width: 180px;
+    }
+
     tbody {
         width: 100%;
 
@@ -51,6 +55,7 @@
         }
 
         tr {}
+
     }
 
     tr,
@@ -74,7 +79,8 @@
         z-index: 1;
         /* border-bottom: 2px solid black; */
     }
-    td{
+
+    td {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

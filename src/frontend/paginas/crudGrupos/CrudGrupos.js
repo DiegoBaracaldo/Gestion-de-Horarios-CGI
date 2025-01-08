@@ -16,7 +16,8 @@ import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudGrupos = () => {
 
-    const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
+    const subs = ['Ficha', 'Programa académico', 'jornada',
+        'trimestre']
 
     const navegar = useNavigate();
 
@@ -71,9 +72,9 @@ const CrudGrupos = () => {
             listaRecibida.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
-                objetoAux.codigoGrupo = element.codigoGrupo;
                 objetoAux.nombrePrograma = element.nombrePrograma;
                 objetoAux.jornada = element.jornada;
+                objetoAux.trimestreLectivo = element.trimestreLectivo;
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);

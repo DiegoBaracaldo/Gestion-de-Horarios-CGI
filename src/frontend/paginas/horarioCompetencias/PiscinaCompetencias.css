@@ -1,0 +1,44 @@
+#contPiscinaCompetencias{
+    /* background-color: yellow; */
+    width: 100vw;
+    height: 100svh;
+    .contBotones{
+        /* background-color: burlywood; */
+        width: 95%;
+        height: 15svh;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        :nth-child(even), :nth-child(odd){
+            height: 55%;
+            width: 30%;
+        }
+    }
+    .ladoDerechoCompetenciasPool{
+        /* background-color: yellow; */
+        height: 100%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: auto;
+        .tarjetaTitulo{
+            /* background-color: yellow; */
+            width: 90%;
+            height: fit-content;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            h2{
+                width: 80%;
+            }
+            .contBtnAgregarComp{
+                /* background-color: blue; */
+                height: 100%;
+                aspect-ratio: 1;
+            }
+        }
+    }
+}

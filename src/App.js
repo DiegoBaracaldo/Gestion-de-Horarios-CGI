@@ -15,6 +15,7 @@ import CrudCompetencias from './frontend/paginas/crudCompetencias/CrudCompetenci
 import CrudJornadas from './frontend/paginas/crudJornadas/CrudJornadas';
 import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
 import GestionHorario from './frontend/paginas/gestionHorario/GestionHorario';
+import PiscinaCompetencias from './frontend/paginas/horarioCompetencias/PiscinaCompetencias';
 
 function App() {
 
@@ -34,6 +35,7 @@ function App() {
           <Route path="/crudTorres" element={<CrudTorres/>} />
           <Route path="/crudJornada" element={<CrudJornadas/>} />
           <Route path="/crudProgramas" element={<CrudPrograma/>} />
+          <Route path="/piscinaCompetencias" element={<PiscinaCompetencias/>} />
         </Routes>
       </Router>
     </div>

@@ -1,0 +1,20 @@
+#contMarcoGralHorario{
+    border: 5px solid var(--colorPrincipal);
+    width: 95vw;
+    height: 85svh;
+    margin: 0 auto;
+    overflow: hidden;
+    .titulo{
+        height: 7%;
+        border-bottom: 5px solid var(--colorPrincipal);
+        text-align: center;
+        color: var(--colorPrincipal);
+        background-color: white;
+    }
+    .hijo{
+        width: 100%;
+        height: 93%;
+        background-color: var(--colorFondoSuave);
+        display: flex;
+    }
+}

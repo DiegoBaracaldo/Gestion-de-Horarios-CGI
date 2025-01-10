@@ -1,0 +1,51 @@
+#contProgramasGrupos {
+    width: 25vw;
+    min-width: 25vw;
+    height: 100%;
+    border-right: 5px solid var(--colorPrincipal);
+    background-color: white;
+    overflow-y: auto;
+
+    .programaLista {
+        background-color: var(--colorNegativoHorario);
+        color: white;
+        letter-spacing: 1px;
+        border-top: solid white 5px;
+        padding: 3px 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
+    .grupoLista {
+        /* background-color: yellow; */
+        border-bottom: 1px solid black;
+        padding: 2px;
+        text-align: justify;
+        cursor: pointer;
+        overflow: hidden;
+        position: relative;
+
+        label {
+            cursor: pointer;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            padding-left: 20%;
+            padding-top: 2px;
+        }
+
+        input[type="radio"] {
+            opacity: 0;
+        }
+
+        input[type="radio"]:checked + label {
+            background-color: var(--colorGrisLectura);
+        }
+    }
+    .grupoLista:hover {
+        background-color: var(--colorGrisLectura);
+    }
+}

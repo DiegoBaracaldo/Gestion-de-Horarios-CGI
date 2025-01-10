@@ -1,0 +1,26 @@
+#contTarjetaCompetenciaPiscina{
+    background-color: white;
+    border: 1px solid black;
+    width: 90%;
+    height: fit-content;
+    padding: 10px 10px;
+    margin-top: 30px;
+    border-radius: 12px;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,0.75);
+    h3{
+        /* background-color: yellow; */
+    }
+    .parteAbajoTarjeta{
+        display: flex;
+        p{
+            /* background-color: orange; */
+            min-width: 80%;
+            width: 80%;
+        }
+        .contBtnDestructivo{
+            /* background-color: rebeccapurple; */
+            flex-grow: 1;
+            padding: 2% 6%;
+        }
+    }
+}

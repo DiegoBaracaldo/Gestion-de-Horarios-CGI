@@ -1,7 +1,16 @@
+:root{
+--colorPrincipal: #39A900;
+--colorFondoSuave: #FBFBE2;
+--colorNegativoHorario: #385C57;
+--colorGrisLectura: #CED4DA;
+
+}
+
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    scrollbar-width: thin;
 }
 ol, ul{
     list-style: none;
@@ -29,3 +38,4 @@ tr{
 button{
     cursor: pointer;
 }
+

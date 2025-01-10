@@ -56,7 +56,7 @@ const GestionHorario = () => {
         <div id='contGestionHorario'>
             <div className='contRutas'>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="editar competencias" />
+                    <BotonProcesos texto="editar competencias" ruta={"/piscinaCompetencias"}/>
                 </div>
                 <div className='contBtnRutaInfo'>
                     <BotonProcesos texto="editar horario" disabledProp={!competenciasListas}/>

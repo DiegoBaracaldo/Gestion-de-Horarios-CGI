@@ -7,14 +7,15 @@
     overflow-y: auto;
 
     .programaLista {
-        background-color: var(--colorNegativoHorario);
+        /* background-color: var(--colorNegativoHorario); */
         color: white;
         letter-spacing: 1px;
         border-top: solid white 5px;
-        padding: 3px 5px;
+        padding: 3px 10px;
         cursor: pointer;
         display: flex;
         align-items: center;
+        justify-content: space-between;
     }
 
     .grupoLista {

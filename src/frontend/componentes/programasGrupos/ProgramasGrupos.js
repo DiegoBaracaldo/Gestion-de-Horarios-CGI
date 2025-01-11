@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './ProgramasGrupos.css';
 
-const ProgramasGrupos = ({ grupoSelecc, listaProgramas }) => {
+const ProgramasGrupos = ({
+    grupoSelecc,
+    listaProgramas,
+    listaParaListaCompletado
+}) => {
+
 
     const [programasExpandidos, setProgramasExpandidos] =
         useState(new Array(grupoSelecc.length).fill(false));
 
 
-    const ManejarSeleccGrupo = (grupo) => {
-        if (typeof grupoSelecc === 'function') grupoSelecc(grupo);
+    const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
+        if (typeof grupoSelecc === 'function') grupoSelecc(grupo, indexPrograma, indexGrupo);
     }
 
     const ManejarTogle = (e, index) => {
@@ -22,22 +27,32 @@ const ProgramasGrupos = ({ grupoSelecc, listaProgramas }) => {
         <div id='contProgramasGrupos'>
             <ul>
                 {
-                    Array.isArray(listaProgramas) && listaProgramas.map((programa, index) => {
+                    Array.isArray(listaProgramas) && listaProgramas.map((programa, i) => {
                         return (
                             <li key={programa.id}>
-                                <details onToggle={(e) => ManejarTogle(e, index)}>
-                                    <summary className='programaLista'>
+                                <details onToggle={(e) => ManejarTogle(e, i)}>
+                                    <summary className='programaLista'
+                                        style={{
+                                            backgroundColor:Array.isArray(listaParaListaCompletado) &&
+                                                listaParaListaCompletado.length > 0 &&
+                                                    listaParaListaCompletado[i].completado ?
+                                                    '#39A900' : '#385C57'
+                                        }}>
                                         <h4>{programa.nombre}</h4>
-                                        <h1>{programasExpandidos[index] ? '-' : '+'}</h1>
+                                        <h1>{programasExpandidos[i] ? '-' : '+'}</h1>
                                     </summary>
                                     <ul>
-                                        {programa.grupos.map((grupo) => {
+                                        {Array.isArray(programa.grupos) && programa.grupos.map((grupo, j) => {
                                             return (
                                                 <li key={grupo.id} className='grupoLista'>
-                                                    <input type='radio' name='gruposRadio' id={grupo.codigo}
-                                                        onChange={() => ManejarSeleccGrupo(grupo)} />
-                                                    <label htmlFor={grupo.codigo}>
-                                                        Grupo {grupo.codigo}
+                                                    <input type='radio' name='gruposRadio' id={grupo.codigoGrupo}
+                                                        onChange={() => ManejarSeleccGrupo(grupo, i, j)} />
+                                                    <label htmlFor={grupo.codigoGrupo}>
+                                                        Grupo {Array.isArray(listaParaListaCompletado) &&
+                                                            listaParaListaCompletado.length > 0 &&
+                                                                listaParaListaCompletado[i].gruposCompletados[j] ?
+                                                                grupo.codigoGrupo + " ✔️" : grupo.codigoGrupo
+                                                        }
                                                     </label>
                                                 </li>
                                             )

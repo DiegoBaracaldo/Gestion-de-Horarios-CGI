@@ -7,7 +7,9 @@ import { FormatearDescripcion } from '../../../backend/formato/FormatoDatos';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 import Swal from 'sweetalert2';
 
-const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa, objConsulta }) => {
+const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa, objConsulta,
+    modoSeleccMultiple
+ }) => {
 
     // para manejar los inputs enviados según si se pueden editar o no
     const [inputsOff, setInputsOff] = useState(false);
@@ -107,7 +109,8 @@ const ModalCompetencias = ({ abrirConsulta, abrirRegistro, onCloseProp, programa
             isOpenConsulta={abrirConsulta}
             bloquearInputs={(valor) => setInputsOff(valor)}
             edicionActivada={(valor) => setSeActivoEdicion(valor)}
-            onClickPositivo={RegistrarCompetencia}>
+            onClickPositivo={RegistrarCompetencia}
+            modoSeleccMultiple={modoSeleccMultiple}>
             <div className='seccCajitasModal'>
                 <section>
                     <label>código: </label>

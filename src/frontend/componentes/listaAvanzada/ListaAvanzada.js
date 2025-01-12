@@ -1,18 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import './ListaAvanzada.css';
 
 
 const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccProp,
-    modoSeleccion, vaciarListaSelecc, variableAux
+    modoSeleccion, vaciarListaSelecc, yaVienenSeleccionadas
 }) => {
 
     //Valor de 10 por defecto como parche para cubrir el dinamismo de las columnas
-    const [numFilas, setNumFilas] = useState(datosJson ? datosJson.length : 0);
+    const [numFilas, setNumFilas] = useState(Array.isArray(datosJson) ? datosJson.length : 0);
     const [numColumnas, setNumColumnas] = useState(subtitulos ? subtitulos.length : 1);
     /*Array que guarda los "checks" de las  filas de la tabla*/
     const [selecciones, setSelecciones] = useState(Array(numFilas).fill(false));
     const [todosSelecc, setTodosSelecc] = useState(false);
     const [listaObjetosSelecc, setListaObjetosSelecc] = useState([]);
+
+    const [yaVienenPrimera, setYaVienenPrimera] = useState(Array.isArray(yaVienenSeleccionadas) ? true : false);
 
     useEffect(() => {
         setNumFilas(datosJson ? datosJson.length : 0);
@@ -20,7 +22,28 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
 
     useEffect(() => {
         setSelecciones(Array(numFilas).fill(false));
+        YaSeleccionadas();
     }, [numFilas]);
+
+    function YaSeleccionadas() {
+        if (Array.isArray(yaVienenSeleccionadas) && yaVienenSeleccionadas.length > 0) {
+            if (Array.isArray(datosJson) && datosJson.length > 0) {
+                console.log("entrando...");
+                const auxSelecciones = new Array(datosJson.length).fill(false);
+                const auxListaObj = [];
+                yaVienenSeleccionadas.forEach((competencia, i) => {
+                    datosJson.forEach((comp, j) => {
+                        if (comp.id === competencia.id) {
+                            auxSelecciones[j] = true;
+                            auxListaObj.push(comp);
+                        }
+                    });
+                });
+                setSelecciones(auxSelecciones);
+                setListaObjetosSelecc(auxListaObj);
+            }
+        }
+    }
 
     const ManejarChecks = (index, objeto) => {
         //Primero se almacenan las selecciones
@@ -84,6 +107,7 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
         }
     }, [selecciones]);
 
+
     return (
         <table id='listaAvanzada'>
             <colgroup>
@@ -127,7 +151,9 @@ const ListaAvanzada = ({ titulo, subtitulos, datosJson, clickFila, listaSeleccPr
                                 {
                                     Object.values(element).map((valor, index) => (
                                         <td onClick={clickFila ? () => clickFila(element) : PedirFuncionalidad}
-                                            key={index} className='columnDato'>{valor}</td>
+                                            key={index} className='columnDato' title={valor}>
+                                            {valor}
+                                        </td>
                                     ))
                                 }
                             </tr>

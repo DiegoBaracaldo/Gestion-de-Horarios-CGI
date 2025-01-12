@@ -12,7 +12,8 @@ import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado }) => {
 
-    const subs = modoSeleccion ? ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
+    const subs = modoSeleccion ? 
+    ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
     : ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
     const navegar = useNavigate();

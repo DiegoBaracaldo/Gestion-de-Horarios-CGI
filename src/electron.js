@@ -10,6 +10,7 @@ const GrupoRepo = require('./backend/repository/repositorios/GrupoRepo');
 const AmbienteRepo = require('./backend/repository/repositorios/AmbienteRepo');
 const CompetenciaRepo = require('./backend/repository/repositorios/CompetenciaRepo');
 const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
+const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -24,6 +25,7 @@ let instructorRepo;
 let grupoRepo;
 let ambienteRepo;
 let competenciaRepo;
+let piscinaRepo;
 
 function createWindow() {
 
@@ -36,6 +38,7 @@ function createWindow() {
     grupoRepo = new GrupoRepo(bd);
     ambienteRepo = new AmbienteRepo(bd);
     competenciaRepo = new CompetenciaRepo(bd);
+    piscinaRepo = new PiscinaRepo(bd);
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -444,6 +447,24 @@ function RegistrarIPC() {
             return await competenciaRepo.Remove(idArray);
         } catch (error) {
             console.log("Error en ipcMain  RemoveCompetencia por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //Piscinas competencias
+    ipcMain.handle('GuardarPiscinas', async (event, arrayGrupos) => {
+        try {
+            return await piscinaRepo.SavePool(arrayGrupos);
+        } catch (error) {
+            console.log("Error en ipcMain  Guardar Piscinas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('CargarPiscinas', async () => {
+        try {
+            return await piscinaRepo.GetAll();
+        } catch (error) {
+            console.log("Error en ipcMain  Cargar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

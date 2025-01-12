@@ -48,10 +48,12 @@ const ProgramasGrupos = ({
                                                     <input type='radio' name='gruposRadio' id={grupo.codigoGrupo}
                                                         onChange={() => ManejarSeleccGrupo(grupo, i, j)} />
                                                     <label htmlFor={grupo.codigoGrupo}>
-                                                        Grupo {Array.isArray(listaParaListaCompletado) &&
+                                                        <span>Grupo {grupo.codigoGrupo}</span>
+                                                        {Array.isArray(listaParaListaCompletado) &&
                                                             listaParaListaCompletado.length > 0 &&
                                                                 listaParaListaCompletado[i].gruposCompletados[j] ?
-                                                                grupo.codigoGrupo + " ✔️" : grupo.codigoGrupo
+                                                                <span>{" ✔️" }</span> 
+                                                                : null
                                                         }
                                                     </label>
                                                 </li>

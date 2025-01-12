@@ -50,4 +50,7 @@ contextBridge.exposeInMainWorld('electron', {
     SaveNewCompetencia: (competencia) => ipcRenderer.invoke('SaveNewCompetencia', competencia),
     SaveCompetencia: (idViejo, competencia) => ipcRenderer.invoke('SaveCompetencia', idViejo, competencia),
     RemoveCompetencia: (idArray) => ipcRenderer.invoke('RemoveCompetencia', idArray),
+
+    GuardarPiscinas: (gruposArray) => ipcRenderer.invoke('GuardarPiscinas', gruposArray),
+    CargarPiscinas: () => ipcRenderer.invoke('CargarPiscinas')
 });

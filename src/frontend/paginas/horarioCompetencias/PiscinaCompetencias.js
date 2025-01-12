@@ -9,6 +9,8 @@ import ProgramaServicio from '../../../backend/repository/servicios/ProgramaServ
 import Swal from 'sweetalert2';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
 import { useNavigate } from 'react-router-dom';
+import CrudCompetencias from '../crudCompetencias/CrudCompetencias';
+import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 
 const PiscinaCompetencias = () => {
 
@@ -20,9 +22,30 @@ const PiscinaCompetencias = () => {
 
     const [listaProgramas, setListaProgramas] = useState([]);
     const [listaGrupos, setListaGrupos] = useState([]);
+    const [listaPiscinas, setListaPiscinas] = useState([]);
+    //variable para comparar al guardar los cambios de manera eficiente
+    let listaPiscinasInicial = [];
     const [listaCombinada, setListaCombinada] = useState([]);
-    
+
     const [btnConfirmarOn, setBtnConfirmarOn] = useState(false);
+    const [abrirListaComp, setAbrirListaComp] = useState(false);
+
+    const [compSeleccionadas, setCompSeleccionadas] = useState([]);
+
+    useEffect(() => {
+        if (compSeleccionadas.length > 0 && Object.keys(grupoSelecc).length > 0) {
+            //Agrego las competencias a la lista de competencias al grupo dentro de la lista de grupos
+            const indexObjeto = listaGrupos.findIndex(obj => obj.codigoGrupo === grupoSelecc.codigoGrupo);
+
+            if (indexObjeto >= 0) {
+                let listaAux = [...listaGrupos];
+                listaAux[indexObjeto].competencias = [...compSeleccionadas];
+                setListaGrupos(listaAux);
+                //Poner chulo o no si el grupo tiene al menos una competencia
+                PintarProgramasGrupos(listaAux, indexObjeto, true);
+            }
+        }
+    }, [compSeleccionadas]);
 
     //Para pintar los grupos y programas según si han sido completados o no
     //Se supone que de esta manera se sincroniza la estructura de índices en la lista
@@ -31,7 +54,7 @@ const PiscinaCompetencias = () => {
 
     useEffect(() => {
         //Esto crea una estructura de una lsita de objetos programa que tienen
-        //el estado de completado en false, además una lalve que es un array
+        //el estado de completado en false, además una llave que es un array
         //del mismo tamaño de los grupos que contiene, y un false por cada uno de ellos
         //para que coincida con la estructura de la lista
         if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
@@ -42,7 +65,18 @@ const PiscinaCompetencias = () => {
                 }));
                 listaCombinada.forEach((programa, index) => {
                     if (Array.isArray(programa.grupos)) {
-                        listaAux[index].gruposCompletados = new Array(programa.grupos.length).fill(false);
+                        listaAux[index].gruposCompletados =
+                            listaCombinada[index]
+                                .grupos.map(grupo => {
+                                    if (grupo.competencias.length > 0) return true;
+                                    else return false;
+                                });
+                    }
+                });
+                //Pintar programas si están completados
+                listaAux.forEach(programa => {
+                    if(programa.gruposCompletados.every(valor => valor === true)){
+                        programa.completado = true
                     }
                 });
                 setProgramasGruposCompletados([...listaAux]);
@@ -59,7 +93,7 @@ const PiscinaCompetencias = () => {
     //Cada que se selecciona un grupo
     useEffect(() => {
         if (Object.keys(grupoSelecc).length > 0) {
-            //Para que se vean las competencias de cada grupo (por el renderizado )
+            //redundante pero es Para que se vean las competencias de cada grupo (por el renderizado )
             setListaGrupos([...listaGrupos]);
             //para llevar el rastro del programa al que pertenece el grupo seleccionado
             //Se asegura que se haga cambio de programa seleccionado para ahorrar procesamiento
@@ -97,15 +131,56 @@ const PiscinaCompetencias = () => {
         try {
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
-            const respuesta = await Promise.all([programas, grupos]);
-            setListaProgramas([...respuesta[0]]);
-            setListaGrupos([...respuesta[1].map(grupo => {
+            const piscinaCompetencias = window.electron.CargarPiscinas();
+            const respuesta = await Promise.all([programas, grupos, piscinaCompetencias]);
+            const auxProgramas = respuesta[0];
+            const auxGrupos = respuesta[1];
+            const auxPiscinas = respuesta[2];
+            listaPiscinasInicial = [...auxPiscinas];
+
+            //analiza los programas a los cuales traer las competencias teniendo en cuenta
+            //las piscinas cargadas
+
+            const auxListasProgramasPiscinas = [];
+            for (const tupla of listaPiscinasInicial) {
+                //capturo el id del programa de cada grupo que está en la piscina
+                const grupoEncontrado = auxGrupos.find(grupo => grupo.id === tupla.idGrupo);
+                const idProgramaAux = grupoEncontrado ? grupoEncontrado.idPrograma : null;
+                //mirar que no se haya incluido ya y lo agrego si no se ha incluido
+                if (!auxListasProgramasPiscinas.includes(idProgramaAux) && idProgramaAux !== null)
+                    auxListasProgramasPiscinas.push(idProgramaAux);
+            }
+            //console.log(auxListasProgramasPiscinas);
+
+            //con la lista de ids programa descargo un array con las listas de competencias
+            let respuestaCompetencias = await Promise.all(
+                auxListasProgramasPiscinas
+                    .map(idprograma => new CompetenciaServicio().CargarLista(idprograma))
+            );
+            //console.log(respuestaCompetencias);
+
+            //aplano la lista de listas de competencias para tener solo una lista completa
+            respuestaCompetencias = respuestaCompetencias.flat();
+
+            //asigno las competencias que le pertenecen al grupo y la lista grupos de una vez
+            setListaGrupos([...auxGrupos.map(grupo => {
                 return {
                     ...grupo,
-                    competencias: []
+                    competencias: listaPiscinasInicial.map(relacion => {
+                        if (grupo.id === relacion.idGrupo) {
+                            const auxRelacion = respuestaCompetencias
+                                .find(comp => comp.id === relacion.idCompetencia);
+                            return auxRelacion;
+                        }
+                        return null;
+                    }).filter(comp => comp !== null)
                 }
             })]);
+            setListaPiscinas([...auxPiscinas]);
+            //setListaProgramas de último ya que activa todo 
+            setListaProgramas([...auxProgramas]);
         } catch (error) {
+            console.log(error);
             Swal.fire(error);
             navegar(-1);
         }
@@ -120,51 +195,39 @@ const PiscinaCompetencias = () => {
         });
     }
 
-    const competenciaMock = {
-        id: '123456',
-        descripcion: `Elaborar productos lácteos con base en leche de ratones calcificados con forticalcio
-        a las  3 y 40 de la mañana mientras hay fuegos artificiales en miami de singapur.`
-    }
-
-    function PintarProgramasGrupos(listaAux, indexGrupo) {
-        if (indexSeleccPrograma >= 0 && indexSeleccGrupo >= 0) {
-            //Poner chulo o no si el grupo tiene al menos una competencia
-            const listAux = [...programasGruposCompletados];
-            listAux[indexSeleccPrograma].gruposCompletados[indexSeleccGrupo] =
-                listaAux[indexGrupo].competencias.length >= 1;
-            //ahora analizo si el programa está completado para pintarlo
-            listAux[indexSeleccPrograma].completado =
-                listAux[indexSeleccPrograma].gruposCompletados.every(valor => valor === true);
-            console.log(listAux[indexSeleccPrograma].gruposCompletados);
-            setProgramasGruposCompletados(listAux);
-            //Ahora analizo si todos los programas están listos para habilitar botón confirmar
-            setBtnConfirmarOn(listAux.every(programa => programa.completado === true));
+    function PintarProgramasGrupos(listaAux, indexGrupo, pintadoManual) {
+        if (pintadoManual) {
+            console.log("pintando manual");
+            if (indexSeleccPrograma >= 0 && indexSeleccGrupo >= 0) {
+                //Poner chulo o no si el grupo tiene al menos una competencia
+                const listAux = [...programasGruposCompletados];
+                listAux[indexSeleccPrograma].gruposCompletados[indexSeleccGrupo] =
+                    listaAux[indexGrupo].competencias.length >= 1;
+                //ahora analizo si el programa está completado para pintarlo
+                listAux[indexSeleccPrograma].completado =
+                    listAux[indexSeleccPrograma].gruposCompletados.every(valor => valor === true);
+                setProgramasGruposCompletados(listAux);
+                //Ahora analizo si todos los programas están listos para habilitar botón confirmar
+                setBtnConfirmarOn(listAux.every(programa => programa.completado === true));
+            }
         }
     }
 
     const ManejarClicPositivo = () => {
-        //Agrego una competencia a la lista de competencias al grupo dentro de la lista de grupos
-        const indexObjeto = listaGrupos.findIndex(obj => obj.codigoGrupo === grupoSelecc.codigoGrupo);
-
-        if (indexObjeto >= 0) {
-            let listaAux = [...listaGrupos];
-            listaAux[indexObjeto].competencias.push(1);
-            setListaGrupos(listaAux);
-            //Poner chulo o no si el grupo tiene al menos una competencia
-            PintarProgramasGrupos(listaAux, indexObjeto);
-        }
+        setAbrirListaComp(true);
     }
 
-    const ManejarClicDestructivo = () => {
+    const ManejarClicDestructivo = (competencia) => {
         //Quito una competencia a la lista de competencias al grupo dentro de la lista de grupos
         const indexObjeto = listaGrupos.findIndex(obj => obj.codigoGrupo === grupoSelecc.codigoGrupo);
 
         if (indexObjeto >= 0) {
             let listaAux = [...listaGrupos];
-            listaAux[indexObjeto].competencias.shift();
+            listaAux[indexObjeto].competencias =
+                listaAux[indexObjeto].competencias.filter(comp => comp.id !== competencia.id);
             setListaGrupos(listaAux);
             //Poner chulo o no si el grupo tiene al menos una competencia
-            PintarProgramasGrupos(listaAux, indexObjeto);
+            PintarProgramasGrupos(listaAux, indexObjeto, true);
         }
     }
 
@@ -172,6 +235,10 @@ const PiscinaCompetencias = () => {
         setGrupoSelecc(grupo);
         setIndexSeleccGrupo(indexGrupo);
         setIndexSeleccPrograma(indexPrograma);
+    }
+
+    async function GuardarPiscina() {
+
     }
 
     return (
@@ -182,7 +249,7 @@ const PiscinaCompetencias = () => {
                 <div className='ladoDerechoCompetenciasPool'>
                     {
                         Object.keys(grupoSelecc).length < 1 ?
-                            <h1>Selecciona un grupo de la lista...</h1>
+                            <h1>Selecciona un grupo del panel izquierdo...</h1>
                             :
                             <div className='tarjetaTitulo'>
                                 <h2>Agregar todas las competencias requeridas para el
@@ -200,8 +267,8 @@ const PiscinaCompetencias = () => {
                                     && item.competencias.length > 0) {
                                     return item.competencias.map(competencia => {
                                         return (
-                                            <TarjetaCompetencia competencia={competenciaMock}
-                                                onClicDestructivo={ManejarClicDestructivo} />)
+                                            <TarjetaCompetencia competencia={competencia}
+                                                onClicDestructivo={() => ManejarClicDestructivo(competencia)} />)
                                     });
                                 }
                             })
@@ -210,10 +277,16 @@ const PiscinaCompetencias = () => {
                 </div>
             </MarcoGralHorario>
             <div className='contBotones'>
-                <BotonPositivo texto={'confirmar'} disabledProp={!btnConfirmarOn}/>
+                <BotonPositivo texto={'confirmar'} disabledProp={!btnConfirmarOn} />
                 <BotonPositivo texto={'guardar'} />
                 <BotonVolver />
             </div>
+            {
+                abrirListaComp && <CrudCompetencias modoSeleccionMultiple={true}
+                    programaBusqueda={programaSelecc} onCloseProp={() => setAbrirListaComp(false)}
+                    selecciones={(lista) => setCompSeleccionadas(lista)}
+                    yaVienenSeleccionadas={grupoSelecc.competencias} />
+            }
         </div>
     );
 }

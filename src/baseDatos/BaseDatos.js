@@ -44,6 +44,9 @@ class ConexionBD {
         this.CrearTablaAmbientes();
         this.CrearTablaGrupos();
         this.CrearTablaCompetencias();
+        this.CrearTablaPiscinaCompetencias();
+        this.CrearTablaFranjas();
+
         this.InsertarTorresMock();
         this.InsertarJornadasMock();
         this.InsertarProgramasMock();
@@ -51,6 +54,7 @@ class ConexionBD {
         this.InsertarAmbientesMock();
         this.InsertarGruposMock();
         this.InsertarCompetenciasMock();
+        this.InsertarPiscinasMock();
     }
 
     CrearTablaTorres() {
@@ -168,6 +172,43 @@ class ConexionBD {
         );
     }
 
+    CrearTablaFranjas(){
+        this.db.run(
+            `
+            CREATE TABLE IF NOT EXISTS franjas (
+            franja INTEGER,
+            idGrupo INTEGER NOT NULL,
+            idInstructor INTEGER NOT NULL,
+            idAmbiente INTEGER NOT NULL,
+            idCompetencia INTEGER NOT NULL,
+            fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (franja, idGrupo),
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idInstructor) REFERENCES instructores(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idAmbiente) REFERENCES ambientes(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE RESTRICT,
+            UNIQUE(franja, idInstructor),
+            UNIQUE(franja, idAmbiente)
+            )
+            `
+        );
+    }
+
+    CrearTablaPiscinaCompetencias(){
+        this.db.run(
+            `
+            CREATE TABLE IF NOT EXISTS piscinaCompetencias (
+            idGrupo INTEGER,
+            idCompetencia INTEGER,
+            fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE RESTRICT,
+            PRIMARY KEY (idGrupo, idCompetencia)
+            )
+            `
+        );
+    }
+
     InsertarTorresMock() {
         this.db.exec(
             `
@@ -244,6 +285,15 @@ class ConexionBD {
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (456789, 234567, 'Estructura pasteles que son arrojados a la basura con facilidad', 6);
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (567891, 345678, 'Implementa la respiración boca a boca sin mal aliento', 15);
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (678912, 345678, 'Llama a emergencias fácilemnte sin poner la canción de daddy yankee', 5);
+            `
+        );
+    }
+
+    InsertarPiscinasMock(){
+        this.db.exec(
+            `
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (849387, 123456);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (520949, 234567);
             `
         );
     }

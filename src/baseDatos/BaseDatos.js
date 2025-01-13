@@ -201,8 +201,8 @@ class ConexionBD {
             idGrupo INTEGER,
             idCompetencia INTEGER,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,
-            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE CASCADE,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE,
             PRIMARY KEY (idGrupo, idCompetencia)
             )
             `

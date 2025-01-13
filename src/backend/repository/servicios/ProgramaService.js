@@ -1,4 +1,3 @@
-import ProgramaRepo from "../repositorios/ProgramaRepo"
 
 class ProgramaServicio {
 

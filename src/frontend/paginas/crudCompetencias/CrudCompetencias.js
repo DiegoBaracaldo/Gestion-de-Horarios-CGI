@@ -14,7 +14,7 @@ import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudCompetencias = ({ modoSeleccionMultiple, programaBusqueda, onCloseProp, selecciones,
     yaVienenSeleccionadas
- }) => {
+}) => {
 
     const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
@@ -66,6 +66,15 @@ const CrudCompetencias = ({ modoSeleccionMultiple, programaBusqueda, onCloseProp
     }, []);
 
     useEffect(() => {
+        //Si viene lista ya seleccionada en modo Seleccion multiple, no deben aparecer en la lista
+        if (Array.isArray(yaVienenSeleccionadas) && yaVienenSeleccionadas.length > 0) {
+            const listaAux = listaObjetos;
+            for(const comp of yaVienenSeleccionadas){
+                const indexAux = listaObjetos.findIndex(compet => compet.id === comp.id);
+                if(indexAux >= 0 )  listaObjetos.splice(indexAux, 1);
+            }
+            setListaFiltrada([...listaAux]);
+        }
         setListaFiltrada(listaObjetos);
     }, [listaObjetos]);
 
@@ -196,13 +205,12 @@ const CrudCompetencias = ({ modoSeleccionMultiple, programaBusqueda, onCloseProp
                 datosJson={!modoSeleccionMultiple ? (esconderBusqueda ? null : listaAdaptada) : listaAdaptada}
                 subtitulos={subs}
                 onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}
-                modoSeleccMultiple={modoSeleccionMultiple} 
-                yaVienenSeleccionadas={yaVienenSeleccionadas}/>
+                modoSeleccMultiple={modoSeleccionMultiple}/>
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
                         onCloseProp={() => CerrarModal()} programa={programa}
-                        objConsulta={competenciaConsultada} modoSeleccMultiple={modoSeleccionMultiple}/>
+                        objConsulta={competenciaConsultada} modoSeleccMultiple={modoSeleccionMultiple} />
                     : null
             }
             {

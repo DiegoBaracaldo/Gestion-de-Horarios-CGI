@@ -452,9 +452,9 @@ function RegistrarIPC() {
     });
 
     //Piscinas competencias
-    ipcMain.handle('GuardarPiscinas', async (event, arrayGrupos) => {
+    ipcMain.handle('GuardarPiscinas', async (event, agregados, eliminados) => {
         try {
-            return await piscinaRepo.SavePool(arrayGrupos);
+            return await piscinaRepo.SavePool(agregados, eliminados);
         } catch (error) {
             console.log("Error en ipcMain  Guardar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);

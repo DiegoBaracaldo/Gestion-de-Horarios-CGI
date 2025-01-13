@@ -14,6 +14,14 @@
             height: 55%;
             width: 30%;
         }
+        .contEstadoProgramas{
+            /* background-color: yellow; */
+            h3{
+                text-transform: capitalize;
+                width: 100%;
+                text-align: start;
+            }
+        }
     }
     .ladoDerechoCompetenciasPool{
         /* background-color: yellow; */

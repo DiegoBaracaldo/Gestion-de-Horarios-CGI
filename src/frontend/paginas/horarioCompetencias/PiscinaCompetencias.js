@@ -11,6 +11,9 @@ import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
 import { useNavigate } from 'react-router-dom';
 import CrudCompetencias from '../crudCompetencias/CrudCompetencias';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
+import SWALConfirm from '../../alertas/SWALConfirm';
+import BotonDestructivo from '../../componentes/botonDestructivo/BotonDestructivo';
+import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService.js';
 
 const PiscinaCompetencias = () => {
 
@@ -31,7 +34,19 @@ const PiscinaCompetencias = () => {
     const [abrirListaComp, setAbrirListaComp] = useState(false);
 
     const [compSeleccionadas, setCompSeleccionadas] = useState([]);
+    //lista que guarda las nuevas agregaciones
+    const [agregados, setAgregados] = useState([]);
+    // useEffect(() => {
+    //     console.log("agregados", agregados);
+    //     console.log('eliminados', eliminados);
+    // }, [agregados]);
+    let [eliminados, setEliminados] = useState([]);
+    // useEffect(() => {
+    //     console.log("agregados", agregados);
+    //     console.log('eliminados', eliminados);
+    // }, [eliminados]);
 
+    // PROCESO DE AGREGAR COMPETENCIAS
     useEffect(() => {
         if (compSeleccionadas.length > 0 && Object.keys(grupoSelecc).length > 0) {
             //Agrego las competencias a la lista de competencias al grupo dentro de la lista de grupos
@@ -39,7 +54,43 @@ const PiscinaCompetencias = () => {
 
             if (indexObjeto >= 0) {
                 let listaAux = [...listaGrupos];
-                listaAux[indexObjeto].competencias = [...compSeleccionadas];
+                const listaAuxCompGrupo = listaAux[indexObjeto].competencias;
+                listaAux[indexObjeto].competencias = [...listaAuxCompGrupo, ...compSeleccionadas];
+                //ahora se agregan los cambios a "agregados" antes de cambiar el estado de listaGrupos
+                compSeleccionadas.forEach(competencia => {
+                    //Recojo la clave de código único
+                    const codUnico = grupoSelecc.id.toString() + competencia.id.toString();
+                    //Analizo si ha sido eliminada en el proceso actual y se elimina de la lista
+                    //Antes de agregarse a los agregados
+                    const indexEliminado = eliminados
+                        .findIndex(eliminado => eliminado.idGrupo === grupoSelecc.id
+                            && eliminado.idCompetencia === competencia.id);
+                    if (indexEliminado >= 0) {
+                        const listaTempEliminados = eliminados;
+                        listaTempEliminados.splice(indexEliminado, 1);
+                        setEliminados([...listaTempEliminados]);
+                    } else {
+                        //Analizo si ya está agregada la relación para evitar que se repita
+                        const yaExisteRelacion =
+                            agregados.some(agregado => agregado.codigoUnico === codUnico);
+                        if (!yaExisteRelacion) {
+                            console.log("agregando...");
+                            const listaTemporal = agregados;
+                            listaTemporal.push({
+                                ...{
+                                    idGrupo: grupoSelecc.id,
+                                    idCompetencia: competencia.id,
+                                    //Código para identificar si es nueva agregación más fácilmente al eliminar
+                                    codigoUnico: codUnico
+                                }
+                            });
+                            setAgregados([...listaTemporal]);
+
+                        }
+                    }
+                });
+
+                //Actualizar listaGrupos
                 setListaGrupos(listaAux);
                 //Poner chulo o no si el grupo tiene al menos una competencia
                 PintarProgramasGrupos(listaAux, indexObjeto, true);
@@ -75,7 +126,7 @@ const PiscinaCompetencias = () => {
                 });
                 //Pintar programas si están completados
                 listaAux.forEach(programa => {
-                    if(programa.gruposCompletados.every(valor => valor === true)){
+                    if (programa.gruposCompletados.every(valor => valor === true)) {
                         programa.completado = true
                     }
                 });
@@ -131,7 +182,7 @@ const PiscinaCompetencias = () => {
         try {
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
-            const piscinaCompetencias = window.electron.CargarPiscinas();
+            const piscinaCompetencias = new PiscinaServicio().CargarPiscinas();
             const respuesta = await Promise.all([programas, grupos, piscinaCompetencias]);
             const auxProgramas = respuesta[0];
             const auxGrupos = respuesta[1];
@@ -197,7 +248,7 @@ const PiscinaCompetencias = () => {
 
     function PintarProgramasGrupos(listaAux, indexGrupo, pintadoManual) {
         if (pintadoManual) {
-            console.log("pintando manual");
+            //console.log("pintando manual");
             if (indexSeleccPrograma >= 0 && indexSeleccGrupo >= 0) {
                 //Poner chulo o no si el grupo tiene al menos una competencia
                 const listAux = [...programasGruposCompletados];
@@ -225,6 +276,26 @@ const PiscinaCompetencias = () => {
             let listaAux = [...listaGrupos];
             listaAux[indexObjeto].competencias =
                 listaAux[indexObjeto].competencias.filter(comp => comp.id !== competencia.id);
+            //Agregar relación de eliminación antes de actualizar listaGrupos
+            const codigoUnico = grupoSelecc.id.toString() + competencia.id.toString();
+            //Se analiza si se elimina una nueva agregación o es vieja de persistencia
+            const indiceAuxAgregado = agregados.findIndex(agregado => agregado.codigoUnico === codigoUnico);
+            if (indiceAuxAgregado < 0) {
+                //Si es vieja de persistencia
+                const listaTemporal = [...eliminados];
+                listaTemporal.push({
+                    idGrupo: grupoSelecc.id,
+                    idCompetencia: competencia.id,
+                    codigoUnico: grupoSelecc.id.toString() + competencia.id.toString()
+                });
+                setEliminados(listaTemporal);
+            } else {
+                //Si es nueva, es decir, de memoria
+                const listaTemporal = [...agregados];
+                listaTemporal.splice(indiceAuxAgregado, 1);
+                setAgregados(listaTemporal);
+            }
+            //Se actualiza la listaGrupos
             setListaGrupos(listaAux);
             //Poner chulo o no si el grupo tiene al menos una competencia
             PintarProgramasGrupos(listaAux, indexObjeto, true);
@@ -237,8 +308,45 @@ const PiscinaCompetencias = () => {
         setIndexSeleccPrograma(indexPrograma);
     }
 
-    async function GuardarPiscina() {
+    async function GuardarPiscina(vieneDeVolver) {
+        if (!vieneDeVolver) {
+            if (agregados.length > 0 || eliminados.length > 0) {
+                const alerta = await new SWALConfirm().ConfirmAlert('¿Desea guardar el progreso actual?');
+                if (alerta) {
+                    try {
+                        const respuesta = await new PiscinaServicio().GuardarPiscinas(agregados, eliminados);
+                        Swal.fire(respuesta);
+                    } catch (error) {
+                        Swal.fire(error);
+                    }
+                }
+            } else {
+                Swal.fire('No hay cambios que guardar!');
+            }
+        } else {
+            try {
+                const respuesta = await new PiscinaServicio().GuardarPiscinas(agregados, eliminados);
+                Swal.fire(respuesta);
+            } catch (error) {
+                Swal.fire(error);
+            }
+        }
+        setAgregados([]);
+        setEliminados([]);
+    }
 
+    const ManejarVolver = async () => {
+        if (agregados.length > 0 || eliminados.length > 0) {
+            const respuesta = await new SWALConfirm().ConfirmAlert('¿Desea guardar los cambios antes de salir?');
+            if (respuesta) {
+                GuardarPiscina(true);
+                navegar(-1);
+            } else {
+                navegar(-1);
+            }
+        } else {
+            navegar(-1);
+        }
     }
 
     return (
@@ -277,9 +385,15 @@ const PiscinaCompetencias = () => {
                 </div>
             </MarcoGralHorario>
             <div className='contBotones'>
-                <BotonPositivo texto={'confirmar'} disabledProp={!btnConfirmarOn} />
-                <BotonPositivo texto={'guardar'} />
-                <BotonVolver />
+                <div className='contEstadoProgramas'>
+                    <h2>Estado:</h2>
+                    <h3 style={{color: btnConfirmarOn ? 'green' : 'red'}}>
+                        {btnConfirmarOn ? 'piscinas completas' : 'piscinas incompletas...'}
+                    </h3>
+                </div>
+                <BotonPositivo texto={'guardar'} onClick={() => GuardarPiscina()}
+                    disabledProp={agregados.length <= 0 && eliminados.length <= 0} />
+                <BotonDestructivo texto={'volver'} onClick={ManejarVolver} />
             </div>
             {
                 abrirListaComp && <CrudCompetencias modoSeleccionMultiple={true}

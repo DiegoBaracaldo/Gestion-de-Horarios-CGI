@@ -468,4 +468,12 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('ConfirmarPiscinas', async () => {
+        try {
+            return await piscinaRepo.ConfirmPool();
+        } catch (error) {
+            console.log("Error en ipcMain  al confirmar Piscinas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
 }

@@ -9,6 +9,7 @@ import BotonProcesos from '../../componentes/botonProcesos/BotonProcesos';
 import './GestionHorario.css';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useState } from 'react';
+import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
 
 const GestionHorario = () => {
 
@@ -18,8 +19,8 @@ const GestionHorario = () => {
 
     useLayoutEffect(() => {
         VerificarExistenciaEntidades();
-        setCompetenciasListas(VerificarPoolCompetencias());
-        setHorarioListo(VerificarHorario());
+        VerificarPoolCompetencias();
+        VerificarHorario();
     }, []);
 
     async function VerificarExistenciaEntidades() {
@@ -41,15 +42,17 @@ const GestionHorario = () => {
         }
     }
 
-    function VerificarPoolCompetencias(){
+    async function VerificarPoolCompetencias(){
         //función para verificar que las piscinas de competencias de todos los
         //grupos estén listas.
-        return false;
+        const respuesta = await new PiscinaServicio().PiscinasConfirmadas();
+        console.log(respuesta);
+        setCompetenciasListas(respuesta);
     }
 
     function VerificarHorario(){
         //función para verificar que el horario esté confirmado
-        return false;
+        setHorarioListo(false);
     }
 
     return (

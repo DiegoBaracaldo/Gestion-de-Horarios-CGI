@@ -67,6 +67,28 @@ class PiscinaRepo {
             });
         });
     }
+
+    async ConfirmPool(){
+        return new Promise((resolve, reject) => {
+            //Primero se cuenta la cantidad de grupos referenciados en la tabla piscinas
+            //si existe al menos una referencia
+            //Se usa NOT EXIST ya que se intenta encontrar la cantidad de registros que NO
+            //se encutran referenciados en piscinasCompetencias pero si están en grupos.
+            //ASí si obtengo cero es que todos están referenciados, si obtengo más, no todos lo están
+            const query = `
+                SELECT COUNT(g.id) AS cantidad FROM grupos g WHERE NOT EXISTS(
+                    SELECT 1 FROM piscinaCompetencias p WHERE p.idGrupo = g.id
+                );
+            `;
+            this.db.get(query, [], (error, respuesta)  => {
+                if(error){
+                    reject(error.errno);
+                }else{
+                    resolve(respuesta.cantidad === 0);
+                }
+            });
+        });
+    }
 }
 
 module.exports = PiscinaRepo;

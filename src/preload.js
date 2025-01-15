@@ -52,5 +52,6 @@ contextBridge.exposeInMainWorld('electron', {
     RemoveCompetencia: (idArray) => ipcRenderer.invoke('RemoveCompetencia', idArray),
 
     GuardarPiscinas: (agregados, eliminados) => ipcRenderer.invoke('GuardarPiscinas', agregados, eliminados),
-    CargarPiscinas: () => ipcRenderer.invoke('CargarPiscinas')
+    CargarPiscinas: () => ipcRenderer.invoke('CargarPiscinas'),
+    ConfirmarPiscinas: () => ipcRenderer.invoke('ConfirmarPiscinas')
 });

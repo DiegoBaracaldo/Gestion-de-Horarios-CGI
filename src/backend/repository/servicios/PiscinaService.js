@@ -17,7 +17,17 @@ class PiscinaServicio {
     async GuardarPiscinas(agregados, eliminados) {
         console.log("Guardando piscinas...");
         try {
-            return await window.electron.GuardarPiscinas(agregados, eliminados)
+            return await window.electron.GuardarPiscinas(agregados, eliminados);
+        } catch (error) {
+            console.log("error en servicio piscinas por: ", error);
+            throw error;
+        }
+    }
+
+    async PiscinasConfirmadas(){
+        console.log("Confirmando piscinas...");
+        try {
+            return await window.electron.ConfirmarPiscinas();
         } catch (error) {
             console.log("error en servicio piscinas por: ", error);
             throw error;

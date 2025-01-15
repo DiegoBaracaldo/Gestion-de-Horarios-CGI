@@ -10,6 +10,7 @@ const GrupoRepo = require('./backend/repository/repositorios/GrupoRepo');
 const AmbienteRepo = require('./backend/repository/repositorios/AmbienteRepo');
 const CompetenciaRepo = require('./backend/repository/repositorios/CompetenciaRepo');
 const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
+const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -24,6 +25,7 @@ let instructorRepo;
 let grupoRepo;
 let ambienteRepo;
 let competenciaRepo;
+let piscinaRepo;
 
 function createWindow() {
 
@@ -36,6 +38,7 @@ function createWindow() {
     grupoRepo = new GrupoRepo(bd);
     ambienteRepo = new AmbienteRepo(bd);
     competenciaRepo = new CompetenciaRepo(bd);
+    piscinaRepo = new PiscinaRepo(bd);
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -300,6 +303,14 @@ function RegistrarIPC() {
     });
 
     //Grupos
+    ipcMain.handle('AtLeastOneGrupo', async () => {
+        try {
+            return await grupoRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainGrupos por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllGrupos', async () => {
         try {
             return await grupoRepo.GetAll();
@@ -342,6 +353,14 @@ function RegistrarIPC() {
     });
 
     //Ambientes
+    ipcMain.handle('AtLeastOneAmbiente', async () => {
+        try {
+            return await ambienteRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainAmbientes por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllAmbientes', async () => {
         try {
             return await ambienteRepo.GetAll();
@@ -383,6 +402,14 @@ function RegistrarIPC() {
     });
 
     //Competencias
+    ipcMain.handle('AtLeastOneCompetencia', async () => {
+        try {
+            return await competenciaRepo.AtLeastOne();
+        } catch (error) {
+            console.log("error en electron ipcMainCompetencias por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllCompetencias', async (event, idPrograma) => {
         try {
             return await competenciaRepo.GetAllByIdPrograma(idPrograma);
@@ -420,6 +447,32 @@ function RegistrarIPC() {
             return await competenciaRepo.Remove(idArray);
         } catch (error) {
             console.log("Error en ipcMain  RemoveCompetencia por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //Piscinas competencias
+    ipcMain.handle('GuardarPiscinas', async (event, agregados, eliminados) => {
+        try {
+            return await piscinaRepo.SavePool(agregados, eliminados);
+        } catch (error) {
+            console.log("Error en ipcMain  Guardar Piscinas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('CargarPiscinas', async () => {
+        try {
+            return await piscinaRepo.GetAll();
+        } catch (error) {
+            console.log("Error en ipcMain  Cargar Piscinas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('ConfirmarPiscinas', async () => {
+        try {
+            return await piscinaRepo.ConfirmPool();
+        } catch (error) {
+            console.log("Error en ipcMain  al confirmar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

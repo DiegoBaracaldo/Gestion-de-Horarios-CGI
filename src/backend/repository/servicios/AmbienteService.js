@@ -4,6 +4,16 @@ class AmbienteServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneAmbiente();
+      } catch (error) {
+        console.log("error en servicio Ambiente por: ", error);
+          throw error.message.split(":")[1].trim();
+      }
+    }
+
     async CargarLista() {
         console.log("cargando lista...");
         try {

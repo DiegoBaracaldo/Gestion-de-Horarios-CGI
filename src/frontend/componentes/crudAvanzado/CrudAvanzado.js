@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
 
 const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, titulo, clicFila,
     onClicPositivo, onCLicDestructivo, disabledDestructivo, disabledPositivo,
-    esconderBusqueda, subtitulos, modoSeleccion, listaSeleccionada, vaciarListaSelecc, variableAux
+    esconderBusqueda, subtitulos, modoSeleccion, listaSeleccionada, vaciarListaSelecc, modoSeleccMultiple,
+    yaVienenSeleccionadas
 }) => {
 
     const [seleccFiltroValor, setseleccFiltroValor] = useState(listaMenu ? listaMenu[0].valor : '');
@@ -75,8 +76,9 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                 <article className='seccListaAvanzada'>
                     <ListaAvanzada datosJson={datosJson} titulo={titulo} clickFila={clicFila}
                         listaSeleccProp={listaSeleccionada && listaSeleccionada}
-                        subtitulos={subtitulos} modoSeleccion={modoSeleccion} 
-                        vaciarListaSelecc={vaciarListaSelecc} variableAux={variableAux}/>
+                        subtitulos={subtitulos} modoSeleccion={modoSeleccion}
+                        vaciarListaSelecc={vaciarListaSelecc} modoSeleccionMultiple={modoSeleccMultiple} 
+                        yaVienenSeleccionadas={yaVienenSeleccionadas}/>
                 </article>
             </section>
 
@@ -84,24 +86,26 @@ const CrudAvanzado = ({ seccLibre, listaMenu, filtrarPor, buscarPor, datosJson, 
                 {
                     modoSeleccion ? null :
                         <article className='contBtnPositivo boton'>
-                            <BotonPositivo texto="Agregar" onClick={onClicPositivo} disabledProp={disabledPositivo} />
+                            <BotonPositivo texto={modoSeleccMultiple ? 'confirmar' : 'Agregar'}
+                                onClick={onClicPositivo} disabledProp={disabledPositivo} />
                         </article>
                 }
                 {
                     modoSeleccion ?
                         <article className='contBtnDestructivo boton'>
-                            <BotonDestructivo texto="Cancelar" onClick={onCLicDestructivo}/>
+                            <BotonDestructivo texto="Cancelar" onClick={onCLicDestructivo} />
                         </article>
                         :
                         <article className='contBtnDestructivo boton'>
-                            <BotonDestructivo texto="Eliminar" 
-                            onClick={onCLicDestructivo}
+                            <BotonDestructivo
+                             texto={!modoSeleccMultiple ? 'Eliminar' : 'cancelar'}
+                                onClick={onCLicDestructivo}
                                 disabledProp={disabledDestructivo} />
                         </article>
                 }
 
                 {
-                    modoSeleccion ? null :
+                    modoSeleccion || modoSeleccMultiple ? null :
                         <article className='contBtnVolver boton'>
                             <BotonVolver />
                         </article>

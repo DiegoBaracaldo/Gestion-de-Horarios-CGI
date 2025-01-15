@@ -49,11 +49,15 @@ class JornadaServicio {
     console.log('Obteniendo todas las franjas horarias de las jornadas...');
     try {
       const respuesta = await window.electron.GetAllFranjasJornada();
-      const listaGlobalString = respuesta.map(listaFranjas => {
-        return listaFranjas.franjaDisponibilidad;
-      }).toString();
-      const listaFranjasNum = listaGlobalString.match(/\d+/g).map(Number);
-      return (listaFranjasNum);  
+      if(Array.isArray(respuesta) && respuesta.length > 0){
+        const listaGlobalString = respuesta.map(listaFranjas => {
+          return listaFranjas.franjaDisponibilidad;
+        }).toString();
+        const listaFranjasNum = listaGlobalString.match(/\d+/g).map(Number);
+        return (listaFranjasNum);  
+      }else{
+        return [];
+      }
     } catch (error) {
       console.log("error en servicio jornadas por: ", error);
       throw error.message;

@@ -5,7 +5,7 @@ import './ModalGeneral.css';
 
 const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
     isOpenRegistro, isOpenConsulta, onClose, bloquearInputs, edicionActivada,
-    onClickPositivo
+    onClickPositivo, modoSeleccMultiple
 }) => {
 
     const [modoEdicion, setModoEdicion] = useState(false);
@@ -99,10 +99,13 @@ const ModalGeneral = ({ children, hiddenPositivo, disabledPositivo,
                     children
                 }
                 <div className='seccBotonesModal'>
-                    <div className='contBtnPositivo contBtn'>
-                        <BotonPositivo onClick={ManejarOnClicPositivo} texto={textoPositivo}
-                            hiddenProp={hiddenPositivo} disabledProp={disabledPositivo} />
-                    </div>
+                    {
+                        modoSeleccMultiple ? null :
+                            <div className='contBtnPositivo contBtn'>
+                                <BotonPositivo onClick={ManejarOnClicPositivo} texto={textoPositivo}
+                                    hiddenProp={hiddenPositivo} disabledProp={disabledPositivo} />
+                            </div>
+                    }
                     <div className='contBtnDestructivo contBtn'>
                         <BotonDestructivo onClick={ManejarOnClicDestructivo} texto="cancelar" />
                     </div>

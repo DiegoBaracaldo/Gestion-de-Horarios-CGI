@@ -16,7 +16,8 @@ import SWALConfirm from '../../alertas/SWALConfirm';
 
 const CrudGrupos = () => {
 
-    const subs = ['Ficha', 'Código de grupo', 'Programa académico', 'jornada']
+    const subs = ['Ficha', 'Programa académico', 'jornada',
+        'trimestre']
 
     const navegar = useNavigate();
 
@@ -71,9 +72,9 @@ const CrudGrupos = () => {
             listaRecibida.forEach((element) => {
                 let objetoAux = {};
                 objetoAux.id = element.id;
-                objetoAux.codigoGrupo = element.codigoGrupo;
                 objetoAux.nombrePrograma = element.nombrePrograma;
                 objetoAux.jornada = element.jornada;
+                objetoAux.trimestreLectivo = element.trimestreLectivo;
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);
@@ -153,27 +154,36 @@ const CrudGrupos = () => {
     /************  SECCIÓN DE REGISTRO ***************************/
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
-    const AbrirRegistro = () => {
-        if (!VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un programa académico, " +
-                "un instructor y una jornada para proceder");
-        } else if (!VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un programa académico y " +
-                "un instructor para proceder");
-        } else if (!VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un programa académico y " +
-                "una jornada para proceder");
-        } else if (!VerificarProgramas() && VerificarResponsables() && VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un programa académico para proceder");
-        } else if (VerificarProgramas() && !VerificarResponsables() && !VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un instructor y " +
-                "una jornada para proceder");
-        } else if (VerificarProgramas() && !VerificarResponsables() && VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos un instructor para proceder");
-        } else if (VerificarProgramas() && VerificarResponsables() && !VerificarJornadas()) {
-            Swal.fire("Debes registrar al menos una jornada para proceder");
-        } else {
-            setAbrirRegistro(true);
+    const AbrirRegistro = async () => {
+
+        try {
+            const VerificarProgramas = await new ProgramaServicio().ExisteUno() !== 0;
+            const VerificarResponsables = await new InstructorServicio().ExisteUno() !== 0;
+            const VerificarJornadas = await new JornadaServicio().ExisteUno() !== 0;
+
+            if (!VerificarProgramas && !VerificarResponsables && !VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un programa académico, " +
+                    "un instructor y una jornada para proceder");
+            } else if (!VerificarProgramas && !VerificarResponsables && VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un programa académico y " +
+                    "un instructor para proceder");
+            } else if (!VerificarProgramas && VerificarResponsables && !VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un programa académico y " +
+                    "una jornada para proceder");
+            } else if (!VerificarProgramas && VerificarResponsables && VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un programa académico para proceder");
+            } else if (VerificarProgramas && !VerificarResponsables && !VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un instructor y " +
+                    "una jornada para proceder");
+            } else if (VerificarProgramas && !VerificarResponsables && VerificarJornadas) {
+                Swal.fire("Debes registrar al menos un instructor para proceder");
+            } else if (VerificarProgramas && VerificarResponsables && !VerificarJornadas) {
+                Swal.fire("Debes registrar al menos una jornada para proceder");
+            } else {
+                setAbrirRegistro(true);
+            }
+        } catch (error) {
+            Swal.fire(error);
         }
     }
     /////////////////////////////////////////////////////
@@ -185,25 +195,9 @@ const CrudGrupos = () => {
         CargarLista();
     }
 
-    async function VerificarProgramas() {
-        const servicioPrograma = new ProgramaServicio();
-        const respuesta = await servicioPrograma.ExisteUno();
-        return respuesta === 0 ? false : true;
-    }
-    async function VerificarResponsables() {
-        const servicioInstructor = new InstructorServicio();
-        const respuesta = await servicioInstructor.ExisteUno();
-        return respuesta === 0 ? false : true;
-    }
-    async function VerificarJornadas() {
-        const servicioJornada = new JornadaServicio();
-        const respuesta = await servicioJornada.ExisteUno();
-        return respuesta === 0 ? false : true;
-    }
-
     const EliminarGrupos = async () => {
         const confirmar = await new SWALConfirm()
-        .ConfirmAlert("¿Confirma que desea eliminar los grupos seleccionados?");
+            .ConfirmAlert("¿Confirma que desea eliminar los grupos seleccionados?");
         if (confirmar) {
             try {
                 const servicioGrupo = new GrupoServicio();
@@ -248,7 +242,7 @@ const CrudGrupos = () => {
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
                 clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs}
-                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}/>
+                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

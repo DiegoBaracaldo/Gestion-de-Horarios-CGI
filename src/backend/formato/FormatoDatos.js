@@ -1,7 +1,7 @@
 export function FormatearNombre(texto) {
 
     //Lista de preposiciones comunes
-    const excepciones = ['de', 'en', 'por', 'con', 'para', 'sobre', 'entre', 'tras', 'desde', 'hasta'];
+    const excepciones = ['y', 'de', 'en', 'por', 'con', 'para', 'sobre', 'entre', 'tras', 'desde', 'hasta'];
 
     // Eliminar espacios adicionales al inicio y al final del texto
     // Luego reemplazar múltiples espacios entre palabras por un solo espacio

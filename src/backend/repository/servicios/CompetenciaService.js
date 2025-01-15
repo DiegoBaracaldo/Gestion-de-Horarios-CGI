@@ -4,6 +4,16 @@ class CompetenciaServicio {
 
     }
 
+    async ExisteUno(){
+      console.log("buscando existencia...");
+      try {
+        return await window.electron.AtLeastOneCompetencia();
+      } catch (error) {
+        console.log("error en servicio Competencia por: ", error);
+          throw error.message.split(":")[1].trim();
+      }
+    }
+
     async CargarLista(idPrograma) {
         console.log("cargando lista...");
         try {

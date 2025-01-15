@@ -5,6 +5,16 @@ class GrupoRepo {
         this.db = db;
     }
 
+    async AtLeastOne() {
+        return new Promise((resolve, reject) => {
+            const query = "SELECT EXISTS(SELECT 1 FROM grupos LIMIT 1) AS hasRecords";
+            this.db.get(query, [], (err, fila) => {
+                if (err) reject(err.errno);
+                else resolve(fila.hasRecords);
+            });
+        });
+    }
+
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query =
@@ -42,15 +52,17 @@ class GrupoRepo {
 
     async SaveNew(grupo) {
         const { id, idPrograma, idResponsable, codigoGrupo, idJornada,
-            cantidadAprendices, esCadenaFormacion } = grupo;
+            cantidadAprendices, esCadenaFormacion, trimestreLectivo, fechaInicioTrimestre,
+            fechaFinTrimestre } = grupo;
         return new Promise((resolve, reject) => {
             const query = "INSERT INTO grupos " +
-                "(id, idPrograma, idResponsable, codigoGrupo, idJornada, cantidadAprendices, esCadenaFormacion) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                "(id, idPrograma, idResponsable, codigoGrupo, idJornada, cantidadAprendices, esCadenaFormacion, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             this.db.run(query,
                 [id, idPrograma, idResponsable, codigoGrupo, idJornada,
-                    cantidadAprendices, esCadenaFormacion],
+                    cantidadAprendices, esCadenaFormacion, trimestreLectivo,
+                    fechaInicioTrimestre, fechaFinTrimestre],
                 function (error) {
                     if (error) {
                         reject(error.errno);
@@ -66,14 +78,17 @@ class GrupoRepo {
             const query = "UPDATE grupos SET " +
                 "id = ?, idPrograma = ?, " +
                 "idResponsable = ?, codigoGrupo = ?, " +
-                "idJornada = ?, cantidadAprendices = ?, esCadenaFormacion = ?" +
+                "idJornada = ?, cantidadAprendices = ?, esCadenaFormacion = ?, " +
+                "trimestreLectivo = ?, fechaInicioTrimestre = ?, fechaFinTrimestre = ?" +
                 "WHERE id = ?";
             const { id, idPrograma, idResponsable, codigoGrupo, idJornada,
-                cantidadAprendices, esCadenaFormacion } = grupo;
+                cantidadAprendices, esCadenaFormacion, trimestreLectivo, fechaInicioTrimestre,
+                fechaFinTrimestre } = grupo;
 
             this.db.run(query,
                 [id, idPrograma, idResponsable, codigoGrupo, idJornada,
-                    cantidadAprendices, esCadenaFormacion, idViejo],
+                    cantidadAprendices, esCadenaFormacion, trimestreLectivo,
+                    fechaInicioTrimestre, fechaFinTrimestre, idViejo],
                 function (error) {
                     if (error) reject(error.errno);
                     else resolve(this.changes); // Devuelve el número de filas modificadas

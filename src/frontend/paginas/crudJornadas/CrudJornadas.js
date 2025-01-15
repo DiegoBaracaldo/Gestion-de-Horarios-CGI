@@ -80,6 +80,7 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
     setAbrirConsulta(false);
     setJornadaConsultada({});
     CargarLista();
+    CargarHorarioCompleto();
   }
   const [listaVacia, setListaVacia] = useState(true);
   const [listaSelecciones, setListaSelecciones] = useState([]);

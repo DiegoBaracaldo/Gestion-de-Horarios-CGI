@@ -13,7 +13,7 @@ const Principal = () => {
                 <BotonProcesos texto="gestión de información" ruta={"/gestionInfo"}/>
             </div>
             <div id='contBtnGestHorario' className='contBtnPrincipal'>
-                <BotonProcesos texto="gestión de horarios" />
+                <BotonProcesos texto="gestión de horario" ruta={"/gestionHorario"}/>
             </div>
         </div>
     );

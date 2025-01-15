@@ -36,6 +36,7 @@ class ConexionBD {
 
     CrearBaseDatos() {
         console.log("Creando base de datos...")
+        this.db.run("PRAGMA foreign_keys = ON;"); //Permitir restricciones de delete en llave foránea
         this.CrearTablaTorres();
         this.CrearTablaJornadas();
         this.CrearTablaProgramas();
@@ -43,6 +44,9 @@ class ConexionBD {
         this.CrearTablaAmbientes();
         this.CrearTablaGrupos();
         this.CrearTablaCompetencias();
+        this.CrearTablaPiscinaCompetencias();
+        this.CrearTablaFranjas();
+
         this.InsertarTorresMock();
         this.InsertarJornadasMock();
         this.InsertarProgramasMock();
@@ -50,6 +54,7 @@ class ConexionBD {
         this.InsertarAmbientesMock();
         this.InsertarGruposMock();
         this.InsertarCompetenciasMock();
+        this.InsertarPiscinasMock();
     }
 
     CrearTablaTorres() {
@@ -121,7 +126,7 @@ class ConexionBD {
             capacidad INTEGER NOT NULL,
             franjaDisponibilidad TEXT NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idTorre) REFERENCES torres(id),
+            FOREIGN KEY (idTorre) REFERENCES torres(id) ON DELETE RESTRICT,
             UNIQUE(nombre, idTorre) 
             );
             `
@@ -139,10 +144,13 @@ class ConexionBD {
             codigoGrupo VARCHAR(100) NOT NULL UNIQUE,
             cantidadAprendices INTEGER NOT NULL,
             esCadenaFormacion BOOLEAN NOT NULL DEFAULT FALSE,
+            trimestreLectivo INTEGER NOT NULL,
+            fechaInicioTrimestre DATE NOT NULL,
+            fechaFinTrimestre DATE NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas (id),
-            FOREIGN KEY (idResponsable) REFERENCES instructores(id),
-            FOREIGN KEY (idJornada) REFERENCES jornadas(id)
+            FOREIGN KEY (idPrograma) REFERENCES programas (id) ON DELETE RESTRICT,
+            FOREIGN KEY (idResponsable) REFERENCES instructores(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idJornada) REFERENCES jornadas(id) ON DELETE RESTRICT
             );
             `
         );
@@ -157,9 +165,46 @@ class ConexionBD {
             descripcion VARCHAR(249) NOT NULL,
             horasRequeridas INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas(id),
+            FOREIGN KEY (idPrograma) REFERENCES programas(id) ON DELETE RESTRICT,
             UNIQUE(idprograma, descripcion)
             );
+            `
+        );
+    }
+
+    CrearTablaFranjas(){
+        this.db.run(
+            `
+            CREATE TABLE IF NOT EXISTS franjas (
+            franja INTEGER,
+            idGrupo INTEGER NOT NULL,
+            idInstructor INTEGER NOT NULL,
+            idAmbiente INTEGER NOT NULL,
+            idCompetencia INTEGER NOT NULL,
+            fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (franja, idGrupo),
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idInstructor) REFERENCES instructores(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idAmbiente) REFERENCES ambientes(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE RESTRICT,
+            UNIQUE(franja, idInstructor),
+            UNIQUE(franja, idAmbiente)
+            )
+            `
+        );
+    }
+
+    CrearTablaPiscinaCompetencias(){
+        this.db.run(
+            `
+            CREATE TABLE IF NOT EXISTS piscinaCompetencias (
+            idGrupo INTEGER,
+            idCompetencia INTEGER,
+            fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE CASCADE,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE,
+            PRIMARY KEY (idGrupo, idCompetencia)
+            )
             `
         );
     }
@@ -221,12 +266,12 @@ class ConexionBD {
     InsertarGruposMock() {
         this.db.exec(
             `
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (849387, 123456, 123456, 1, 'G100SSTG', 30);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices) VALUES (520949, 123456, 123456, 2, 'G229909UURR', true, 25);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (478302, 234567, 234567, 3, 'G300UURRYE', 20);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (674589, 234567, 234567, 1, 'G488FFGRYY', 35);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices) VALUES (096724, 345678, 345678, 2, 'G577GGFYYR', true, 28);
-            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices) VALUES (263798, 345678, 345678, 3, 'G600IIFFN', 32);
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (849387, 123456, 123456, 1, 'G100SSTG', 30, 3, '2025-01-19', '2025-03-19');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (520949, 123456, 123456, 2, 'G229909UURR', true, 25, 4, '2025-02-15', '2025-04-15');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (478302, 234567, 234567, 3, 'G300UURRYE', 20, 1, '2025-01-24', '2025-03-24');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (674589, 234567, 234567, 1, 'G488FFGRYY', 35, 2, '2025-01-07', '2025-03-07');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, esCadenaFormacion, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (096724, 345678, 345678, 2, 'G577GGFYYR', true, 28, 6, '2025-01-15', '2025-03-15');
+            INSERT INTO grupos (id, idPrograma, idResponsable, idJornada, codigoGrupo, cantidadAprendices, trimestreLectivo, fechaInicioTrimestre, fechaFinTrimestre) VALUES (263798, 345678, 345678, 3, 'G600IIFFN', 32, 5, '2025-01-15', '2025-03-15');
             `
         );
     }
@@ -240,6 +285,15 @@ class ConexionBD {
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (456789, 234567, 'Estructura pasteles que son arrojados a la basura con facilidad', 6);
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (567891, 345678, 'Implementa la respiración boca a boca sin mal aliento', 15);
             INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (678912, 345678, 'Llama a emergencias fácilemnte sin poner la canción de daddy yankee', 5);
+            `
+        );
+    }
+
+    InsertarPiscinasMock(){
+        this.db.exec(
+            `
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (849387, 123456);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (520949, 234567);
             `
         );
     }

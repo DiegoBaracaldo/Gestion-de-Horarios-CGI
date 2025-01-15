@@ -12,7 +12,9 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudCompetencias = () => {
+const CrudCompetencias = ({ modoSeleccionMultiple, programaBusqueda, onCloseProp, selecciones,
+    yaVienenSeleccionadas
+}) => {
 
     const subs = ['Código', 'Descripción Corta', 'Horas Semanales']
 
@@ -53,10 +55,26 @@ const CrudCompetencias = () => {
     const [btnAgregarOff, setBtnAgregarOff] = useState(true);
 
     useEffect(() => {
-        CargarLista();
+        if (modoSeleccionMultiple) {
+            if (programaBusqueda && Object.keys(programaBusqueda).length > 0) {
+                setEsconderBusqueda(true);
+                setPrograma(programaBusqueda);
+            }
+        } else {
+            CargarLista();
+        }
     }, []);
 
     useEffect(() => {
+        //Si viene lista ya seleccionada en modo Seleccion multiple, no deben aparecer en la lista
+        if (Array.isArray(yaVienenSeleccionadas) && yaVienenSeleccionadas.length > 0) {
+            const listaAux = listaObjetos;
+            for(const comp of yaVienenSeleccionadas){
+                const indexAux = listaObjetos.findIndex(compet => compet.id === comp.id);
+                if(indexAux >= 0 )  listaObjetos.splice(indexAux, 1);
+            }
+            setListaFiltrada([...listaAux]);
+        }
         setListaFiltrada(listaObjetos);
     }, [listaObjetos]);
 
@@ -101,9 +119,11 @@ const CrudCompetencias = () => {
     /////////////////////////////////////////////////////
 
     //sección libre del crud
-    const btnSeleccPrograma = <button className='btnSeleccPrograma' onClick={() => setSeleccPrograma(true)}>
-        {nombrePrograma}
-    </button>
+    const btnSeleccPrograma = !modoSeleccionMultiple ?
+        <button className='btnSeleccPrograma' onClick={() => setSeleccPrograma(true)}>
+            {nombrePrograma}
+        </button>
+        : <h1>Seleccione las competencias...</h1>
 
     ///////// SECCIÓN DE CONSULTA ///////////////
     const [abrirConsulta, setAbrirConsulta] = useState(false);
@@ -125,7 +145,13 @@ const CrudCompetencias = () => {
     const [abrirRegistro, setAbrirRegistro] = useState(false);
 
     const AbrirRegistro = () => {
-        setAbrirRegistro(true);
+        if (!modoSeleccionMultiple) setAbrirRegistro(true);
+        else {
+            if (typeof selecciones === 'function' && typeof onCloseProp === 'function') {
+                selecciones(listaSelecciones);
+                onCloseProp();
+            }
+        }
     }
 
     const CerrarModal = () => {
@@ -137,7 +163,7 @@ const CrudCompetencias = () => {
 
     async function EliminarCompetencias() {
         const confirmar = await new SWALConfirm()
-        .ConfirmAlert("¿Confirma que desea eliminar los competencias seleccionados?");
+            .ConfirmAlert("¿Confirma que desea eliminar los competencias seleccionados?");
         if (confirmar) {
             try {
                 const servicioCompetencia = new CompetenciaServicio();
@@ -155,25 +181,36 @@ const CrudCompetencias = () => {
     }
 
     const OnClicDestructivo = () => {
-        EliminarCompetencias();
-        setVaciarListaSelecc(true);
+        if (modoSeleccionMultiple) {
+            if (typeof onCloseProp === 'function') onCloseProp();
+            else return null;
+        } else {
+            EliminarCompetencias();
+            setVaciarListaSelecc(true);
+        }
     }
 
     return (
         <div id='contCrudCompetencias'>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
-                disabledDestructivo={listaVacia} titulo="Competencias"
+                disabledDestructivo={!modoSeleccionMultiple ? listaVacia : false}
+                titulo="Competencias"
                 listaMenu={listaMenuCompetencias} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)} esconderBusqueda={esconderBusqueda}
-                seccLibre={btnSeleccPrograma} disabledPositivo={btnAgregarOff} onClicPositivo={AbrirRegistro}
-                clicFila={AbrirConsulta} datosJson={esconderBusqueda ? null : listaAdaptada}
+                buscarPor={(texto) => setTextoBusqueda(texto)}
+                esconderBusqueda={!modoSeleccionMultiple ? esconderBusqueda : true}
+                seccLibre={btnSeleccPrograma}
+                disabledPositivo={!modoSeleccionMultiple ? btnAgregarOff : listaVacia}
+                onClicPositivo={AbrirRegistro}
+                clicFila={AbrirConsulta}
+                datosJson={!modoSeleccionMultiple ? (esconderBusqueda ? null : listaAdaptada) : listaAdaptada}
                 subtitulos={subs}
-                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
+                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}
+                modoSeleccMultiple={modoSeleccionMultiple}/>
             {
                 abrirRegistro || abrirConsulta ?
                     <ModalCompetencias abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}
                         onCloseProp={() => CerrarModal()} programa={programa}
-                        objConsulta={competenciaConsultada} />
+                        objConsulta={competenciaConsultada} modoSeleccMultiple={modoSeleccionMultiple} />
                     : null
             }
             {

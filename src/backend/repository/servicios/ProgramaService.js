@@ -1,4 +1,3 @@
-import ProgramaRepo from "../repositorios/ProgramaRepo"
 
 class ProgramaServicio {
 
@@ -19,6 +18,7 @@ class ProgramaServicio {
     async CargarLista() {
         console.log("cargando lista...");
         try {
+          //throw new Error("error: Error intensionado");
           return await window.electron.GetAllProgramas();
         } catch (error) {
           console.log("error en crud progrmas por: ", error);

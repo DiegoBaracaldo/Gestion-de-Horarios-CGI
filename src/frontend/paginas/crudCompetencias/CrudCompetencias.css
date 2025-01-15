@@ -1,6 +1,10 @@
 #contCrudCompetencias{
     height: 100svh;
     width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
     .btnSeleccPrograma{
         width: 93%;
         height: 60%;

@@ -62,7 +62,7 @@ const BotonDispHoraria = ({ disabledProp, hiddenProp, esDisponibilidad, esConsul
             ()  => alert("Agregar funcionalidad para abrir horario...!")}
             disabled={disabledHook} hidden={hiddenHook}
             className={clasesHook}
-            style={{background: `${horarioSeleccionado ? '#CB7766' : '#385C57'}`}}>
+            style={{background: `${horarioSeleccionado ? '#39A900' : '#385C57'}`}}>
             {textoBtn}
         </button>
     );

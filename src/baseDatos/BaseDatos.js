@@ -55,6 +55,7 @@ class ConexionBD {
         this.InsertarGruposMock();
         this.InsertarCompetenciasMock();
         this.InsertarPiscinasMock();
+        this.InsertarFranjasMock();
     }
 
     CrearTablaTorres() {
@@ -294,6 +295,23 @@ class ConexionBD {
             `
             INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (849387, 123456);
             INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (520949, 234567);
+            `
+        );
+    }
+
+    InsertarFranjasMock(){
+        this.db.exec(
+            `
+            INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 
+            VALUES  (25, 849387, 123456, 1, 123456);
+            INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 
+            VALUES  (26, 849387, 123456, 1, 123456);
+            INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 
+            VALUES  (27, 849387, 123456, 1, 123456);
+            INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 
+            VALUES  (30, 520949, 234567, 2, 234567);
+            INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 
+            VALUES  (40, 478302, 345678, 3, 456789);
             `
         );
     }

@@ -8,8 +8,8 @@ const ProgramasGrupos = ({
 }) => {
 
 
-    const [programasExpandidos, setProgramasExpandidos] =
-        useState(new Array(grupoSelecc.length).fill(false));
+    const [programasExpandidos, setProgramasExpandidos] = 
+        useState(grupoSelecc ? new Array(grupoSelecc.length).fill(false) : []);
 
 
     const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {

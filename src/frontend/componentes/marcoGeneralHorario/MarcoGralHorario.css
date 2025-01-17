@@ -10,6 +10,7 @@
         text-align: center;
         color: var(--colorPrincipal);
         background-color: white;
+        text-transform: uppercase;
     }
     .hijo{
         width: 100%;

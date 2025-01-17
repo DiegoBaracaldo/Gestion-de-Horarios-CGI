@@ -47,11 +47,14 @@ contextBridge.exposeInMainWorld('electron', {
     AtLeastOneCompetencia: () => ipcRenderer.invoke('AtLeastOneCompetencia'),
     GetAllCompetencias: (idPrograma) => ipcRenderer.invoke('GetAllCompetencias', idPrograma),
     GetCompetenciaByID: (id) => ipcRenderer.invoke('GetCompetenciaByID', id),
+    GetAllByPoolCompetencias: (idGrupo) => ipcRenderer.invoke('GetAllByPoolCompetencias', idGrupo),
     SaveNewCompetencia: (competencia) => ipcRenderer.invoke('SaveNewCompetencia', competencia),
     SaveCompetencia: (idViejo, competencia) => ipcRenderer.invoke('SaveCompetencia', idViejo, competencia),
     RemoveCompetencia: (idArray) => ipcRenderer.invoke('RemoveCompetencia', idArray),
 
     GuardarPiscinas: (agregados, eliminados) => ipcRenderer.invoke('GuardarPiscinas', agregados, eliminados),
     CargarPiscinas: () => ipcRenderer.invoke('CargarPiscinas'),
-    ConfirmarPiscinas: () => ipcRenderer.invoke('ConfirmarPiscinas')
+    ConfirmarPiscinas: () => ipcRenderer.invoke('ConfirmarPiscinas'),
+
+    GetAllFranjas: () => ipcRenderer.invoke('GetAllFranjas')
 });

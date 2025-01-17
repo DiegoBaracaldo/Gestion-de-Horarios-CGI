@@ -104,6 +104,13 @@ const PiscinaCompetencias = () => {
     const [programasGruposCompletados, setProgramasGruposCompletados] = useState([]);
 
     useEffect(() => {
+        if (programasGruposCompletados.length > 0 &&
+            programasGruposCompletados.every(programa => programa.completado === true))
+            setBtnConfirmarOn(true);
+        else setBtnConfirmarOn(false);
+    }, [programasGruposCompletados]);
+
+    useEffect(() => {
         //Esto crea una estructura de una lsita de objetos programa que tienen
         //el estado de completado en false, además una llave que es un array
         //del mismo tamaño de los grupos que contiene, y un false por cada uno de ellos
@@ -387,7 +394,7 @@ const PiscinaCompetencias = () => {
             <div className='contBotones'>
                 <div className='contEstadoProgramas'>
                     <h2>Estado:</h2>
-                    <h3 style={{color: btnConfirmarOn ? 'green' : 'red'}}>
+                    <h3 style={{ color: btnConfirmarOn ? 'green' : 'red' }}>
                         {btnConfirmarOn ? 'piscinas completas' : 'piscinas incompletas...'}
                     </h3>
                 </div>

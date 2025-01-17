@@ -53,6 +53,6 @@
         }
     }
     .grupoLista:hover {
-        background-color: var(--colorGrisLectura);
+        background-color: lightblue;
     }
 }

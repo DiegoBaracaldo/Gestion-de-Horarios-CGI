@@ -11,6 +11,7 @@ const AmbienteRepo = require('./backend/repository/repositorios/AmbienteRepo');
 const CompetenciaRepo = require('./backend/repository/repositorios/CompetenciaRepo');
 const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
 const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
+const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -26,6 +27,7 @@ let grupoRepo;
 let ambienteRepo;
 let competenciaRepo;
 let piscinaRepo;
+let franjaRepo;
 
 function createWindow() {
 
@@ -39,6 +41,7 @@ function createWindow() {
     ambienteRepo = new AmbienteRepo(bd);
     competenciaRepo = new CompetenciaRepo(bd);
     piscinaRepo = new PiscinaRepo(bd);
+    franjaRepo = new FranjaRepo(bd);
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -426,6 +429,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllByPoolCompetencias', async(event, idGrupo) => {
+        try {
+            return await competenciaRepo.GetByPool(idGrupo);
+        } catch (error) {
+            console.log("Error en ipcMain  GetAllByPoolCompetencias por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('SaveNewCompetencia', async (event, competencia) => {
         try {
             return await competenciaRepo.SaveNew(competencia);
@@ -473,6 +484,16 @@ function RegistrarIPC() {
             return await piscinaRepo.ConfirmPool();
         } catch (error) {
             console.log("Error en ipcMain  al confirmar Piscinas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //Franjas
+    ipcMain.handle('GetAllFranjas', async() => {
+        try {
+            return franjaRepo.GetAll();
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

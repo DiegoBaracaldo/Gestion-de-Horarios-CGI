@@ -81,8 +81,67 @@
     }
 
     .SeccionHorarioCompSelecc {
-        background-color: red;
+        /* background-color: red; */
         width: 100%;
         height: 60%;
+    }
+    .contTablaMatrizHorarioCreacion{
+        overflow-y: scroll;
+        /* background-color: rebeccapurple; */
+        width: 100%;
+        height: 100%;
+        border: 2px solid black;
+        table{
+            /* background-color: yellow; */
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            border-collapse: separate;
+            border-spacing: 0;
+            user-select: none;
+            thead{
+                position: sticky;
+                top: 0;
+                left: 0;
+                background-color: #00324D;
+                color: white;
+                text-transform: capitalize;
+                th{
+                    padding: 2px 0;
+                    border: 1px solid black;
+                }
+            }
+            tbody{
+                tr{
+                    td{
+                        text-align: center;
+                        border: 1px solid black;
+                        background-color: white;
+                    }
+                }
+                tr:hover td:not(.colFranja){
+                    background-color: lightblue;
+                }
+                .colRango{
+                    background-color: var(--colorFondoSuave);
+                    font-weight: bold;
+                    width: 25%;
+                }
+                .colFranja{
+                    width: calc(75% / 7);
+                }
+                .celdaWhite{
+                    background-color: white;
+                }
+                .celdaRed{
+                    background-color: red;
+                    pointer-events: none;
+                }
+                .celdaGreen{
+                    background-color: var(--colorPrincipal);
+                }
+            }
+        }
     }
 }

@@ -16,7 +16,7 @@ import CrudJornadas from './frontend/paginas/crudJornadas/CrudJornadas';
 import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
 import GestionHorario from './frontend/paginas/gestionHorario/GestionHorario';
 import PiscinaCompetencias from './frontend/paginas/horarioCompetencias/PiscinaCompetencias';
-import Horario from './frontend/paginas/horario/Horario';
+import Horario from './frontend/paginas/horario/horario';
 
 function App() {
 

@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 import CompetenciaServicio from '../../../backend/repository/servicios/CompetenciaService';
 import CreacionHorario from '../../componentes/creacionHorario/CreacionHorario';
 import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
+import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 
 
 const Horario = () => {
@@ -27,15 +28,30 @@ const Horario = () => {
 
     const [grupoSeleccionado, setGrupoSeleccionado] = useState({});
     const [competenciaSelecc, setCompetenciaSelecc] = useState({});
-    const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [bloqueSelecc, setBloqueSelecc] = useState({});
-    const [numDeBloque, setNumDeBloque] = useState(0);
+    const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
+    const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
+    const [ocupanciaJornada, setOcupanciaJornada] = useState([]);
+    const [tipoJornada, setTipoJornada] = useState('');
     const [bloques, setBloques] = useState([]);
+    const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
+
+    const [contObjBloques, setContObjBloques] = useState([]);
 
     useLayoutEffect(() => {
         GetListas();
     }, []);
 
+    useEffect(() => {
+        //console.log(seleccBloqueRadioArray);
+        if(indexBloqueSelecc >= 0){
+            setBloqueSelecc(bloques[seleccBloqueRadioArray.findIndex(valor => valor === true)]);
+        }
+    }, [seleccBloqueRadioArray]);
+
+    // useEffect(() => {
+    //     console.log(ocupanciaJornada);
+    // }, [ocupanciaJornada]);
 
     async function GetListas() {
         try {
@@ -46,7 +62,6 @@ const Horario = () => {
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
             const auxFranjas = respuesta[2];
-
             //Meto la key "franjas" a cada grupo con sus respectivas franjas desde bd
             //y si no tiene se agrega un array vacío
             auxGrupos = auxGrupos.map(grupo => (
@@ -127,7 +142,7 @@ const Horario = () => {
 
     useEffect(() => {
         if (Object.values(grupoSeleccionado).length > 0) {
-            PedirCompetenciasPiscina();
+            PedirDatosForaneosGrupo();
             setCompetenciaSelecc({});
             setBloques([]);
             setBloqueSelecc({});
@@ -135,16 +150,20 @@ const Horario = () => {
     }, [grupoSeleccionado]);
 
     useEffect(() => {
+        setBloques([]);
         setBloqueSelecc({});
     }, [competenciaSelecc]);
 
     useEffect(() => {
-        
+
     }, [bloqueSelecc]);
 
-    const ManejarCheckBloque = (bloque, numero) => {
+    const ManejarCheckBloque = (bloque, i) => {
+        let auxNuevoSeleccLista = [...seleccBloqueRadioArray];
+        auxNuevoSeleccLista = auxNuevoSeleccLista.map((selecc, j) => (i === j ? true : false));
+        setSeleccBloqueRadioArray(auxNuevoSeleccLista);
         setBloqueSelecc(bloque);
-        setNumDeBloque(numero);
+        setIndexBloqueSelecc(i);
     }
 
     // useEffect(() => {
@@ -153,21 +172,94 @@ const Horario = () => {
     //     }
     // }, [competenciasGrupo]);
 
-    async function PedirCompetenciasPiscina() {
+
+    async function PedirDatosForaneosGrupo() {
         try {
-            setCompetenciasGrupo(await new CompetenciaServicio()
-                .CargarListaSegunPiscina(grupoSeleccionado.id));
+            const competenciasAux = new CompetenciaServicio().CargarListaSegunPiscina(grupoSeleccionado.id);
+            const JornadaAux = new JornadaServicio().CargarJornada(grupoSeleccionado.idJornada);
+
+            const resultadoAux = await Promise.all([competenciasAux, JornadaAux]);
+            setCompetenciasGrupo(resultadoAux[0]);
+            setTipoJornada(resultadoAux[1].tipo);
+            //Ahora convierto las franjas de ocupancia de jornada en un array de números
+            //Obtengo primero la lista de disponibilidad
+            const arrayDisponibilidadAux = resultadoAux[1].franjaDisponibilidad.toString()
+                .split(',').map(item => Number(item.trim()));
+            const setDisponibilidadAux = new Set(arrayDisponibilidadAux);
+            //Ahora obtengo el array de ocupancia iniciado con los 336 valores
+            const arrayOcupanciaAux = new Array(336).fill(null).map((valor, i) => (
+                i + 1
+            ));
+            //Filtro el array de ocupancia para que quede sin lovalores de disponibilidad
+            //Se elimina de atraás para adelante porque el array se va modificando en cada ciclo
+            //y de la manera normal los indices no coincidirian después de la primera eliminación
+            const listaFiltradaOcupancia = [
+                ...arrayOcupanciaAux.filter(valor => !setDisponibilidadAux.has(valor))
+            ]
+            // console.log(listaFiltradaOcupancia);
+            setOcupanciaJornada(listaFiltradaOcupancia);
+
         } catch (error) {
-            Swal.fire(error);
+            Swal.fire('Error a obtener los datos del grupo');
+            navegar(-1);
         }
     }
 
     const ManejarSeleccCompetencia = (competencia) => {
+        setIndexBloqueSelecc(-1);
         setCompetenciaSelecc(competencia);
     }
 
-    useEffect(() => {
+    //Se agrega un nuevo bloque
+    const ManejarAddBloque = () => {
+        const auxBloques = [...bloques];
+        const cantidadObj = auxBloques.length;
+        const objAux = {
+            idInstructor: null,
+            idAmbiente: null,
+            franjas: []
+        };
+        if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
+        else objAux.numBloque = 1;
+        auxBloques.push(objAux);
+        setBloques([...auxBloques]);
+    }
 
+    const ManejarRemoveBloque = (index) => {
+        const listaAux = [...bloques];
+        //Si se tiene seleccionado el último mientras se elimina uno, incluyéndolo
+        if (indexBloqueSelecc + 1 === bloques.length || index < indexBloqueSelecc) {
+            setIndexBloqueSelecc(indexBloqueSelecc - 1);
+        }
+        listaAux.splice(index, 1);
+        setBloques([...listaAux]);
+    }
+
+    //Cada que se modifican los bloques
+    useEffect(() => {
+        if (bloques.length > 0) {
+            const listaAux = [...contObjBloques];
+            // const objAux = {
+            //     idGrupo: grupoSeleccionado.id,
+            //     idCompetencia: competenciaSelecc.id,
+            //     bloques: bloques
+            // }
+            // listaAux.push(objAux);
+            // setContObjBloques(listaAux);
+            //Se ajustan los checked de los radio de bloques cada que cambian por agregar o eliminar
+            if (indexBloqueSelecc >= 0) {
+                //Si se elimina uno igual o  por debajo del seleccionado
+                const listaAuxSelecc = bloques.map((bloque, i) => i === indexBloqueSelecc ? true : false);
+                setSeleccBloqueRadioArray([...listaAuxSelecc]);
+            }
+            else {
+                setSeleccBloqueRadioArray(bloques.map(() => false));
+            }
+            //Ahora, dependiendo de si se agregó o eliminó
+
+        } else {
+            setSeleccBloqueRadioArray([]);
+        }
     }, [bloques]);
 
     return (
@@ -200,37 +292,51 @@ const Horario = () => {
                                         }
                                     </tbody>
                                 </table>
-                                <table className='tablaBloquesCompetencia'>
-                                    <thead>
-                                        <th>bloques</th>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            bloques.map((bloque, index) => (
-                                                <tr key={grupoSeleccionado.coigoGrupo + competenciaSelecc.id + index}>
-                                                    <td>
-                                                        <input type='radio' name='seleccBloque'
-                                                            id={bloque.idInstructor.toString() + index.toString()} 
-                                                            onChange={() => ManejarCheckBloque(bloque, index+1)}>
-                                                        </input>
-                                                        <label htmlFor={bloque.idInstructor.toString() + index.toString()}>
-                                                            Bloque {(index + 1).toString()}
-                                                        </label>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
+                                {
+                                    Object.keys(competenciaSelecc).length > 0 ?
+                                        <table className='tablaBloquesCompetencia'>
+                                            <thead>
+                                                <th><label>bloques </label>
+                                                    <button onClick={ManejarAddBloque}>+</button></th>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    bloques.map((bloque, index) => (
+                                                        <tr key={grupoSeleccionado.codigoGrupo + competenciaSelecc.id + index}>
+                                                            <td className='colBloque'>
+                                                                <input type='radio' name='seleccBloque'
+                                                                    id={'bloqueComp' + index}
+                                                                    onChange={() => ManejarCheckBloque(bloque, index)}
+                                                                    checked={seleccBloqueRadioArray[index]}>
+                                                                </input>
+                                                                <label htmlFor={'bloqueComp' + index}>
+                                                                    <button onClick={() => ManejarRemoveBloque(index)}>
+                                                                        X
+                                                                    </button>
+                                                                    <span>
+                                                                        Bloque {bloque.numBloque}
+                                                                    </span>
+                                                                </label>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                }
+                                            </tbody>
+                                        </table>
+                                        :
+                                        null
+                                }
                             </div>
                             <div className='ladoDerInterno'>
                                 {
                                     Object.keys(competenciaSelecc).length > 0 ?
                                         <CreacionHorario competencia={competenciaSelecc}
                                             franjas={grupoSeleccionado.franjas || []}
-                                            setListaBloques={(b) => setBloques(b)} 
+                                            setListaBloques={(b) => setBloques(b)}
                                             bloque={bloqueSelecc}
-                                            bloqueNumero={numDeBloque}/>
+                                            bloqueNumero={bloqueSelecc.numBloque}
+                                            ocupanciaJornada={ocupanciaJornada}
+                                            tipoJornada={tipoJornada} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

@@ -13,7 +13,7 @@ const TarjetaCompetencia = ({ competencia, onClicDestructivo }) => {
             <h3>{competencia ? competencia.id : ''}</h3>
             <p>{competencia ? competencia.descripcion : ''}</p>
             <div className='contBtnDestructivo'>
-                <BotonDestructivo texto={'-'} onClick={ManejarOnClic} />
+                <BotonDestructivo texto={'x'} onClick={ManejarOnClic} />
             </div>
         </div>
     );

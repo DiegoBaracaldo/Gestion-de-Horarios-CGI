@@ -223,12 +223,14 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
     function ValorInicialListaHora() {
         let listaAux = [];
         let contadorMinutos = 0;
+        //Son 48 filas
         for (let i = 0; i < 48; i++) {
+            //Se crea primero la columna que indica de qué hora a qujé hora va
             const horas = String(Math.floor(contadorMinutos / 60)).padStart(2, '0');
             const minutos = String(contadorMinutos % 60).padStart(2, '0');
             const horasnext = String(Math.floor((contadorMinutos + 30) / 60)).padStart(2, '0');
             const minutosNext = String((contadorMinutos + 30) % 60).padStart(2, '0');
-
+            //Se agrega ahora cada columna de izuierda a derecha
             listaAux.push(
                 <tr key={`fila${i + 1}`}>
                     <td className={classCeldaHora}>{horas}:{minutos} - {horasnext}:{minutosNext}</td>

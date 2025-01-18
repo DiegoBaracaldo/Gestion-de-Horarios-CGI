@@ -78,6 +78,7 @@
                     padding: 2px 0;
                     position: relative;
                     overflow: hidden;
+
                     :hover {
                         background-color: lightblue;
                     }
@@ -95,6 +96,7 @@
                         padding-right: 10px;
                         display: flex;
                         justify-content: space-between;
+
                         :hover {
                             background-color: lightblue;
                         }
@@ -110,8 +112,57 @@
                 }
 
             }
+
+            .tablaBloquesCompetencia {
+                thead {
+                    th {
+                        padding: 3px 5px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: end;
+                        gap: 10%;
+
+                        button {
+                            color: white;
+                            background-color: transparent;
+                            border: 2px solid white;
+                            padding: 0 10px;
+                            font-size: medium;
+                            font-weight: bold;
+                            border-radius: 6px;
+                            height: 20px;
+                        }
+                    }
+                }
+
+                td {
+                    /* background-color:red; */
+                    label{
+                        display: flex;
+                        justify-content: space-between;
+                        button {
+                            height: 20px;
+                            aspect-ratio: 1;
+                            background-color: var(--colorDestructivo);
+                            color: white;
+                            font-weight: bold;
+                            border: none;
+                            border-radius: 6px;
+                            z-index: 100;
+                            :hover{
+                                background-color: black;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .tablaCompetenciasPiscina {
+                border-bottom: 1px solid black;
+            }
         }
-        .ladoDerInterno{
+
+        .ladoDerInterno {
             height: 100%;
             flex-grow: 1;
             /* background-color: yellow; */

@@ -33,7 +33,7 @@ const Horario = () => {
     const [bloqueSelecc, setBloqueSelecc] = useState({});
     const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
     const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
-    const [ocupanciaJornada, setOcupanciaJornada] = useState([]);
+    const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
     const [bloques, setBloques] = useState([]);
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
@@ -174,25 +174,30 @@ const Horario = () => {
         setGrupoSeleccionado(grupo);
     }
 
+    //CADA QUE SE SELECCIONA UN GRUPO
     useEffect(() => {
-        if (Object.values(grupoSeleccionado).length > 0) {
-            console.log(grupoSeleccionado.competencias);
+        if (Object.values(grupoSeleccionado).length > 0
+            && Array.isArray(grupoSeleccionado.competencias)) {
+            //console.log(grupoSeleccionado.competencias);
             PedirDatosForaneosGrupo();
-            setCompetenciasGrupo(grupoSeleccionado.competencias);
+            setCompetenciasGrupo([...grupoSeleccionado.competencias]);
             setCompetenciaSelecc({});
             setBloques([]);
             setBloqueSelecc({});
         }
     }, [grupoSeleccionado]);
 
+    //CADA QUE SE SELECCIONA UNA COMPETENCIA
     useEffect(() => {
-        setBloques([]);
-        setBloqueSelecc({});
+        if (Array.isArray(competenciaSelecc.bloques)) {
+            //console.log(competenciaSelecc.bloques);
+            setBloques([...competenciaSelecc.bloques]);
+            setBloqueSelecc({});
+        }
     }, [competenciaSelecc]);
 
-    useEffect(() => {
-
-    }, [bloqueSelecc]);
+    //CADA QUE SE SELECCIONA UN BLOQUE
+    const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
 
     const ManejarCheckBloque = (bloque, i) => {
         let auxNuevoSeleccLista = [...seleccBloqueRadioArray];
@@ -200,6 +205,8 @@ const Horario = () => {
         setSeleccBloqueRadioArray(auxNuevoSeleccLista);
         setBloqueSelecc(bloque);
         setIndexBloqueSelecc(i);
+        //Se maneja la detección de cambio de bloque por aquí porque en el useEffect hace loop
+        setEsPrimeraCargaBloque(true);
     }
 
     // useEffect(() => {
@@ -207,15 +214,6 @@ const Horario = () => {
     //         //Cuando se cargan las competencias del grupo según la piscina
     //     }
     // }, [competenciasGrupo]);
-
-    async function PedirCompetenciasPorGrupo(idGrupo) {
-        try {
-            return await new CompetenciaServicio().CargarListaSegunPiscina(idGrupo);
-        } catch (error) {
-            Swal.fire('Error a obtener las piscinas de competencias de los grupos...', error);
-            navegar(-1);
-        }
-    }
 
     async function PedirDatosForaneosGrupo() {
         try {
@@ -239,7 +237,7 @@ const Horario = () => {
                 ...arrayOcupanciaAux.filter(valor => !setDisponibilidadAux.has(valor))
             ]
             // console.log(listaFiltradaOcupancia);
-            setOcupanciaJornada(listaFiltradaOcupancia);
+            setOcupanciaJornada(new Set(listaFiltradaOcupancia));
 
         } catch (error) {
             Swal.fire('Error a obtener los datos del grupo');
@@ -259,6 +257,8 @@ const Horario = () => {
         const objAux = {
             idInstructor: null,
             idAmbiente: null,
+            idCompetencia: competenciaSelecc.id,
+            idGrupo: grupoSeleccionado.id,
             franjas: []
         };
         if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
@@ -323,7 +323,8 @@ const Horario = () => {
                                                 <tr key={comp.id.toString() + grupoSeleccionado.codigoGrupo.toString()}>
                                                     <td>
                                                         <input type='radio' name='compSeleccGrupo'
-                                                            id={grupoSeleccionado.codigoGrupo + comp.id} onChange={() => ManejarSeleccCompetencia(comp)}>
+                                                            id={grupoSeleccionado.codigoGrupo + comp.id}
+                                                            onChange={() => ManejarSeleccCompetencia(comp)}>
                                                         </input>
                                                         <label htmlFor={grupoSeleccionado.codigoGrupo + comp.id}>
                                                             {comp.id}
@@ -375,12 +376,13 @@ const Horario = () => {
                                 {
                                     Object.keys(competenciaSelecc).length > 0 ?
                                         <CreacionHorario competencia={competenciaSelecc}
-                                            franjas={grupoSeleccionado.franjas || []}
-                                            setListaBloques={(b) => setBloques(b)}
                                             bloque={bloqueSelecc}
                                             bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
                                             ocupanciaJornada={ocupanciaJornada}
-                                            tipoJornada={tipoJornada} />
+                                            tipoJornada={tipoJornada} 
+                                            bloqueDevuelto={(b) => setBloqueSelecc(b)}
+                                            esPrimeraCargaBloque={esPrimeraCargaBloque}
+                                            devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}/>
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import BotonDispHoraria from '../botonDIspHoraria/BotonDispHoraria';
 import './CreacionHorario.css';
 import Swal from 'sweetalert2';
@@ -6,24 +6,32 @@ import InstructorServicio from '../../../backend/repository/servicios/Instructor
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
 
-const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloqueNumero,
-    ocupanciaJornada, tipoJornada
+const CreacionHorario = ({ competencia, bloque, bloqueNumero,
+    ocupanciaJornada, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
+    devolverFalsePrimeraCarga
 }) => {
 
     //con las franjas se trabajan los bloques y todo el tema del horario
 
     //Manejo de bloques
-    const [bloques, setBloques] = useState([]);
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
-    const [franjasBloque, setFranjasBloque] = useState([]);
-
+    const [franjasBloque, setFranjasBloque] = useState(new Set());
+    const franjasLibres = new Set(Array.from({ length: 336 }, (_, i) => i + 1));
 
     useEffect(() => {
-        //En cada carga debe trabajar el tema de franjas que incluyen instructores y ambientes
-        //por bloques en cada competencia, es decir, algoritmo central del programa
+        if (esPrimeraCargaBloque) {
+            //Se cargan los datos del bloque en cuestión por primera vez
+            setInstructorBloque(ObtenerInstructor());
+            setAmbienteBloque(ObtenerAmbiente());
+            setFranjasBloque(new Set(bloque.franjas));
+            //Vuelo a ponerle en false
+            if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
+        }
+    }, [esPrimeraCargaBloque]);
 
-        FormarBloques();
+    useEffect(() => {
+        
     }, []);
 
     //Matriz para generar la matriz visual del horario
@@ -42,17 +50,60 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
     );
 
     //******************************************************************************************//
+    //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
+
+    useEffect(() => {
+        //Se reinician el isntructor y ambiente dada la modificación de las franjas
+        // console.log(franjasBloque);
+        if (typeof bloqueDevuelto === 'function') {
+            const bloqueAux = {
+                ...bloque,
+                idInstructor: null,
+                idAmbiente: null,
+                franjas: franjasBloque
+            }
+            bloqueDevuelto(bloqueAux);
+        }
+    }, [franjasBloque]);
+
+    useEffect(() => {
+        if (typeof bloqueDevuelto === 'function') {
+            const bloqueAux = {
+                ...bloque,
+                idInstructor: instructorBloque.id
+            }
+            bloqueDevuelto(bloqueAux);
+        }
+    }, [instructorBloque]);
+
+    useEffect(() => {
+        if (typeof bloqueDevuelto === 'function') {
+            const bloqueAux = {
+                ...bloque,
+                idAmbiente: ambienteBloque.id
+            }
+            bloqueDevuelto(bloqueAux);
+        }
+    }, [ambienteBloque]);
+    //******************************************************************************************//
+    //******************************************************************************************//
+
+    //******************************************************************************************//
     //********** SECCIÓN PARA MANEJAR PINTADA DE CELDAS Y RECOLECCIÓN DE FRANJAS ***************//
 
     const [arrastrandoVerde, setArrastrandoVerde] = useState(false);
     const [arrastrandoBlanco, setArrastrandoBlanco] = useState(false);
-    const [datosFranjaArrastre, setDatosFranjaArrastre] = useState([-1, -1, 0]);
+    const [valorArrastre, setValorArrastre] = useState(0);
 
-    const ManejarClickFranja = (i, j) => {
-        const matrixAux = [...matrizHorario];
-        const colorCelda = matrixAux[i][j].colorCelda;
-        matrixAux[i][j].colorCelda = colorCelda === 'white' ? 'green' : 'white';
-        setMatrizHorario(matrixAux);
+    //Para clic individual sin arrastre
+    const ManejarClickFranja = (valor, color) => {
+        const auxFranjasBloque = new Set(franjasBloque);
+        if (color === 'white') {
+            auxFranjasBloque.add(valor);
+        } else if(color === 'green') {
+            auxFranjasBloque.delete(valor);
+        }
+        setFranjasBloque(auxFranjasBloque);
     }
 
     const ManejarClickDownFranja = (colorPintado) => {
@@ -60,73 +111,62 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
         else if (colorPintado === 'green') setArrastrandoBlanco(true);
     }
 
-    const ManejarArrastreFranjas = (i, j, valor) => {
-        if (datosFranjaArrastre[2] !== valor) {
-            setDatosFranjaArrastre([i, j, valor]);
+    const ManejarArrastreFranjas = (valor) => {
+        if (valorArrastre !== valor) {
+            setValorArrastre(valor);
         }
     }
 
     //Recibiendo todos los datos de la celda arrastrada
     useEffect(() => {
-        if (datosFranjaArrastre[0] >= 0 && datosFranjaArrastre[1] >= 0) {
+        if (valorArrastre >= 0 ) {
             // console.log(datosFranjaArrastre);
-            const i = datosFranjaArrastre[0];
-            const j = datosFranjaArrastre[1];
-            const valorFranja = datosFranjaArrastre[2];
-            const matrixAux = [...matrizHorario];
             if (arrastrandoBlanco) {
-                matrixAux[i][j].colorCelda = 'white';
+                setFranjasBloque(() => {
+                    const auxLista = new Set(franjasBloque);
+                    auxLista.delete(valorArrastre);
+                    return auxLista;
+                });
             } else if (arrastrandoVerde) {
-                matrixAux[i][j].colorCelda = 'green';
+                setFranjasBloque(new Set(franjasBloque).add(valorArrastre));
             }
-            setMatrizHorario(matrixAux);
         }
-    }, [datosFranjaArrastre]);
+    }, [valorArrastre]);
 
     const ManejarClickUpFranja = () => {
         setArrastrandoVerde(false);
         setArrastrandoBlanco(false);
-        setDatosFranjaArrastre(-1, -1, 0);
+        setValorArrastre(0);
     }
-
-    const PintandoVerde = () => {
-
-    }
-
-    const PintandoBlanco = () => {
-
-    }
-
 
     //******************************************************************************************//
     //******************************************************************************************//
 
-    function PintarFranjasBloque() {
-        if (bloque.franjas && bloque.franjas.length > 0) {
-            PintarFranjas('green', bloque.franjas);
-        }
-    }
 
-    function PintarFranjasOcupanciaJornada() {
-        if (Array.isArray(ocupanciaJornada) && ocupanciaJornada.length > 0) {
-            PintarFranjas('red', ocupanciaJornada);
-        }
-    }
-
-    function PintarFranjas(color, listaFranjas) {
-        //console.log(listaFranjas);
+    function PintarFranjas(verdes, blancas, rojas) {
         //algortimo para entrar de una vez al índice y cambiarlo
-        //en lugar de recorrer todo el array buscando la coincidencia
+        ////en lugar de recorrer todo el array buscando la coincidencia
         const auxMatriz = [...matrizHorario];
-        if (listaFranjas && listaFranjas.length > 0) {
-            for (const franja of listaFranjas) {
-                const indexMatriz = GetMatrizIndexFromValue(franja);
-                const iAux = indexMatriz[0];
-                const jAux = indexMatriz[1];
-                auxMatriz[iAux][jAux].colorCelda = color;
-            }
-            setMatrizHorario([...auxMatriz]);
-        }
+    //    console.log("vamoa pintar...");
+        verdes.forEach(franja => {
+            const indexMatriz = GetMatrizIndexFromValue(franja);
+            const iAux = indexMatriz[0];
+            const jAux = indexMatriz[1];
+            auxMatriz[iAux][jAux].colorCelda = 'green';
+        });
+        blancas.forEach(franja => {
+            const indexMatriz = GetMatrizIndexFromValue(franja);
+            const iAux = indexMatriz[0];
+            const jAux = indexMatriz[1];
+            auxMatriz[iAux][jAux].colorCelda = 'white';
+        });
+        rojas.forEach(franja => {
+            const indexMatriz = GetMatrizIndexFromValue(franja);
+            const iAux = indexMatriz[0];
+            const jAux = indexMatriz[1];
+            auxMatriz[iAux][jAux].colorCelda = 'red';
+        });
+        setMatrizHorario([...auxMatriz]);
     }
 
     //Generar variables para primera columna de la matriz que indica el rango horario
@@ -139,51 +179,9 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
         return `${desdeHora}:${desdeMinutos} - ${hastaHora}:${hastaMinutos}`;
     }
 
-    function FormarBloques() {
-        if (Array.isArray(franjas) && franjas.length > 0) {
-            console.log("Empezando a crear bloques...");
-            let franjasAux = [...franjas];
-            const bloquesAux = [];
-            let contadorAuxiliarLog = 0;
-            while (franjasAux.length > 0) {
-                //Se toman los datos iniciales de comparación en cada ciclo
-                const instructorAux = franjasAux[0].idInstructor;
-                const ambienteAux = franjasAux[0].idAmbiente;
-                const coincidencias = franjasAux.filter
-                    (franja => (franja.idInstructor === instructorAux && franja.idAmbiente === ambienteAux));
-                if (coincidencias.length > 0) {
-                    const objBloqueAux = {
-                        ...{
-                            idInstructor: coincidencias[0].idInstructor,
-                            idAmbiente: coincidencias[0].idAmbiente,
-                            franjas: coincidencias.map(franja => franja.franja)
-                        }
-                    };
-                    bloquesAux.push(objBloqueAux);
-                    //Ahora elimino los datos usados de la lista iterada para crear el bloque
-                    for (let i = 0; i < coincidencias.length; i++) {
-                        const indexAux = franjasAux.findIndex(franja =>
-                            franja.idInstructor === instructorAux &&
-                            franja.idAmbiente === ambienteAux &&
-                            franja.franja === coincidencias[i].franja
-                        );
-                        if (indexAux >= 0) {
-                            franjasAux.splice(indexAux, 1);
-                        }
-                    }
-                }
-
-                contadorAuxiliarLog = contadorAuxiliarLog + 1;
-            }
-            //Cuando termina el ciclo
-            setBloques(bloquesAux);
-        }
-    }
-
     async function ObtenerInstructor(idInstructor) {
         try {
-            const respuesta = await new InstructorServicio().CargarInstructor(idInstructor);
-            setInstructorBloque(respuesta);
+            return await new InstructorServicio().CargarInstructor(idInstructor);
         } catch (error) {
             Swal.fire(error);
         }
@@ -191,32 +189,22 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
 
     async function ObtenerAmbiente(idAmbiente) {
         try {
-            const respuesta = await new AmbienteServicio().CargarAmbiente(idAmbiente);
-            setAmbienteBloque(respuesta);
+            return await new AmbienteServicio().CargarAmbiente(idAmbiente);
         } catch (error) {
             Swal.fire(error);
         }
     }
 
-    useEffect(() => {
-        if (typeof setListaBloques === 'function') {
-            setListaBloques(bloques);
-        }
-    }, [bloques]);
-
-    useEffect(() => {
+    //CADA QUE CAMBIA EL BLOQUE 
+    useLayoutEffect(() => {
         if (bloque && Object.values(bloque).length > 0) {
-            ObtenerInstructor(bloque.idInstructor);
-            ObtenerAmbiente(bloque.idAmbiente);
-            setFranjasBloque([...bloque.franjas]);
+            //Se pintan las celdas de su color correspondiente pero se obtienen
+            ///primero las libres para completar las 3 (verdes, blancas, rojas)
+            ocupanciaJornada.forEach(franja => franjasLibres.delete(franja));
+            bloque.franjas.forEach(franja => franjasLibres.delete(franja));
+            PintarFranjas(bloque.franjas, franjasLibres, ocupanciaJornada);
         }
     }, [bloque]);
-
-    //Cada que se selecciona un bloque
-    useEffect(() => {
-        PintarFranjasBloque();
-        PintarFranjasOcupanciaJornada();
-    }, [franjasBloque]);
 
     function GetMatrizIndexFromValue(valor) {
         // (Convertir bloque en índice de celda)
@@ -256,13 +244,17 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
             {
                 bloque && Object.values(bloque).length > 0 ?
                     <div className='seleccInstrucAmbienteCompSelecc'>
-                        <button className='seleccInstructorBtn'
+                        <button className={franjasBloque.size <= 0 ?
+                            'seleccInstructorBtn btnOff'
+                            : 'seleccInstructorBtn'}
                             style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}>
                             {instructorBloque && Object.values(instructorBloque).length > 0 ?
                                 instructorBloque.nombre
                                 : 'seleccionar instructor...'}
                         </button>
-                        <button className='seleccAmbienteBtn'
+                        <button className={franjasBloque.size <= 0 ?
+                            'seleccAmbienteBtn btnOff'
+                            : 'seleccAmbienteBtn'}
                             style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}>
                             {ambienteBloque && Object.values(ambienteBloque).length > 0 ?
                                 ambienteBloque.nombre
@@ -303,10 +295,10 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
                                                             <td key={j}
                                                                 className={`colFranja 
                                                                  celda${colum.colorCelda}`}
-                                                                onClick={() => ManejarClickFranja(i, j)}
+                                                                onClick={() => ManejarClickFranja(colum.valor, colum.colorCelda)}
                                                                 onMouseDown={() => ManejarClickDownFranja(colum.colorCelda)}
                                                                 onMouseMove={arrastrandoBlanco || arrastrandoVerde ?
-                                                                    () => ManejarArrastreFranjas(i, j, colum.valor) : null}>
+                                                                    () => ManejarArrastreFranjas(colum.valor) : null}>
                                                                 {colum.valor}
                                                             </td>
                                                         ))}

@@ -76,7 +76,7 @@
         }
         .seleccInstructorBtn:hover::after, .seleccAmbienteBtn:hover::after{
             content: '  > Cambiar';
-            color: red;
+            color: var(--colorPrincipal);
         }
     }
 

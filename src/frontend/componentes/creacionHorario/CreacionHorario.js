@@ -41,24 +41,65 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
         })
     );
 
-    //para manejar las clases de las celdas fácilmente
-    const [matrizClases, setMatrizClases] = useState(matrizHorario.map((fila, i) => (
-        fila.map((col, j) => (
-            'celdaWhite colFranja'
-        ))
-    )));
+    //******************************************************************************************//
+    //********** SECCIÓN PARA MANEJAR PINTADA DE CELDAS Y RECOLECCIÓN DE FRANJAS ***************//
 
+    const [arrastrandoVerde, setArrastrandoVerde] = useState(false);
+    const [arrastrandoBlanco, setArrastrandoBlanco] = useState(false);
+    const [datosFranjaArrastre, setDatosFranjaArrastre] = useState([-1, -1, 0]);
+
+    const ManejarClickFranja = (i, j) => {
+        const matrixAux = [...matrizHorario];
+        const colorCelda = matrixAux[i][j].colorCelda;
+        matrixAux[i][j].colorCelda = colorCelda === 'white' ? 'green' : 'white';
+        setMatrizHorario(matrixAux);
+    }
+
+    const ManejarClickDownFranja = (colorPintado) => {
+        if (colorPintado === 'white') setArrastrandoVerde(true);
+        else if (colorPintado === 'green') setArrastrandoBlanco(true);
+    }
+
+    const ManejarArrastreFranjas = (i, j, valor) => {
+        if (datosFranjaArrastre[2] !== valor) {
+            setDatosFranjaArrastre([i, j, valor]);
+        }
+    }
+
+    //Recibiendo todos los datos de la celda arrastrada
     useEffect(() => {
-        let auxMatriz = [];
-        auxMatriz = matrizHorario.map((fila, i) => (
-            fila.map((col, j) => (
-                (col.colorCelda === 'red' && 'celdaRed colFranja') ||
-                (col.colorCelda === 'green' && 'celdaGreen colFranja') ||
-                (col.colorCelda === 'white' && 'celdaWhite colFranja')
-            ))
-        ));
-        setMatrizClases(auxMatriz);
-    }, [matrizHorario]);
+        if (datosFranjaArrastre[0] >= 0 && datosFranjaArrastre[1] >= 0) {
+            // console.log(datosFranjaArrastre);
+            const i = datosFranjaArrastre[0];
+            const j = datosFranjaArrastre[1];
+            const valorFranja = datosFranjaArrastre[2];
+            const matrixAux = [...matrizHorario];
+            if (arrastrandoBlanco) {
+                matrixAux[i][j].colorCelda = 'white';
+            } else if (arrastrandoVerde) {
+                matrixAux[i][j].colorCelda = 'green';
+            }
+            setMatrizHorario(matrixAux);
+        }
+    }, [datosFranjaArrastre]);
+
+    const ManejarClickUpFranja = () => {
+        setArrastrandoVerde(false);
+        setArrastrandoBlanco(false);
+        setDatosFranjaArrastre(-1, -1, 0);
+    }
+
+    const PintandoVerde = () => {
+
+    }
+
+    const PintandoBlanco = () => {
+
+    }
+
+
+    //******************************************************************************************//
+    //******************************************************************************************//
 
     function PintarFranjasBloque() {
         if (bloque.franjas && bloque.franjas.length > 0) {
@@ -164,9 +205,11 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
     }, [bloques]);
 
     useEffect(() => {
-        if (bloque.idInstructor) ObtenerInstructor(bloque.idInstructor);
-        if (bloque.idAmbiente) ObtenerAmbiente(bloque.idAmbiente);
-        if (bloque.franjas) setFranjasBloque([...bloque.franjas]);
+        if (bloque && Object.values(bloque).length > 0) {
+            ObtenerInstructor(bloque.idInstructor);
+            ObtenerAmbiente(bloque.idAmbiente);
+            setFranjasBloque([...bloque.franjas]);
+        }
     }, [bloque]);
 
     //Cada que se selecciona un bloque
@@ -215,11 +258,15 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
                     <div className='seleccInstrucAmbienteCompSelecc'>
                         <button className='seleccInstructorBtn'
                             style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}>
-                            {instructorBloque.nombre || 'Seleccionar Instructor...'}
+                            {instructorBloque && Object.values(instructorBloque).length > 0 ?
+                                instructorBloque.nombre
+                                : 'seleccionar instructor...'}
                         </button>
                         <button className='seleccAmbienteBtn'
                             style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}>
-                            {ambienteBloque.nombre || 'Seleccionar ambiente..'}
+                            {ambienteBloque && Object.values(ambienteBloque).length > 0 ?
+                                ambienteBloque.nombre
+                                : 'seleccionar ambiente..'}
                         </button>
                     </div>
                     :
@@ -246,13 +293,20 @@ const CreacionHorario = ({ competencia, bloque, franjas, setListaBloques, bloque
                                                 <th >dom</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody onMouseUp={ManejarClickUpFranja}
+                                            onMouseLeave={ManejarClickUpFranja}>
                                             {
                                                 matrizHorario.map((fila, i) => (
                                                     <tr key={i}>
                                                         <td className='colRango'>{GetRango(i)}</td>
                                                         {fila.map((colum, j) => (
-                                                            <td key={j} className={matrizClases[i][j]}>
+                                                            <td key={j}
+                                                                className={`colFranja 
+                                                                 celda${colum.colorCelda}`}
+                                                                onClick={() => ManejarClickFranja(i, j)}
+                                                                onMouseDown={() => ManejarClickDownFranja(colum.colorCelda)}
+                                                                onMouseMove={arrastrandoBlanco || arrastrandoVerde ?
+                                                                    () => ManejarArrastreFranjas(i, j, colum.valor) : null}>
                                                                 {colum.valor}
                                                             </td>
                                                         ))}

@@ -42,6 +42,7 @@
                     font-weight: bold;
                 }
                 .celdaFranja{
+                    cursor: cell;
                 }
                 .celdaFranja:hover{
                     /* background-color: lightblue; */
@@ -51,6 +52,7 @@
                     border: 1px solid black;
                     height: 24px;
                     vertical-align: middle;
+                    cursor: auto;
                 }
                 tr{
                     /* Para que no se seleccionen las filas a medida que se arrastra */
@@ -62,6 +64,8 @@
                 }
                 .celdaHora{
                     width: 15%;
+                    cursor: auto;
+                    pointer-events: none;
                 }
                 /* dar anchos iguales a las columnas de los días de la semana */
                 .celdaTitulo{

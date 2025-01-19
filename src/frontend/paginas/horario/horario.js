@@ -12,6 +12,7 @@ import CompetenciaServicio from '../../../backend/repository/servicios/Competenc
 import CreacionHorario from '../../componentes/creacionHorario/CreacionHorario';
 import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
+import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
 
 
 const Horario = () => {
@@ -19,7 +20,8 @@ const Horario = () => {
     const [horarioConfirmado, setHorarioConfirmado] = useState(false);
 
     const [listaProgramas, setListaProgramas] = useState([]);
-    const [listaGrupos, setListaGrupos] = useState([]);
+    const [listaGruposInicial, setListaGruposInicial] = useState([]);
+    const [listaGruposDinamica, setListaGruposDinammica] = useState([...listaGruposInicial]);
     const [listaCombinada, setListaCombinada] = useState([]);
     //Para pintar los grupos y programas según si han sido completados o no
     //Se supone que de esta manera se sincroniza la estructura de índices en la lista
@@ -36,15 +38,17 @@ const Horario = () => {
     const [bloques, setBloques] = useState([]);
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
 
-    const [contObjBloques, setContObjBloques] = useState([]);
-
     useLayoutEffect(() => {
         GetListas();
     }, []);
 
     useEffect(() => {
+        setListaGruposDinammica([...listaGruposInicial]);
+    }, [listaGruposInicial]);
+
+    useEffect(() => {
         //console.log(seleccBloqueRadioArray);
-        if(indexBloqueSelecc >= 0){
+        if (indexBloqueSelecc >= 0) {
             setBloqueSelecc(bloques[seleccBloqueRadioArray.findIndex(valor => valor === true)]);
         }
     }, [seleccBloqueRadioArray]);
@@ -61,17 +65,47 @@ const Horario = () => {
             const respuesta = await Promise.all([programas, grupos, franjas]);
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
+            const auxArrayPiscinasComp = await Promise.all
+                (auxGrupos.map((grupo) => new CompetenciaServicio().CargarListaSegunPiscina(grupo.id)));
             const auxFranjas = respuesta[2];
-            //Meto la key "franjas" a cada grupo con sus respectivas franjas desde bd
-            //y si no tiene se agrega un array vacío
-            auxGrupos = auxGrupos.map(grupo => (
+            //Con ayuda de las franjas sacamos bloques para mejorar el algoritmos
+            ////a la hora de agregar los bloques a las competencias dentro de los grupos
+            //los bloques los saco según coincidencia entre grupo  competencia
+            let agrupados = {};
+            auxFranjas.forEach(obj => {
+                const claveUnica = `${obj.idGrupo}-${obj.idInstructor}-${obj.idCompetencia}-${obj.idAmbiente}`;
+
+                if (!agrupados[claveUnica]) {
+                    agrupados[claveUnica] = {
+                        idGrupo: obj.idGrupo,
+                        idAmbiente: obj.idAmbiente,
+                        idInstructor: obj.idInstructor,
+                        idCompetencia: obj.idCompetencia,
+                        franjas: []
+                    }
+
+                }
+                agrupados[claveUnica].franjas.push(obj.franja);
+            });
+            const arrayBloques = Object.values(agrupados);
+            //Agrego las competencias que cada grupo debe ver (piscina) y las franjas completas
+            ////y a su vez en cada competencias, los bloques.
+            auxGrupos = auxGrupos.map((grupo, index) => (
                 {
                     ...grupo,
-                    franjas: auxFranjas.filter(franja => (franja.idGrupo === grupo.id))
-                }
-            ));
+                    competencias: auxArrayPiscinasComp[index].map(compet => (
+                        {
+                            ...compet,
+                            //Agrego los bloques pertinentes a la competencia en este grupo
+                            bloques: arrayBloques
+                                .filter(bloque => bloque.idGrupo === grupo.id
+                                    && bloque.idCompetencia === compet.id)
+                        }
+                    ))
+                }));
 
-            setListaGrupos([...auxGrupos]);
+
+            setListaGruposInicial([...auxGrupos]);
             //setListaProgramas de último ya que activa todo 
             setListaProgramas([...auxProgramas]);
         } catch (error) {
@@ -83,7 +117,7 @@ const Horario = () => {
 
     useEffect(() => {
         if (Array.isArray(listaProgramas) && listaProgramas.length > 0) {
-            if (Array.isArray(listaGrupos) && listaGrupos.length > 0) {
+            if (Array.isArray(listaGruposInicial) && listaGruposInicial.length > 0) {
                 setListaCombinada(CombinarLista());
             }
         }
@@ -131,7 +165,7 @@ const Horario = () => {
         return listaProgramas.map(programa => {
             return {
                 ...programa,
-                grupos: listaGrupos.filter(grupo => grupo.idPrograma === programa.id)
+                grupos: listaGruposInicial.filter(grupo => grupo.idPrograma === programa.id)
             }
         });
     }
@@ -142,7 +176,9 @@ const Horario = () => {
 
     useEffect(() => {
         if (Object.values(grupoSeleccionado).length > 0) {
+            console.log(grupoSeleccionado.competencias);
             PedirDatosForaneosGrupo();
+            setCompetenciasGrupo(grupoSeleccionado.competencias);
             setCompetenciaSelecc({});
             setBloques([]);
             setBloqueSelecc({});
@@ -172,18 +208,24 @@ const Horario = () => {
     //     }
     // }, [competenciasGrupo]);
 
+    async function PedirCompetenciasPorGrupo(idGrupo) {
+        try {
+            return await new CompetenciaServicio().CargarListaSegunPiscina(idGrupo);
+        } catch (error) {
+            Swal.fire('Error a obtener las piscinas de competencias de los grupos...', error);
+            navegar(-1);
+        }
+    }
 
     async function PedirDatosForaneosGrupo() {
         try {
-            const competenciasAux = new CompetenciaServicio().CargarListaSegunPiscina(grupoSeleccionado.id);
             const JornadaAux = new JornadaServicio().CargarJornada(grupoSeleccionado.idJornada);
 
-            const resultadoAux = await Promise.all([competenciasAux, JornadaAux]);
-            setCompetenciasGrupo(resultadoAux[0]);
-            setTipoJornada(resultadoAux[1].tipo);
+            const resultadoAux = await Promise.all([JornadaAux]);
+            setTipoJornada(resultadoAux[0].tipo);
             //Ahora convierto las franjas de ocupancia de jornada en un array de números
             //Obtengo primero la lista de disponibilidad
-            const arrayDisponibilidadAux = resultadoAux[1].franjaDisponibilidad.toString()
+            const arrayDisponibilidadAux = resultadoAux[0].franjaDisponibilidad.toString()
                 .split(',').map(item => Number(item.trim()));
             const setDisponibilidadAux = new Set(arrayDisponibilidadAux);
             //Ahora obtengo el array de ocupancia iniciado con los 336 valores
@@ -238,7 +280,6 @@ const Horario = () => {
     //Cada que se modifican los bloques
     useEffect(() => {
         if (bloques.length > 0) {
-            const listaAux = [...contObjBloques];
             // const objAux = {
             //     idGrupo: grupoSeleccionado.id,
             //     idCompetencia: competenciaSelecc.id,
@@ -248,7 +289,6 @@ const Horario = () => {
             // setContObjBloques(listaAux);
             //Se ajustan los checked de los radio de bloques cada que cambian por agregar o eliminar
             if (indexBloqueSelecc >= 0) {
-                //Si se elimina uno igual o  por debajo del seleccionado
                 const listaAuxSelecc = bloques.map((bloque, i) => i === indexBloqueSelecc ? true : false);
                 setSeleccBloqueRadioArray([...listaAuxSelecc]);
             }
@@ -273,7 +313,9 @@ const Horario = () => {
                             <div className='ladoIzqInterno'>
                                 <table className='tablaCompetenciasPiscina'>
                                     <thead>
-                                        <th>competencias</th>
+                                        <tr>
+                                            <th>competencias</th>
+                                        </tr>
                                     </thead>
                                     <tbody>
                                         {
@@ -296,8 +338,10 @@ const Horario = () => {
                                     Object.keys(competenciaSelecc).length > 0 ?
                                         <table className='tablaBloquesCompetencia'>
                                             <thead>
-                                                <th><label>bloques </label>
-                                                    <button onClick={ManejarAddBloque}>+</button></th>
+                                                <tr>
+                                                    <th><label>bloques </label>
+                                                        <button onClick={ManejarAddBloque}>+</button></th>
+                                                </tr>
                                             </thead>
                                             <tbody>
                                                 {
@@ -334,7 +378,7 @@ const Horario = () => {
                                             franjas={grupoSeleccionado.franjas || []}
                                             setListaBloques={(b) => setBloques(b)}
                                             bloque={bloqueSelecc}
-                                            bloqueNumero={bloqueSelecc.numBloque}
+                                            bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
                                             ocupanciaJornada={ocupanciaJornada}
                                             tipoJornada={tipoJornada} />
                                         :

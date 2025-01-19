@@ -110,6 +110,7 @@
                 th{
                     padding: 2px 0;
                     border: 1px solid black;
+                    cursor: auto;
                 }
             }
             tbody{
@@ -127,18 +128,21 @@
                     background-color: var(--colorFondoSuave);
                     font-weight: bold;
                     width: 25%;
+                    cursor: auto;
+                    pointer-events: none;
                 }
                 .colFranja{
                     width: calc(75% / 7);
+                    cursor: cell;
                 }
-                .celdaWhite{
+                .celdawhite{
                     background-color: white;
                 }
-                .celdaRed{
+                .celdared{
                     background-color: red;
                     pointer-events: none;
                 }
-                .celdaGreen{
+                .celdagreen{
                     background-color: var(--colorPrincipal);
                 }
             }

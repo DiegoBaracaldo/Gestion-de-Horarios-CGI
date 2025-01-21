@@ -36,7 +36,7 @@ const Horario = () => {
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
     const [bloques, setBloques] = useState([]);
-    const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
+    const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState(new Array(bloques).fill(false));
 
     useLayoutEffect(() => {
         GetListas();
@@ -46,12 +46,10 @@ const Horario = () => {
         setListaGruposDinammica([...listaGruposInicial]);
     }, [listaGruposInicial]);
 
-    useEffect(() => {
-        //console.log(seleccBloqueRadioArray);
-        if (indexBloqueSelecc >= 0) {
-            setBloqueSelecc(bloques[seleccBloqueRadioArray.findIndex(valor => valor === true)]);
-        }
-    }, [seleccBloqueRadioArray]);
+    // useEffect(() => {
+    //     console.log(seleccBloqueRadioArray);
+
+    // }, [seleccBloqueRadioArray]);
 
     // useEffect(() => {
     //     console.log(ocupanciaJornada);
@@ -100,6 +98,10 @@ const Horario = () => {
                             bloques: arrayBloques
                                 .filter(bloque => bloque.idGrupo === grupo.id
                                     && bloque.idCompetencia === compet.id)
+                                .map((bloque, j) => ({
+                                    ...bloque,
+                                    numBloque: j + 1
+                                }))
                         }
                     ))
                 }));
@@ -190,6 +192,10 @@ const Horario = () => {
     //CADA QUE SE SELECCIONA UNA COMPETENCIA
     useEffect(() => {
         if (Array.isArray(competenciaSelecc.bloques)) {
+            setTotalHorasTomadasComp(
+                competenciaSelecc.bloques.reduce((arrayAcc, bloque) => {
+                    return arrayAcc.concat(bloque.franjas)
+                }, []).length / 2);
             //console.log(competenciaSelecc.bloques);
             setBloques([...competenciaSelecc.bloques]);
             setBloqueSelecc({});
@@ -198,22 +204,54 @@ const Horario = () => {
 
     //CADA QUE SE SELECCIONA UN BLOQUE
     const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
+    const [seleccionandoBloque, setSeleccionandoBloque] = useState(false);
+    const [guardandoBloqueSelecc, setGuardandoBloqueSelecc] = useState(false);
 
     const ManejarCheckBloque = (bloque, i) => {
-        let auxNuevoSeleccLista = [...seleccBloqueRadioArray];
-        auxNuevoSeleccLista = auxNuevoSeleccLista.map((selecc, j) => (i === j ? true : false));
+        setSeleccionandoBloque(true);
+        //Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
+        ////en su index correspondiente antes de cambiar la selección a uno nuevo
+        ////Si el anterior no es vacío y si es uno diferente (numBloque)
+        if (Object.values(bloqueSelecc).length > 1 &&
+            bloque.numBloque !== bloqueSelecc.numBloque) {
+            setGuardandoBloqueSelecc(true);
+            const listAux = [...bloques];
+            listAux[indexBloqueSelecc] = bloqueSelecc;
+            setBloques(listAux);
+        }
+        //Resto de lógica de selección de bloque
+        const auxNuevoSeleccLista = bloques.map((selecc, j) => (i === j ? true : false));
+        // console.log(auxNuevoSeleccLista);
         setSeleccBloqueRadioArray(auxNuevoSeleccLista);
-        setBloqueSelecc(bloque);
         setIndexBloqueSelecc(i);
-        //Se maneja la detección de cambio de bloque por aquí porque en el useEffect hace loop
-        setEsPrimeraCargaBloque(true);
     }
 
     // useEffect(() => {
-    //     if (competenciasGrupo.length > 0) {
-    //         //Cuando se cargan las competencias del grupo según la piscina
-    //     }
-    // }, [competenciasGrupo]);
+    //     console.log(bloqueSelecc);
+    // }, [bloqueSelecc]);
+
+    useEffect(() => {
+        if(guardandoBloqueSelecc){
+            setGuardandoBloqueSelecc(false);
+        }
+    }, [bloques, guardandoBloqueSelecc]);
+
+    useEffect(() => {
+        // console.log(indexBloqueSelecc);
+        if (indexBloqueSelecc >= 0 && seleccionandoBloque) {
+            console.log("seleccionando...");
+            setBloqueSelecc(bloques[indexBloqueSelecc]);
+        }
+    }, [indexBloqueSelecc, seleccionandoBloque]);
+
+    useEffect(() => {
+        if (indexBloqueSelecc >= 0 && seleccionandoBloque) {
+            // console.log("Se seleccionó el bloque...", bloqueSelecc);
+            //Se maneja la detección de cambio de bloque por aquí porque en el useEffect hace loop
+            setEsPrimeraCargaBloque(true);
+            setSeleccionandoBloque(false);
+        }
+    }, [bloqueSelecc]);
 
     async function PedirDatosForaneosGrupo() {
         try {
@@ -250,34 +288,86 @@ const Horario = () => {
         setCompetenciaSelecc(competencia);
     }
 
-    //Se agrega un nuevo bloque
+    //SECCIÓN AGREGAR NUEVO BLOQUE
+    const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
+    //Hook para detectar que es una agregación
+    const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
+
     const ManejarAddBloque = () => {
-        const auxBloques = [...bloques];
-        const cantidadObj = auxBloques.length;
-        const objAux = {
-            idInstructor: null,
-            idAmbiente: null,
-            idCompetencia: competenciaSelecc.id,
-            idGrupo: grupoSeleccionado.id,
-            franjas: []
-        };
-        if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
-        else objAux.numBloque = 1;
-        auxBloques.push(objAux);
-        setBloques([...auxBloques]);
-    }
-
-    const ManejarRemoveBloque = (index) => {
-        const listaAux = [...bloques];
-        //Si se tiene seleccionado el último mientras se elimina uno, incluyéndolo
-        if (indexBloqueSelecc + 1 === bloques.length || index < indexBloqueSelecc) {
-            setIndexBloqueSelecc(indexBloqueSelecc - 1);
+        if (bloques[bloques.length - 1]?.franjas?.length > 0 || bloques.length === 0 ||
+            (indexBloqueSelecc === bloques.length - 1 && bloqueSelecc.franjas.size > 0)
+        ) {
+            if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
+                const auxBloques = [...bloques];
+                const cantidadObj = auxBloques.length;
+                const objAux = {
+                    idInstructor: 0,
+                    idAmbiente: 0,
+                    idCompetencia: competenciaSelecc.id,
+                    idGrupo: grupoSeleccionado.id,
+                    franjas: []
+                };
+                if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
+                else objAux.numBloque = 1;
+                //Agrego el nuevo bloque a los bloques
+                auxBloques.push(objAux);
+                //Guardo los cambios del bloque anterior
+                auxBloques[indexBloqueSelecc] = bloqueSelecc;
+                //Se asigna el índice del bloque recién agregado
+                setIndexBloqueAdd(auxBloques.length - 1);
+                setBloques([...auxBloques]);
+            } else {
+                Swal.fire(`Ya están completas las horas requeridas para esta competencia,
+                    debes liberar un bloque para poder crear otro.`);
+            }
+        } else {
+            Swal.fire(`Rellena el último bloque con al menos 1 franja!`);
         }
-        listaAux.splice(index, 1);
-        setBloques([...listaAux]);
     }
 
-    //Cada que se modifican los bloques
+    //Cambio de bloques por agregar nuevo bloque
+    useEffect(() => {
+        if (bloques.length > 0 && indexBloqueAdd >= 0) {
+            console.log("agregando...");
+            //El hook indexBloqueAdd es redundante pero sirve para detectar cuando el cambio
+            ////de bloques es por agregación
+            const i = indexBloqueAdd;
+            let auxListaSeleccRadio = new Array(bloques).fill(false);
+            //Se agrega uno porque los bloques tienen también uno nuevo
+            auxListaSeleccRadio.push(false);
+            auxListaSeleccRadio = bloques.map((_, j) => i === j ? true : false);
+            setSeleccBloqueRadioArray(auxListaSeleccRadio);
+            setIndexBloqueSelecc(i);
+            
+            //Ahora se aplica selección con la sección dedicada a ello
+            ManejarCheckBloque(bloques[i], i);
+            //Se reinicia el valor del index agregado
+            setIndexBloqueAdd(-1);
+        }
+    }, [bloques, indexBloqueAdd]);
+
+    //SECCIÓN PARA ELIMINAR BLOQUE
+    let indexBloqueEliminado = -1;
+
+    const ManejarRemoveBloque = (bloque, index) => {
+        indexBloqueEliminado = index;
+        setTotalHorasTomadasComp((totalHorasTomadasComp - (index !== indexBloqueSelecc ?
+            (bloque.franjas.size / 2) : (bloqueSelecc.franjas.size / 2))) || 0);
+        const listaAux = [...bloques];
+
+        //Reiniciar valores si se elimina el último de la lista
+        if (listaAux.length === 0) {
+            setSeleccBloqueRadioArray([]);
+            setBloqueSelecc({});
+            setIndexBloqueSelecc(-1);
+        } else {
+
+            listaAux.splice(index, 1);
+            setBloques([...listaAux]);
+        }
+    }
+
+    //CADA QUE SE MODIFICAN LOS BLOQUES
     useEffect(() => {
         if (bloques.length > 0) {
             // const objAux = {
@@ -287,18 +377,43 @@ const Horario = () => {
             // }
             // listaAux.push(objAux);
             // setContObjBloques(listaAux);
-            //Se ajustan los checked de los radio de bloques cada que cambian por agregar o eliminar
             if (indexBloqueSelecc >= 0) {
-                const listaAuxSelecc = bloques.map((bloque, i) => i === indexBloqueSelecc ? true : false);
-                setSeleccBloqueRadioArray([...listaAuxSelecc]);
-            }
-            else {
-                setSeleccBloqueRadioArray(bloques.map(() => false));
-            }
-            //Ahora, dependiendo de si se agregó o eliminó
+                //Cuando se elimina
+                if (indexBloqueEliminado >= 0 && indexBloqueAdd < 0) {
+                    console.log("a eliminar...");
+                    const i = () => {
+                        //Si se elimina el seleccionado y HABIA más por delante
+                        if (indexBloqueEliminado === indexBloqueSelecc
+                            && bloques.length >= 1 &&
+                            indexBloqueEliminado < bloques.length)
+                            return indexBloqueEliminado + 1;
+                        //Si se elimina el seleccionado, ERA el último y HABÍA más de uno Ó
+                        ////, si se elimina otro que no es el seleccionado pero ESTABA por encima
+                        else if ((bloques.length >= 1 && indexBloqueEliminado < indexBloqueSelecc) ||
+                            (indexBloqueEliminado === indexBloqueSelecc && bloques.length >= 1 &&
+                                indexBloqueEliminado < bloques.length))
+                            return indexBloqueEliminado - 1;
+                        //El resto que es si se elimina uno NO seleccionado y está por debajo
+                        else return indexBloqueEliminado;
+                    }
 
+                    let auxListaSeleccRadio = [...seleccBloqueRadioArray];
+                    //Se elimina uno porque los bloques perdieron uno
+                    auxListaSeleccRadio.pop();
+                    auxListaSeleccRadio = auxListaSeleccRadio.map((_, j) => i === j ? true : false);
+                    setSeleccBloqueRadioArray(auxListaSeleccRadio);
+                    setBloqueSelecc(bloques[i]);
+                    setIndexBloqueSelecc(i);
+                    setEsPrimeraCargaBloque();
+
+                    //Se reinicia el valor del index eliminado
+                    indexBloqueEliminado = -1;
+                }
+            }
         } else {
             setSeleccBloqueRadioArray([]);
+            setBloqueSelecc({});
+            setIndexBloqueSelecc(-1);
         }
     }, [bloques]);
 
@@ -341,30 +456,35 @@ const Horario = () => {
                                             <thead>
                                                 <tr>
                                                     <th><label>bloques </label>
-                                                        <button onClick={ManejarAddBloque}>+</button></th>
+                                                        <button
+                                                            onClick={ManejarAddBloque}>
+                                                            +
+                                                        </button></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {
-                                                    bloques.map((bloque, index) => (
-                                                        <tr key={grupoSeleccionado.codigoGrupo + competenciaSelecc.id + index}>
-                                                            <td className='colBloque'>
-                                                                <input type='radio' name='seleccBloque'
-                                                                    id={'bloqueComp' + index}
-                                                                    onChange={() => ManejarCheckBloque(bloque, index)}
-                                                                    checked={seleccBloqueRadioArray[index]}>
-                                                                </input>
-                                                                <label htmlFor={'bloqueComp' + index}>
-                                                                    <button onClick={() => ManejarRemoveBloque(index)}>
-                                                                        X
-                                                                    </button>
-                                                                    <span>
-                                                                        Bloque {bloque.numBloque}
-                                                                    </span>
-                                                                </label>
-                                                            </td>
-                                                        </tr>
-                                                    ))
+                                                    bloques?.length > 0 ?
+                                                        bloques.map((bloque, index) => (
+                                                            <tr key={grupoSeleccionado.codigoGrupo + competenciaSelecc.id + index}>
+                                                                <td className='colBloque'>
+                                                                    <input type='radio' name='seleccBloque'
+                                                                        id={'bloqueComp' + index}
+                                                                        onChange={() => ManejarCheckBloque(bloque, index)}
+                                                                        checked={seleccBloqueRadioArray[index]}>
+                                                                    </input>
+                                                                    <label htmlFor={'bloqueComp' + index}>
+                                                                        <button onClick={() => ManejarRemoveBloque(bloque, index)}>
+                                                                            X
+                                                                        </button>
+                                                                        <span>
+                                                                            Bloque {bloque.numBloque}
+                                                                        </span>
+                                                                    </label>
+                                                                </td>
+                                                            </tr>
+                                                        ))
+                                                        : null
                                                 }
                                             </tbody>
                                         </table>
@@ -379,10 +499,12 @@ const Horario = () => {
                                             bloque={bloqueSelecc}
                                             bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
                                             ocupanciaJornada={ocupanciaJornada}
-                                            tipoJornada={tipoJornada} 
+                                            tipoJornada={tipoJornada}
                                             bloqueDevuelto={(b) => setBloqueSelecc(b)}
                                             esPrimeraCargaBloque={esPrimeraCargaBloque}
-                                            devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}/>
+                                            devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
+                                            totalHorasTomadasComp={totalHorasTomadasComp}
+                                            devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

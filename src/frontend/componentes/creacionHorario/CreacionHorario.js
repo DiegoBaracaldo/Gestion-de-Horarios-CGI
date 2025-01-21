@@ -8,10 +8,8 @@ import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     ocupanciaJornada, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
-    devolverFalsePrimeraCarga
+    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp
 }) => {
-
-    //con las franjas se trabajan los bloques y todo el tema del horario
 
     //Manejo de bloques
     const [instructorBloque, setInstructorBloque] = useState({});
@@ -22,8 +20,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     useEffect(() => {
         if (esPrimeraCargaBloque) {
             //Se cargan los datos del bloque en cuestión por primera vez
-            setInstructorBloque(ObtenerInstructor());
-            setAmbienteBloque(ObtenerAmbiente());
+            setInstructorBloque(bloque?.idInstructor > 0 ? ObtenerInstructor() : 0);
+            setAmbienteBloque(bloque?.idAmbiente > 0 ? ObtenerAmbiente() : 0);
             setFranjasBloque(new Set(bloque.franjas));
             //Vuelo a ponerle en false
             if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
@@ -31,7 +29,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     }, [esPrimeraCargaBloque]);
 
     useEffect(() => {
-        
+
     }, []);
 
     //Matriz para generar la matriz visual del horario
@@ -98,9 +96,11 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //Para clic individual sin arrastre
     const ManejarClickFranja = (valor, color) => {
         const auxFranjasBloque = new Set(franjasBloque);
-        if (color === 'white') {
+        if (color === 'white' && totalHorasTomadasComp < competencia.horasRequeridas) {
+            devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
             auxFranjasBloque.add(valor);
-        } else if(color === 'green') {
+        } else if (color === 'green') {
+            devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
             auxFranjasBloque.delete(valor);
         }
         setFranjasBloque(auxFranjasBloque);
@@ -119,15 +119,17 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     //Recibiendo todos los datos de la celda arrastrada
     useEffect(() => {
-        if (valorArrastre >= 0 ) {
+        if (valorArrastre >= 0) {
             // console.log(datosFranjaArrastre);
             if (arrastrandoBlanco) {
+                devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
                 setFranjasBloque(() => {
                     const auxLista = new Set(franjasBloque);
                     auxLista.delete(valorArrastre);
                     return auxLista;
                 });
-            } else if (arrastrandoVerde) {
+            } else if (arrastrandoVerde && totalHorasTomadasComp < competencia.horasRequeridas) {
+                devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
                 setFranjasBloque(new Set(franjasBloque).add(valorArrastre));
             }
         }
@@ -147,7 +149,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         //algortimo para entrar de una vez al índice y cambiarlo
         ////en lugar de recorrer todo el array buscando la coincidencia
         const auxMatriz = [...matrizHorario];
-    //    console.log("vamoa pintar...");
+        //    console.log("vamoa pintar...");
         verdes.forEach(franja => {
             const indexMatriz = GetMatrizIndexFromValue(franja);
             const iAux = indexMatriz[0];
@@ -198,6 +200,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //CADA QUE CAMBIA EL BLOQUE 
     useLayoutEffect(() => {
         if (bloque && Object.values(bloque).length > 0) {
+            // console.log(bloque.franjas);
             //Se pintan las celdas de su color correspondiente pero se obtienen
             ///primero las libres para completar las 3 (verdes, blancas, rojas)
             ocupanciaJornada.forEach(franja => franjasLibres.delete(franja));
@@ -232,11 +235,15 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                             {typeof bloqueNumero === 'number' && bloqueNumero > 0 ? bloqueNumero : '?'}
                         </span>
                         </label>
-                        <label>Horas: <span className='datoDinamico'>
-                            {bloque && Object.values(bloque).length > 0 ? bloque.franjas.length / 2 : '~'}
-                            {" / "}
-                            {competencia ? competencia.horasRequeridas : 0}
-                        </span>
+                        <label style={{
+                            color: totalHorasTomadasComp === competencia.horasRequeridas ?
+                                '#39A900' : '#DC3545 '
+                        }}>
+                            Horas: <span className='datoDinamico'>
+                                {totalHorasTomadasComp}
+                                {" / "}
+                                {competencia ? competencia.horasRequeridas : 0}
+                            </span>
                         </label>
                     </div>
                 </div>

@@ -46,15 +46,6 @@ const Horario = () => {
         setListaGruposDinammica([...listaGruposInicial]);
     }, [listaGruposInicial]);
 
-    // useEffect(() => {
-    //     console.log(seleccBloqueRadioArray);
-
-    // }, [seleccBloqueRadioArray]);
-
-    // useEffect(() => {
-    //     console.log(ocupanciaJornada);
-    // }, [ocupanciaJornada]);
-
     async function GetListas() {
         try {
             const programas = new ProgramaServicio().CargarLista();
@@ -193,9 +184,9 @@ const Horario = () => {
     useEffect(() => {
         if (Array.isArray(competenciaSelecc.bloques)) {
             setTotalHorasTomadasComp(
-                competenciaSelecc.bloques.reduce((arrayAcc, bloque) => {
-                    return arrayAcc.concat(bloque.franjas)
-                }, []).length / 2);
+                bloques.reduce((acc, bloque) => {
+                    return acc + ([...bloque.franjas].length / 2);
+                }, 0));
             //console.log(competenciaSelecc.bloques);
             setBloques([...competenciaSelecc.bloques]);
             setBloqueSelecc({});
@@ -206,52 +197,53 @@ const Horario = () => {
     const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
     const [seleccionandoBloque, setSeleccionandoBloque] = useState(false);
     const [guardandoBloqueSelecc, setGuardandoBloqueSelecc] = useState(false);
+    //HOOK PARA ELIMINAR BLOQUE
+    const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
 
     const ManejarCheckBloque = (bloque, i) => {
+        //El bloque recibido como parámetro es el último seleccionado
+        //// y sirve solamente para detectar redundamente que se ha seleccionado
+        // console.log("indice de check es: " + i);
         setSeleccionandoBloque(true);
-        //Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
+        let auxBloques = [...bloques];
+        //SI ES ADD Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
         ////en su index correspondiente antes de cambiar la selección a uno nuevo
-        ////Si el anterior no es vacío y si es uno diferente (numBloque)
+        ////Si el anterior no es vacío, si es uno diferente (numBloque) y si no es eliminación
         if (Object.values(bloqueSelecc).length > 1 &&
-            bloque.numBloque !== bloqueSelecc.numBloque) {
+            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado < 0) {
+            // console.log("Guardando bloque anterior");
             setGuardandoBloqueSelecc(true);
-            const listAux = [...bloques];
-            listAux[indexBloqueSelecc] = bloqueSelecc;
-            setBloques(listAux);
+            auxBloques[indexBloqueSelecc] = { ...bloqueSelecc };
+            setBloques(auxBloques);
         }
-        //Resto de lógica de selección de bloque
-        const auxNuevoSeleccLista = bloques.map((selecc, j) => (i === j ? true : false));
-        // console.log(auxNuevoSeleccLista);
-        setSeleccBloqueRadioArray(auxNuevoSeleccLista);
-        setIndexBloqueSelecc(i);
+        //Se se debe guardar bloque seleccionado por eliminación de diferente bloque
+        else if (Object.values(bloqueSelecc).length > 1 &&
+            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado >= 0
+            && indexBloqueEliminado !== indexBloqueSelecc) {
+            // console.log("Guardando bloque seleccionado");
+            setGuardandoBloqueSelecc(true);
+            //Se le cambia el nombre dle bloque para que se acomo  d e con los otros
+            auxBloques[i] = { 
+                ...bloqueSelecc, 
+                numBloque: i + 1
+            };
+            setBloques(auxBloques);
+        }
+        setSeleccBloqueRadioArray(auxBloques.map((selecc, j) => (i === j ? true : false)));
     }
 
     // useEffect(() => {
     //     console.log(bloqueSelecc);
     // }, [bloqueSelecc]);
 
+    //Si vino por guardar bloque anterior
+    //No borrar, se necesita
     useEffect(() => {
-        if(guardandoBloqueSelecc){
+        if (guardandoBloqueSelecc) {
             setGuardandoBloqueSelecc(false);
         }
     }, [bloques, guardandoBloqueSelecc]);
 
-    useEffect(() => {
-        // console.log(indexBloqueSelecc);
-        if (indexBloqueSelecc >= 0 && seleccionandoBloque) {
-            console.log("seleccionando...");
-            setBloqueSelecc(bloques[indexBloqueSelecc]);
-        }
-    }, [indexBloqueSelecc, seleccionandoBloque]);
-
-    useEffect(() => {
-        if (indexBloqueSelecc >= 0 && seleccionandoBloque) {
-            // console.log("Se seleccionó el bloque...", bloqueSelecc);
-            //Se maneja la detección de cambio de bloque por aquí porque en el useEffect hace loop
-            setEsPrimeraCargaBloque(true);
-            setSeleccionandoBloque(false);
-        }
-    }, [bloqueSelecc]);
 
     async function PedirDatosForaneosGrupo() {
         try {
@@ -294,8 +286,8 @@ const Horario = () => {
     const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
 
     const ManejarAddBloque = () => {
-        if (bloques[bloques.length - 1]?.franjas?.length > 0 || bloques.length === 0 ||
-            (indexBloqueSelecc === bloques.length - 1 && bloqueSelecc.franjas.size > 0)
+        if (bloques[bloques.length - 1]?.franjas?.size > 0 || bloques.length === 0 ||
+            (indexBloqueSelecc === bloques?.length - 1 && bloqueSelecc?.franjas?.size > 0)
         ) {
             if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
                 const auxBloques = [...bloques];
@@ -305,17 +297,16 @@ const Horario = () => {
                     idAmbiente: 0,
                     idCompetencia: competenciaSelecc.id,
                     idGrupo: grupoSeleccionado.id,
-                    franjas: []
+                    franjas: new Set()
+
                 };
                 if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
                 else objAux.numBloque = 1;
                 //Agrego el nuevo bloque a los bloques
                 auxBloques.push(objAux);
-                //Guardo los cambios del bloque anterior
-                auxBloques[indexBloqueSelecc] = bloqueSelecc;
                 //Se asigna el índice del bloque recién agregado
                 setIndexBloqueAdd(auxBloques.length - 1);
-                setBloques([...auxBloques]);
+                setBloques(auxBloques);
             } else {
                 Swal.fire(`Ya están completas las horas requeridas para esta competencia,
                     debes liberar un bloque para poder crear otro.`);
@@ -327,48 +318,118 @@ const Horario = () => {
 
     //Cambio de bloques por agregar nuevo bloque
     useEffect(() => {
-        if (bloques.length > 0 && indexBloqueAdd >= 0) {
+        if (bloques.length > 0 && indexBloqueAdd >= 0 && !guardandoBloqueSelecc) {
             console.log("agregando...");
             //El hook indexBloqueAdd es redundante pero sirve para detectar cuando el cambio
             ////de bloques es por agregación
             const i = indexBloqueAdd;
-            let auxListaSeleccRadio = new Array(bloques).fill(false);
-            //Se agrega uno porque los bloques tienen también uno nuevo
-            auxListaSeleccRadio.push(false);
-            auxListaSeleccRadio = bloques.map((_, j) => i === j ? true : false);
-            setSeleccBloqueRadioArray(auxListaSeleccRadio);
-            setIndexBloqueSelecc(i);
-            
             //Ahora se aplica selección con la sección dedicada a ello
             ManejarCheckBloque(bloques[i], i);
-            //Se reinicia el valor del index agregado
-            setIndexBloqueAdd(-1);
         }
     }, [bloques, indexBloqueAdd]);
 
-    //SECCIÓN PARA ELIMINAR BLOQUE
-    let indexBloqueEliminado = -1;
+
+    // SECCIÓN PARA ELIMINAR EL BLOQUE, EL HOOK SE ENCUENTRA EN LA PARTE DE SELECCIÓN
+    const [futuriIndexSelecc, setFuturoIndexSelecc] = useState(-1);
 
     const ManejarRemoveBloque = (bloque, index) => {
-        indexBloqueEliminado = index;
-        setTotalHorasTomadasComp((totalHorasTomadasComp - (index !== indexBloqueSelecc ?
-            (bloque.franjas.size / 2) : (bloqueSelecc.franjas.size / 2))) || 0);
-        const listaAux = [...bloques];
+        //Se agrega e bloque eliminado solo si es diferente al seleccionado para guardar
+        ////los datos del bloque seleccionado al cambiar la estructura de bloques
+        //Primero elimino y luego selecciono
+        setIndexBloqueEliminado(index);
+        let listaAux = [...bloques];
 
         //Reiniciar valores si se elimina el último de la lista
-        if (listaAux.length === 0) {
+        if (listaAux.length === 1) {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
             setIndexBloqueSelecc(-1);
+            setBloques([]);
+            setIndexBloqueEliminado(-1);
         } else {
+            let i = indexBloqueSelecc;
 
+            //Si se elimina el seleccionado y es el último de la lista Ó 
+            //// si se elimina otro que está por encima del seleccionado
+            if ((index === indexBloqueSelecc && index === listaAux.length - 1) ||
+                (index < indexBloqueSelecc)
+            )
+                i = indexBloqueSelecc - 1;
+
+            console.log("i vale ", i);
+
+            //Se eliminan los bloques
             listaAux.splice(index, 1);
-            setBloques([...listaAux]);
+            //Se reorganiza el nombre de los bloques
+            listaAux = listaAux.map((bloque, index) => {
+                return {
+                    ...bloque,
+                    numBloque: index + 1
+                }
+            });
+            setFuturoIndexSelecc(i);
+            setBloques(listaAux);
         }
     }
 
+    useEffect(() => {
+        if (bloques.length > 0 && indexBloqueEliminado >= 0 && futuriIndexSelecc >= 0) {
+            //// (el objeto enviado no importa ya que será ignorado)
+            ManejarCheckBloque(bloques[futuriIndexSelecc], futuriIndexSelecc);
+        }
+    }, [bloques, indexBloqueEliminado, futuriIndexSelecc]);
+
+    ///////////////////////// --------------- /////////////////
+
+    //ESTO ES CONTINUACIÓN DE SELECCIÓN
+    useEffect(() => {
+        if (seleccBloqueRadioArray.some(valor => valor === true) &&
+            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
+            if (indexBloqueEliminado >= 0) setIndexBloqueSelecc(-1);
+            else setIndexBloqueSelecc(seleccBloqueRadioArray.findIndex(valor => valor === true));
+        }
+    }, [seleccBloqueRadioArray]);
+
+    //Solo para reiniciar el indexSelecc para poder seguir con la selección al eliminar
+    useEffect(() => {
+        if (indexBloqueSelecc < 0 && seleccBloqueRadioArray.some(valor => valor === true) &&
+            indexBloqueEliminado >= 0 && indexBloqueAdd < 0) {
+            const seleccAux = seleccBloqueRadioArray.findIndex(valor => valor === true);
+            setIndexBloqueSelecc(seleccAux);
+        }
+    }, [indexBloqueSelecc]);
+
+    //ESTO ES CONTINUACIÓN DE SELECCIÓN
+    useEffect(() => {
+        // console.log(indexBloqueSelecc)
+        if ((indexBloqueSelecc >= 0) &&
+            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
+            setBloqueSelecc({ ...bloques[indexBloqueSelecc] });
+        }
+    }, [indexBloqueSelecc]);
+
+    //Finaliza la selección
+    useEffect(() => {
+        // console.log(bloqueSelecc);
+        if ((Object.values(bloqueSelecc).length >= 0) &&
+            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
+            // console.log("El objeto final seleccionado es: ", bloqueSelecc)
+            setEsPrimeraCargaBloque(true);
+            setIndexBloqueAdd(-1);
+            setIndexBloqueEliminado(-1);
+            setFuturoIndexSelecc(-1);
+            setSeleccionandoBloque(false);
+            setTotalHorasTomadasComp(
+                bloques.reduce((acc, bloque) => {
+                    return acc + ([...bloque.franjas].length / 2);
+                }, 0)
+            );
+        }
+    }, [bloqueSelecc]);
+
     //CADA QUE SE MODIFICAN LOS BLOQUES
     useEffect(() => {
+        // console.log(bloques);
         if (bloques.length > 0) {
             // const objAux = {
             //     idGrupo: grupoSeleccionado.id,
@@ -377,45 +438,18 @@ const Horario = () => {
             // }
             // listaAux.push(objAux);
             // setContObjBloques(listaAux);
-            if (indexBloqueSelecc >= 0) {
-                //Cuando se elimina
-                if (indexBloqueEliminado >= 0 && indexBloqueAdd < 0) {
-                    console.log("a eliminar...");
-                    const i = () => {
-                        //Si se elimina el seleccionado y HABIA más por delante
-                        if (indexBloqueEliminado === indexBloqueSelecc
-                            && bloques.length >= 1 &&
-                            indexBloqueEliminado < bloques.length)
-                            return indexBloqueEliminado + 1;
-                        //Si se elimina el seleccionado, ERA el último y HABÍA más de uno Ó
-                        ////, si se elimina otro que no es el seleccionado pero ESTABA por encima
-                        else if ((bloques.length >= 1 && indexBloqueEliminado < indexBloqueSelecc) ||
-                            (indexBloqueEliminado === indexBloqueSelecc && bloques.length >= 1 &&
-                                indexBloqueEliminado < bloques.length))
-                            return indexBloqueEliminado - 1;
-                        //El resto que es si se elimina uno NO seleccionado y está por debajo
-                        else return indexBloqueEliminado;
-                    }
-
-                    let auxListaSeleccRadio = [...seleccBloqueRadioArray];
-                    //Se elimina uno porque los bloques perdieron uno
-                    auxListaSeleccRadio.pop();
-                    auxListaSeleccRadio = auxListaSeleccRadio.map((_, j) => i === j ? true : false);
-                    setSeleccBloqueRadioArray(auxListaSeleccRadio);
-                    setBloqueSelecc(bloques[i]);
-                    setIndexBloqueSelecc(i);
-                    setEsPrimeraCargaBloque();
-
-                    //Se reinicia el valor del index eliminado
-                    indexBloqueEliminado = -1;
-                }
-            }
+            //Se calcula el tiempo total de horas en cada selección, eliminación y agregación
         } else {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
             setIndexBloqueSelecc(-1);
         }
     }, [bloques]);
+
+    const ManjearReciboBloque = (bloque) => {
+        // console.log("Se recibe desde hijo...", bloque);
+        setBloqueSelecc(bloque);
+    }
 
     return (
         <div id="contCreacionHorario">
@@ -500,7 +534,7 @@ const Horario = () => {
                                             bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
                                             ocupanciaJornada={ocupanciaJornada}
                                             tipoJornada={tipoJornada}
-                                            bloqueDevuelto={(b) => setBloqueSelecc(b)}
+                                            bloqueDevuelto={(b) => ManjearReciboBloque(b)}
                                             esPrimeraCargaBloque={esPrimeraCargaBloque}
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
                                             totalHorasTomadasComp={totalHorasTomadasComp}

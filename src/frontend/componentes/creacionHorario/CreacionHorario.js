@@ -15,10 +15,11 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
     const [franjasBloque, setFranjasBloque] = useState(new Set());
-    const franjasLibres = new Set(Array.from({ length: 336 }, (_, i) => i + 1));
+    const [franjasLibres, setFranjasLibres] = useState(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
 
     useEffect(() => {
         if (esPrimeraCargaBloque) {
+            // console.log("Primera Carga!");
             //Se cargan los datos del bloque en cuestión por primera vez
             setInstructorBloque(bloque?.idInstructor > 0 ? ObtenerInstructor() : 0);
             setAmbienteBloque(bloque?.idAmbiente > 0 ? ObtenerAmbiente() : 0);
@@ -51,15 +52,16 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
 
     useEffect(() => {
-        //Se reinician el isntructor y ambiente dada la modificación de las franjas
-        // console.log(franjasBloque);
+        //Se reinician el instructor y ambiente dada la modificación de las franjas
         if (typeof bloqueDevuelto === 'function') {
+            // console.log("El objeto antes de acomodar es: ", bloque);
             const bloqueAux = {
                 ...bloque,
-                idInstructor: null,
-                idAmbiente: null,
-                franjas: franjasBloque
+                idInstructor: 0,
+                idAmbiente: 0,
+                franjas: new Set(franjasBloque)
             }
+            // console.log("El objeto acomodado es: ", bloqueAux);
             bloqueDevuelto(bloqueAux);
         }
     }, [franjasBloque]);
@@ -199,13 +201,15 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     //CADA QUE CAMBIA EL BLOQUE 
     useLayoutEffect(() => {
+        // console.log("se recibe desde padre...", bloque);
         if (bloque && Object.values(bloque).length > 0) {
             // console.log(bloque.franjas);
             //Se pintan las celdas de su color correspondiente pero se obtienen
             ///primero las libres para completar las 3 (verdes, blancas, rojas)
-            ocupanciaJornada.forEach(franja => franjasLibres.delete(franja));
-            bloque.franjas.forEach(franja => franjasLibres.delete(franja));
-            PintarFranjas(bloque.franjas, franjasLibres, ocupanciaJornada);
+            const auxFranjasLibres = new Set(franjasLibres);
+            ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
+            bloque.franjas.forEach(franja => auxFranjasLibres.delete(franja));
+            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada);
         }
     }, [bloque]);
 

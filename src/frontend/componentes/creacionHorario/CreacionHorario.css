@@ -75,8 +75,8 @@
             color: white;
         }
         .seleccInstructorBtn:hover::after, .seleccAmbienteBtn:hover::after{
-            content: '  > Cambiar';
-            color: var(--colorPrincipal);
+            content: '  -->';
+            color: white;
         }
     }
 

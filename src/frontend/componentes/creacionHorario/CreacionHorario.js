@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
+import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
+import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     ocupanciaJornada, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
@@ -53,6 +55,9 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     useEffect(() => {
         //Se reinician el instructor y ambiente dada la modificación de las franjas
+        setInstructorBloque({});
+        setAmbienteBloque({});
+
         if (typeof bloqueDevuelto === 'function') {
             // console.log("El objeto antes de acomodar es: ", bloque);
             const bloqueAux = {
@@ -124,7 +129,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         if (valorArrastre >= 0) {
             // console.log(datosFranjaArrastre);
             if (arrastrandoBlanco) {
-                devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
+                if(totalHorasTomadasComp >= 0.5)devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
                 setFranjasBloque(() => {
                     const auxLista = new Set(franjasBloque);
                     auxLista.delete(valorArrastre);
@@ -210,6 +215,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
             bloque.franjas.forEach(franja => auxFranjasLibres.delete(franja));
             PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada);
+
         }
     }, [bloque]);
 
@@ -223,6 +229,17 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         const jReal = valor - 1 - (7 * iReal);
         return [iReal, jReal];
     }
+
+    
+    //******************************************************************************************//
+    //************************* ÁREA DE SELECCIÓN DE AMBIENTE E INSTRUCTOR *********************//
+
+    const [openListaInstructores, setOpenListaInstructores] = useState(false);
+    const [openListaAmbientes, setOpenListaAmbientes] = useState(false);
+
+
+    //******************************************************************************************//
+    //******************************************************************************************//
 
     return (
         <div id="contCreacionHorarioVista">
@@ -258,18 +275,20 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         <button className={franjasBloque.size <= 0 ?
                             'seleccInstructorBtn btnOff'
                             : 'seleccInstructorBtn'}
-                            style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}>
+                            style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}
+                            onClick={() => setOpenListaInstructores(true)}>
                             {instructorBloque && Object.values(instructorBloque).length > 0 ?
-                                instructorBloque.nombre
-                                : 'seleccionar instructor...'}
+                                `${instructorBloque.nombre}`
+                                : 'seleccionar instructor '}
                         </button>
                         <button className={franjasBloque.size <= 0 ?
                             'seleccAmbienteBtn btnOff'
                             : 'seleccAmbienteBtn'}
-                            style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}>
+                            style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}
+                            onClick={() => setOpenListaAmbientes(true)}>
                             {ambienteBloque && Object.values(ambienteBloque).length > 0 ?
                                 ambienteBloque.nombre
-                                : 'seleccionar ambiente..'}
+                                : 'seleccionar ambiente '}
                         </button>
                     </div>
                     :
@@ -324,6 +343,24 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         }
                     </div>
                     : null
+            }
+            {
+                openListaInstructores ? 
+                <CrudInstructores 
+                onClose={ () => setOpenListaInstructores(false)}
+                modoSeleccion={true}
+                responsableSeleccionado={(r) => setInstructorBloque(r)}
+                franjasDeseadas={[...franjasBloque]}/>
+                : null
+            }
+            {
+                openListaAmbientes ?
+                <CrudAmbientes
+                modoSeleccion={true}
+                ambienteSelecc={(a) => setAmbienteBloque(a)}
+                onClose={() => setOpenListaAmbientes(false)}
+                franjasDeseadas={[...franjasBloque]}/>
+                : null
             }
         </div>
     );

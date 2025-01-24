@@ -28,15 +28,14 @@ const ModalInstructores = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsu
     const [especialidad, setEspecialidad] = useState(especialidadInicial);
     const topeHorasInicial = objConsultado.topeHoras || '';
     const [topeHoras, setTopeHoras] = useState(topeHorasInicial);
-    const franjaInicialEstatica = objConsultado.franjaDisponibilidad &&
-        objConsultado.franjaDisponibilidad.split(',').map(item => Number(item.trim())) || [];
+    const franjaInicialEstatica = objConsultado?.franjaDisponibilidad || [];
     const [franjaInicial, setFranjaInicial] = useState(franjaInicialEstatica);
     const [franjaDisponibilidad, setFranjaDisponibilidad] = useState(franjaInicialEstatica);
     const [instructor, setInstructor] = useState({});
 
-    useEffect(() => {
-        console.log(franjaDisponibilidad);
-    }, [franjaDisponibilidad]);
+    // useEffect(() => {
+    //     console.log(franjaDisponibilidad);
+    // }, [franjaDisponibilidad]);
 
     useEffect(() => {
         if (Object.keys(instructor).length > 0) {

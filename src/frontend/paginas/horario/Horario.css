@@ -1,0 +1,171 @@
+#contCreacionHorario {
+    .contBotones {
+        /* background-color: burlywood; */
+        width: 95%;
+        height: 15svh;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+
+        :nth-child(even),
+        :nth-child(odd) {
+            height: 55%;
+            width: 30%;
+        }
+
+        .contEstadoHorario {
+
+            /* background-color: yellow; */
+            h3 {
+                text-transform: capitalize;
+                width: 100%;
+                text-align: start;
+            }
+        }
+    }
+
+    .ladoDerechoMarcoHorario {
+        /* background-color: yellow; */
+        width: 100%;
+        height: 100%;
+        display: flex;
+
+        .ladoIzqInterno {
+            /* background-color: lightcoral; */
+            width: 25%;
+            height: 100%;
+            border-right: 5px solid var(--colorPrincipal);
+
+            .tablaCompetenciasPiscina,
+            .tablaBloquesCompetencia {
+                max-height: 50%;
+                min-height: 50%;
+                min-width: 100%;
+                max-width: 100%;
+                background-color: white;
+
+                thead {
+                    position: sticky;
+                    top: 0;
+                    z-index: 0;
+                    background-color: #00324D;
+                    color: white;
+                    text-transform: uppercase;
+                }
+
+                th {
+                    padding: 2px 0;
+                }
+
+                tbody {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: start;
+                    align-items: center;
+                }
+
+                tr {
+                    /* background-color: red; */
+                    width: 100%;
+                    border-bottom: 1px solid black;
+                }
+
+                td {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 2px 0;
+                    position: relative;
+                    overflow: hidden;
+
+                    :hover {
+                        background-color: lightblue;
+                    }
+
+                    /* background-color: rebeccapurple; */
+                    label {
+                        cursor: pointer;
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        top: 0;
+                        left: 0;
+                        padding-left: 20%;
+                        padding-top: 2px;
+                        padding-right: 10px;
+                        display: flex;
+                        justify-content: space-between;
+
+                        :hover {
+                            background-color: lightblue;
+                        }
+                    }
+
+                    input[type="radio"] {
+                        opacity: 0;
+                    }
+
+                    input[type="radio"]:checked+label {
+                        background-color: var(--colorGrisLectura);
+                    }
+                }
+
+            }
+
+            .tablaBloquesCompetencia {
+                thead {
+                    th {
+                        padding: 3px 5px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: end;
+                        gap: 10%;
+
+                        button {
+                            color: white;
+                            background-color: transparent;
+                            border: 2px solid white;
+                            padding: 0 10px;
+                            font-size: medium;
+                            font-weight: bold;
+                            border-radius: 6px;
+                            height: 20px;
+                        }
+                    }
+                }
+
+                td {
+                    /* background-color:red; */
+                    label{
+                        display: flex;
+                        justify-content: space-between;
+                        button {
+                            height: 20px;
+                            aspect-ratio: 1;
+                            background-color: var(--colorDestructivo);
+                            color: white;
+                            font-weight: bold;
+                            border: none;
+                            border-radius: 6px;
+                            z-index: 0;
+                            :hover{
+                                background-color: black;
+                            }
+                        }
+                    }
+                }
+            }
+
+            .tablaCompetenciasPiscina {
+                border-bottom: 1px solid black;
+            }
+        }
+
+        .ladoDerInterno {
+            height: 100%;
+            flex-grow: 1;
+            /* background-color: yellow; */
+        }
+    }
+}

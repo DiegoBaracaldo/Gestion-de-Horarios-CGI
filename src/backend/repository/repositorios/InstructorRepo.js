@@ -18,9 +18,12 @@ class InstructorRepo {
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query = `
-            SELECT i.*, COUNT(g.idResponsable) AS cantidadGruposACargo
+            SELECT i.*, 
+            COUNT(g.idResponsable) AS cantidadGruposACargo,
+            GROUP_CONCAT(f.franja) AS listaOcupancia
             FROM instructores i
             LEFT JOIN grupos g ON i.id = g.idResponsable
+            LEFT JOIN franjas f ON i.id = f.idInstructor
             GROUP BY i.id
         `;
             this.db.all(query, [], (error, filas) => {

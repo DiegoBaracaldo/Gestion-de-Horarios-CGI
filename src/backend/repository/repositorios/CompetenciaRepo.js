@@ -34,6 +34,20 @@ class CompetenciaRepo {
         });
     }
 
+    async GetByPool(idGrupo){
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT c.* FROM competencias c
+                JOIN piscinaCompetencias p ON p.idCompetencia = c.id
+                WHERE p.idGrupo = ?
+            `;
+            this.db.all(query, [idGrupo], (error, competencias) => {
+                if(error) reject(error.errno);
+                else resolve(competencias);
+            });
+        });
+    }
+
     async SaveNew(competencia) {
         const {id, idPrograma, descripcion, horasRequeridas} = competencia;
         return new Promise((resolve, reject) => {

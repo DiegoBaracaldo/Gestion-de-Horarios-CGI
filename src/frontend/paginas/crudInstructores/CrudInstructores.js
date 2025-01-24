@@ -10,22 +10,47 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado }) => {
+const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, franjasDeseadas }) => {
 
-    const subs = modoSeleccion ? 
-    ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
-    : ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
+    const subs = modoSeleccion ?
+        ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
+        : ['identificación', 'nombre completo', 'especialidad', 'tope horas'];
 
     const navegar = useNavigate();
 
     const CargarLista = async () => {
+        //// si es que viene de edición de horario, es decir, si es un array
         console.log("cargando lista...");
         try {
-            setListaObjetos(await new InstructorServicio().CargarLista());
+            let respuesta = await new InstructorServicio().CargarLista();
+            respuesta = respuesta.map(instr => (
+                {
+                    ...instr,
+                    franjaDisponibilidad: DeserealizarDisponibilidad(instr.franjaDisponibilidad),
+                    listaOcupancia:
+                        instr.listaOcupancia === null ? [] : DeserealizarDisponibilidad(instr.listaOcupancia)
+                }
+            ));
+            //La variable franjasdDeseadas se usa  para  filtrar la lista por su disponibilidad
+            //// y por su cantidad horas en listaOcupancia
+            if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0 ) {
+                respuesta = respuesta.filter(instr =>
+                    franjasDeseadas.every(franja =>
+                        instr.franjaDisponibilidad.includes(franja) &&
+                        franjasDeseadas.length <= instr.franjaDisponibilidad.length - instr.listaOcupancia.length)
+                );
+            }
+            console.log(respuesta);
+            setListaObjetos(respuesta);
+
         } catch (error) {
             Swal.fire(error);
             navegar(-1);
         }
+    }
+
+    function DeserealizarDisponibilidad(texto) {
+        return texto.split(',').map(item => Number(item.trim())) || [];
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -59,8 +84,8 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado }) =
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
                 objetoAux.especialidad = element.especialidad;
-                objetoAux.topeHoras = element.topeHoras;
-                if(modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
+                objetoAux.topeHoras = `${element.listaOcupancia.length / 2} / ${element.topeHoras}`;
+                if (modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);

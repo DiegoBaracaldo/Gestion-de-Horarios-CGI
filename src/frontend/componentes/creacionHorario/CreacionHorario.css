@@ -1,0 +1,151 @@
+#contCreacionHorarioVista {
+    /* background-color: rebeccapurple; */
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    .descripcionCompetenciaSelecc {
+        /* background-color: yellow; */
+        width: 100%;
+        height: 25%;
+        display: flex;
+        flex-direction: column;
+        /* padding: 0 15px; */
+        background-color: white;
+        border-bottom: 1px solid black;
+        .etDescrip{
+            padding-left: 15px;
+        }
+        label, h3{
+            height: fit-content;
+        }
+        h3{
+            width: 100%;
+            text-align: center;
+            text-transform: uppercase;
+            background-color: #00324D;
+            color: white;
+        }
+        .parteAbajoDescripCompet{
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            /* background-color: aliceblue; */
+            flex-grow: 1;
+            padding-bottom: 10px;
+            padding-left: 15px;
+            textarea{
+                width: 80%;
+                resize: none;
+                border-radius: 6px;
+                background-color: var(--colorGrisLectura);
+                font-size: large;
+                padding: 7px 7px;
+            }
+            .divisionIzq{
+                /* background-color: antiquewhite; */
+                display: flex;
+                flex-direction: column;
+                width: 30%;
+                align-items: start;
+                justify-content: space-evenly;
+                padding-left: 20px;
+            }
+        }
+        .datoDinamico{
+            font-weight: bold;
+        }
+    }
+
+    .seleccInstrucAmbienteCompSelecc {
+        /* background-color: blue; */
+        width: 100%;
+        height: 15%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+        .seleccInstructorBtn, .seleccAmbienteBtn{
+            width: 90%;
+            height: 40%;
+            text-transform: capitalize;
+            font-size: larger;
+            letter-spacing: 2px;
+            border-radius: 12px;
+            color: white;
+        }
+        .seleccInstructorBtn:hover::after, .seleccAmbienteBtn:hover::after{
+            content: '  -->';
+            color: white;
+        }
+    }
+
+    .SeccionHorarioCompSelecc {
+        /* background-color: red; */
+        width: 100%;
+        height: 60%;
+    }
+    .contTablaMatrizHorarioCreacion{
+        overflow-y: scroll;
+        /* background-color: rebeccapurple; */
+        width: 100%;
+        height: 100%;
+        border: 2px solid black;
+        table{
+            /* background-color: yellow; */
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+            border-collapse: separate;
+            border-spacing: 0;
+            user-select: none;
+            thead{
+                position: sticky;
+                top: 0;
+                left: 0;
+                background-color: #00324D;
+                color: white;
+                text-transform: capitalize;
+                th{
+                    padding: 2px 0;
+                    border: 1px solid black;
+                    cursor: auto;
+                }
+            }
+            tbody{
+                tr{
+                    td{
+                        text-align: center;
+                        border: 1px solid black;
+                        background-color: white;
+                    }
+                }
+                tr:hover td:not(.colFranja){
+                    background-color: lightblue;
+                }
+                .colRango{
+                    background-color: var(--colorFondoSuave);
+                    font-weight: bold;
+                    width: 25%;
+                    cursor: auto;
+                    pointer-events: none;
+                }
+                .colFranja{
+                    width: calc(75% / 7);
+                    cursor: cell;
+                }
+                .celdawhite{
+                    background-color: white;
+                }
+                .celdared{
+                    background-color: red;
+                    pointer-events: none;
+                }
+                .celdagreen{
+                    background-color: var(--colorPrincipal);
+                }
+            }
+        }
+    }
+}

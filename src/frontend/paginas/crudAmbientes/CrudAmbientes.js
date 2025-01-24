@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudAmbientes = () => {
+const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas }) => {
 
     const subs = ['id', 'Ambiente', 'Torre', 'Capacidad de Estudiantes'];
     const navegar = useNavigate();
@@ -18,12 +18,27 @@ const CrudAmbientes = () => {
     const CargarLista = async () => {
         console.log("cargando lista...");
         try {
-            const respuesta = await new AmbienteServicio().CargarLista();
+            let respuesta = await new AmbienteServicio().CargarLista();
+            respuesta = respuesta.map(ambiente => (
+                {
+                    ...ambiente,
+                    franjaDisponibilidad: DeserealizarDisponibilidad(ambiente.franjaDisponibilidad)
+                }
+            ));
+            if(Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0){
+                respuesta = respuesta.filter(ambiente => 
+                    franjasDeseadas.every(franja => ambiente.franjaDisponibilidad.includes(franja))
+                );
+            }
             setListaObjetos(respuesta);
         } catch (error) {
             Swal.fire(error);
             navegar(-1);
         }
+    }
+
+    function DeserealizarDisponibilidad(texto) {
+        return texto.split(',').map(item => Number(item.trim())) || [];
     }
 
     const [listaSelecciones, setListaSelecciones] = useState([]);
@@ -96,7 +111,14 @@ const CrudAmbientes = () => {
     }
 
     useEffect(() => {
-        if (Object.keys(ambienteConsultado).length > 0) setAbrirConsulta(true);
+        if (Object.keys(ambienteConsultado).length > 0) {
+            if (!modoSeleccion) {
+                setAbrirConsulta(true);
+            } else {
+                if(typeof ambienteSelecc === 'function') ambienteSelecc(ambienteConsultado);
+                if(typeof onClose === 'function') onClose();
+            }
+        }
     }, [ambienteConsultado]);
 
     ///////// SECCIÓN DE REGISTRO ///////////////
@@ -148,15 +170,24 @@ const CrudAmbientes = () => {
         if (vaciarListaSelecc) setVaciarListaSelecc(false);
     }, [vaciarListaSelecc]);
 
+    const ManejarClicFila = (e) => {
+        AbrirConsulta(e);
+    }
+
     return (
         <div id='contCrudAmbientes'>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
-                disabledDestructivo={listaVacia} titulo="Ambientes"
-                listaMenu={listaMenuAmbientes} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
+                disabledDestructivo={listaVacia}
+                titulo="Ambientes"
+                listaMenu={listaMenuAmbientes}
+                filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
                 buscarPor={(texto) => setTextoBusqueda(texto)}
-                clicFila={e => AbrirConsulta(e)} onClicPositivo={AbrirRegistro}
+                clicFila={e => ManejarClicFila(e)}
+                onClicPositivo={AbrirRegistro}
                 datosJson={listaAdaptada} subtitulos={subs}
-                onCLicDestructivo={OnClicDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
+                onCLicDestructivo={modoSeleccion ? () => onClose() : OnClicDestructivo} 
+                vaciarListaSelecc={vaciarListaSelecc} 
+                modoSeleccion={modoSeleccion}/>
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

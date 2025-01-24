@@ -223,8 +223,8 @@ const Horario = () => {
             // console.log("Guardando bloque seleccionado");
             setGuardandoBloqueSelecc(true);
             //Se le cambia el nombre dle bloque para que se acomo  d e con los otros
-            auxBloques[i] = { 
-                ...bloqueSelecc, 
+            auxBloques[i] = {
+                ...bloqueSelecc,
                 numBloque: i + 1
             };
             setBloques(auxBloques);
@@ -286,34 +286,29 @@ const Horario = () => {
     const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
 
     const ManejarAddBloque = () => {
-        if (bloques[bloques.length - 1]?.franjas?.size > 0 || bloques.length === 0 ||
-            (indexBloqueSelecc === bloques?.length - 1 && bloqueSelecc?.franjas?.size > 0)
-        ) {
-            if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
-                const auxBloques = [...bloques];
-                const cantidadObj = auxBloques.length;
-                const objAux = {
-                    idInstructor: 0,
-                    idAmbiente: 0,
-                    idCompetencia: competenciaSelecc.id,
-                    idGrupo: grupoSeleccionado.id,
-                    franjas: new Set()
+        if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
+            const auxBloques = [...bloques];
+            const cantidadObj = auxBloques.length;
+            const objAux = {
+                idInstructor: 0,
+                idAmbiente: 0,
+                idCompetencia: competenciaSelecc.id,
+                idGrupo: grupoSeleccionado.id,
+                franjas: new Set()
 
-                };
-                if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
-                else objAux.numBloque = 1;
-                //Agrego el nuevo bloque a los bloques
-                auxBloques.push(objAux);
-                //Se asigna el índice del bloque recién agregado
-                setIndexBloqueAdd(auxBloques.length - 1);
-                setBloques(auxBloques);
-            } else {
-                Swal.fire(`Ya están completas las horas requeridas para esta competencia,
-                    debes liberar un bloque para poder crear otro.`);
-            }
+            };
+            if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
+            else objAux.numBloque = 1;
+            //Agrego el nuevo bloque a los bloques
+            auxBloques.push(objAux);
+            //Se asigna el índice del bloque recién agregado
+            setIndexBloqueAdd(auxBloques.length - 1);
+            setBloques(auxBloques);
         } else {
-            Swal.fire(`Rellena el último bloque con al menos 1 franja!`);
+            Swal.fire(`Ya están completas las horas requeridas para esta competencia,
+                        debes liberar un bloque para poder crear otro.`);
         }
+
     }
 
     //Cambio de bloques por agregar nuevo bloque

@@ -21,15 +21,19 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     useEffect(() => {
         if (esPrimeraCargaBloque) {
-            // console.log("Primera Carga!");
+            console.log("Primera Carga!");
             //Se cargan los datos del bloque en cuestión por primera vez
-            setInstructorBloque(bloque?.idInstructor > 0 ? ObtenerInstructor() : 0);
-            setAmbienteBloque(bloque?.idAmbiente > 0 ? ObtenerAmbiente() : 0);
+            if (Object.keys(bloque).length >= 0 && bloque.idInstructor !== 0)
+                ObtenerInstructor(bloque?.idInstructor);
+            else setInstructorBloque({});
+            if (Object.keys(bloque).length >= 0 && bloque.idAmbiente !== 0)
+                ObtenerAmbiente(bloque?.idAmbiente);
+            else setAmbienteBloque({});
             setFranjasBloque(new Set(bloque.franjas));
             //Vuelo a ponerle en false
             if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
         }
-    }, [esPrimeraCargaBloque]);
+    }, [esPrimeraCargaBloque, bloque]);
 
     useEffect(() => {
 
@@ -54,16 +58,12 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
 
     useEffect(() => {
-        //Se reinician el instructor y ambiente dada la modificación de las franjas
         setInstructorBloque({});
         setAmbienteBloque({});
-
         if (typeof bloqueDevuelto === 'function') {
             // console.log("El objeto antes de acomodar es: ", bloque);
             const bloqueAux = {
                 ...bloque,
-                idInstructor: 0,
-                idAmbiente: 0,
                 franjas: new Set(franjasBloque)
             }
             // console.log("El objeto acomodado es: ", bloqueAux);
@@ -72,20 +72,20 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     }, [franjasBloque]);
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function') {
+        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque) {
             const bloqueAux = {
                 ...bloque,
-                idInstructor: instructorBloque.id
+                idInstructor: Object.values(instructorBloque).length > 0 ? instructorBloque.id : 0
             }
             bloqueDevuelto(bloqueAux);
         }
     }, [instructorBloque]);
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function') {
+        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque) {
             const bloqueAux = {
                 ...bloque,
-                idAmbiente: ambienteBloque.id
+                idAmbiente: Object.values(ambienteBloque).length > 0 ? ambienteBloque.id : 0
             }
             bloqueDevuelto(bloqueAux);
         }
@@ -129,7 +129,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         if (valorArrastre >= 0) {
             // console.log(datosFranjaArrastre);
             if (arrastrandoBlanco) {
-                if(totalHorasTomadasComp >= 0.5)devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
+                if (totalHorasTomadasComp >= 0.5) devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
                 setFranjasBloque(() => {
                     const auxLista = new Set(franjasBloque);
                     auxLista.delete(valorArrastre);
@@ -190,7 +190,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     async function ObtenerInstructor(idInstructor) {
         try {
-            return await new InstructorServicio().CargarInstructor(idInstructor);
+            const respuesta = await new InstructorServicio().CargarInstructor(idInstructor);
+            setInstructorBloque(respuesta);
         } catch (error) {
             Swal.fire(error);
         }
@@ -198,13 +199,14 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     async function ObtenerAmbiente(idAmbiente) {
         try {
-            return await new AmbienteServicio().CargarAmbiente(idAmbiente);
+            const respuesta = await new AmbienteServicio().CargarAmbiente(idAmbiente);
+            setAmbienteBloque(respuesta);
         } catch (error) {
             Swal.fire(error);
         }
     }
 
-    //CADA QUE CAMBIA EL BLOQUE 
+    //CADA QUE CAMBIA EL BLOQUE o se modifica el actual
     useLayoutEffect(() => {
         // console.log("se recibe desde padre...", bloque);
         if (bloque && Object.values(bloque).length > 0) {
@@ -215,7 +217,6 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
             bloque.franjas.forEach(franja => auxFranjasLibres.delete(franja));
             PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada);
-
         }
     }, [bloque]);
 
@@ -230,7 +231,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         return [iReal, jReal];
     }
 
-    
+
     //******************************************************************************************//
     //************************* ÁREA DE SELECCIÓN DE AMBIENTE E INSTRUCTOR *********************//
 
@@ -275,7 +276,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         <button className={franjasBloque.size <= 0 ?
                             'seleccInstructorBtn btnOff'
                             : 'seleccInstructorBtn'}
-                            style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}
+                            style={{ backgroundColor: Object.values(instructorBloque).length > 0 ? '#39A900' : '#385C57' }}
                             onClick={() => setOpenListaInstructores(true)}>
                             {instructorBloque && Object.values(instructorBloque).length > 0 ?
                                 `${instructorBloque.nombre}`
@@ -284,7 +285,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         <button className={franjasBloque.size <= 0 ?
                             'seleccAmbienteBtn btnOff'
                             : 'seleccAmbienteBtn'}
-                            style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}
+                            style={{ backgroundColor: Object.values(ambienteBloque).length > 0 ? '#39A900' : '#385C57' }}
                             onClick={() => setOpenListaAmbientes(true)}>
                             {ambienteBloque && Object.values(ambienteBloque).length > 0 ?
                                 ambienteBloque.nombre
@@ -345,22 +346,22 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                     : null
             }
             {
-                openListaInstructores ? 
-                <CrudInstructores 
-                onClose={ () => setOpenListaInstructores(false)}
-                modoSeleccion={true}
-                responsableSeleccionado={(r) => setInstructorBloque(r)}
-                franjasDeseadas={[...franjasBloque]}/>
-                : null
+                openListaInstructores ?
+                    <CrudInstructores
+                        onClose={() => setOpenListaInstructores(false)}
+                        modoSeleccion={true}
+                        responsableSeleccionado={(r) => setInstructorBloque(r)}
+                        franjasDeseadas={[...franjasBloque]} />
+                    : null
             }
             {
                 openListaAmbientes ?
-                <CrudAmbientes
-                modoSeleccion={true}
-                ambienteSelecc={(a) => setAmbienteBloque(a)}
-                onClose={() => setOpenListaAmbientes(false)}
-                franjasDeseadas={[...franjasBloque]}/>
-                : null
+                    <CrudAmbientes
+                        modoSeleccion={true}
+                        ambienteSelecc={(a) => setAmbienteBloque(a)}
+                        onClose={() => setOpenListaAmbientes(false)}
+                        franjasDeseadas={[...franjasBloque]} />
+                    : null
             }
         </div>
     );

@@ -491,9 +491,17 @@ function RegistrarIPC() {
     //Franjas
     ipcMain.handle('GetAllFranjas', async() => {
         try {
-            return franjaRepo.GetAll();
+            return await franjaRepo.GetAll();
         } catch (error) {
             console.log("Error en ipcMain  al obtener franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetBloquesByCompetenciaFranjas', async(event, idGrupo, idCompetencia) => {
+        try {
+            return await franjaRepo.GetBloquesByCompetencia(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener bloques en franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

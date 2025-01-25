@@ -35,6 +35,7 @@ const Horario = () => {
     const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
+    const [bloquesIniciales, setBloquesIniciales] = useState([]);
     const [bloques, setBloques] = useState([]);
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState(new Array(bloques).fill(false));
 
@@ -50,54 +51,9 @@ const Horario = () => {
         try {
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
-            const franjas = new FranjaServicio().CargarFranjas();
-            const respuesta = await Promise.all([programas, grupos, franjas]);
+            const respuesta = await Promise.all([programas, grupos]);
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
-            const auxArrayPiscinasComp = await Promise.all
-                (auxGrupos.map((grupo) => new CompetenciaServicio().CargarListaSegunPiscina(grupo.id)));
-            const auxFranjas = respuesta[2];
-            //Con ayuda de las franjas sacamos bloques para mejorar el algoritmos
-            ////a la hora de agregar los bloques a las competencias dentro de los grupos
-            //los bloques los saco según coincidencia entre grupo  competencia
-            let agrupados = {};
-            auxFranjas.forEach(obj => {
-                const claveUnica = `${obj.idGrupo}-${obj.idInstructor}-${obj.idCompetencia}-${obj.idAmbiente}`;
-
-                if (!agrupados[claveUnica]) {
-                    agrupados[claveUnica] = {
-                        idGrupo: obj.idGrupo,
-                        idAmbiente: obj.idAmbiente,
-                        idInstructor: obj.idInstructor,
-                        idCompetencia: obj.idCompetencia,
-                        franjas: []
-                    }
-
-                }
-                agrupados[claveUnica].franjas.push(obj.franja);
-            });
-            const arrayBloques = Object.values(agrupados);
-            //Agrego las competencias que cada grupo debe ver (piscina) y las franjas completas
-            ////y a su vez en cada competencias, los bloques.
-            auxGrupos = auxGrupos.map((grupo, index) => (
-                {
-                    ...grupo,
-                    competencias: auxArrayPiscinasComp[index].map(compet => (
-                        {
-                            ...compet,
-                            //Agrego los bloques pertinentes a la competencia en este grupo
-                            bloques: arrayBloques
-                                .filter(bloque => bloque.idGrupo === grupo.id
-                                    && bloque.idCompetencia === compet.id)
-                                .map((bloque, j) => ({
-                                    ...bloque,
-                                    numBloque: j + 1
-                                }))
-                        }
-                    ))
-                }));
-
-
             setListaGruposInicial([...auxGrupos]);
             //setListaProgramas de último ya que activa todo 
             setListaProgramas([...auxProgramas]);
@@ -169,29 +125,58 @@ const Horario = () => {
 
     //CADA QUE SE SELECCIONA UN GRUPO
     useEffect(() => {
-        if (Object.values(grupoSeleccionado).length > 0
-            && Array.isArray(grupoSeleccionado.competencias)) {
+        if (Object.values(grupoSeleccionado).length > 0) {
             //console.log(grupoSeleccionado.competencias);
             PedirDatosForaneosGrupo();
-            setCompetenciasGrupo([...grupoSeleccionado.competencias]);
+            PedirCompetenciasPiscina(grupoSeleccionado.id);
             setCompetenciaSelecc({});
             setBloques([]);
             setBloqueSelecc({});
         }
     }, [grupoSeleccionado]);
 
+    //Pedir las competencias para el grupo
+    async function PedirCompetenciasPiscina(idGrupo) {
+        try {
+            let respuesta = await new CompetenciaServicio().CargarListaSegunPiscina(idGrupo);
+            respuesta = respuesta.map(competencia => (
+                {
+                    ...competencia,
+                    bloques: []
+                }
+            ));
+            setCompetenciasGrupo(respuesta);
+        } catch (error) {
+            Swal.fire("Error al obtener competencias de la piscina para el grupo!");
+            setCompetenciasGrupo([]);
+        }
+    }
+
     //CADA QUE SE SELECCIONA UNA COMPETENCIA
     useEffect(() => {
-        if (Array.isArray(competenciaSelecc.bloques)) {
+        if (Array.isArray(bloques) && Object.values(competenciaSelecc).length > 0) {
             setTotalHorasTomadasComp(
                 bloques.reduce((acc, bloque) => {
                     return acc + ([...bloque.franjas].length / 2);
                 }, 0));
             //console.log(competenciaSelecc.bloques);
-            setBloques([...competenciaSelecc.bloques]);
+            ObtenerBloques(competenciaSelecc.id);
             setBloqueSelecc({});
         }
     }, [competenciaSelecc]);
+
+    async function ObtenerBloques(idCompetencia) {
+        //Se arman los bloques directamente desde el repositorio de franjas, según 
+        //// el grupo y la competencia seleccionados 
+        try {
+            const respuesta = await new FranjaServicio()
+                .ObtenerBloquesComeptencia(grupoSeleccionado.id, idCompetencia);
+            setBloquesIniciales(respuesta);
+            setBloques(respuesta);
+        } catch (error) {
+            Swal.fire(error);
+        }
+    }
 
     //CADA QUE SE SELECCIONA UN BLOQUE
     const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
@@ -286,14 +271,13 @@ const Horario = () => {
     const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
 
     const ManejarAddBloque = () => {
+        // console.log(bloques);
         if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
             const auxBloques = [...bloques];
             const cantidadObj = auxBloques.length;
             const objAux = {
-                idInstructor: 0,
-                idAmbiente: 0,
-                idCompetencia: competenciaSelecc.id,
-                idGrupo: grupoSeleccionado.id,
+                instructor: {},
+                ambiente: {},
                 franjas: new Set()
 
             };

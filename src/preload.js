@@ -56,5 +56,6 @@ contextBridge.exposeInMainWorld('electron', {
     CargarPiscinas: () => ipcRenderer.invoke('CargarPiscinas'),
     ConfirmarPiscinas: () => ipcRenderer.invoke('ConfirmarPiscinas'),
 
-    GetAllFranjas: () => ipcRenderer.invoke('GetAllFranjas')
+    GetAllFranjas: () => ipcRenderer.invoke('GetAllFranjas'),
+    GetBloquesByCompetenciaFranjas: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetBloquesByCompetenciaFranjas', idGrupo, idCompetencia)
 });

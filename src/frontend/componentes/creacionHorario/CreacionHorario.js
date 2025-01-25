@@ -9,7 +9,7 @@ import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
-    ocupanciaJornada, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
+    ocupanciaJornada, ocupanciaBloques, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
     devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp
 }) => {
 
@@ -17,13 +17,14 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
     const [franjasBloque, setFranjasBloque] = useState(new Set());
+    const [ocupanciaBloquesInterno, setOcupanciaBloquesInterno] = useState(ocupanciaBloques.current);
     const [franjasLibres, setFranjasLibres] = useState(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (esPrimeraCargaBloque) {
             // console.log("Primera Carga, bloque ", bloque);
             //Se cargan los datos del bloque en cuestión por primera vez
-            if (bloque && bloque.instructor && Object.keys(bloque.instructor).length > 0 )
+            if (bloque && bloque.instructor && Object.keys(bloque.instructor).length > 0)
                 setInstructorBloque(bloque.instructor);
             else setInstructorBloque({});
             if (bloque && bloque.ambiente && Object.keys(bloque.ambiente).length > 0)
@@ -155,7 +156,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //******************************************************************************************//
 
 
-    function PintarFranjas(verdes, blancas, rojas) {
+    function PintarFranjas(verdes, blancas, rojas, grises) {
         //algortimo para entrar de una vez al índice y cambiarlo
         ////en lugar de recorrer todo el array buscando la coincidencia
         const auxMatriz = [...matrizHorario];
@@ -177,6 +178,12 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             const iAux = indexMatriz[0];
             const jAux = indexMatriz[1];
             auxMatriz[iAux][jAux].colorCelda = 'red';
+        });
+        grises.forEach(franja => {
+            const indexMatriz = GetMatrizIndexFromValue(franja);
+            const iAux = indexMatriz[0];
+            const jAux = indexMatriz[1];
+            auxMatriz[iAux][jAux].colorCelda = 'gray';
         });
         setMatrizHorario([...auxMatriz]);
     }
@@ -201,7 +208,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             const auxFranjasLibres = new Set(franjasLibres);
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
             bloque?.franjas?.forEach(franja => auxFranjasLibres.delete(franja));
-            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada);
+            ocupanciaBloques.current.forEach(franja => auxFranjasLibres.delete(franja));
+            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada, ocupanciaBloques.current);
         }
     }, [bloque]);
 
@@ -315,7 +323,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                                                                 onMouseDown={() => ManejarClickDownFranja(colum.colorCelda)}
                                                                 onMouseMove={arrastrandoBlanco || arrastrandoVerde ?
                                                                     () => ManejarArrastreFranjas(colum.valor) : null}>
-                                                                {colum.valor}
+                                                                {/* {colum.valor} */}
                                                             </td>
                                                         ))}
                                                     </tr>

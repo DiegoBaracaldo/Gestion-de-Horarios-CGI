@@ -3,7 +3,7 @@ import BotonDestructivo from "../../componentes/botonDestructivo/BotonDestructiv
 import BotonPositivo from "../../componentes/botonPositivo/BotonPositivo";
 import MarcoGralHorario from "../../componentes/marcoGeneralHorario/MarcoGralHorario";
 import ProgramasGrupos from "../../componentes/programasGrupos/ProgramasGrupos";
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
@@ -34,6 +34,7 @@ const Horario = () => {
     const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
     const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
+    const ocupanciaBloques = useRef(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
     const [bloquesIniciales, setBloquesIniciales] = useState([]);
     const [bloques, setBloques] = useState([]);
@@ -360,12 +361,20 @@ const Horario = () => {
 
     ///////////////////////// --------------- /////////////////
 
-    //ESTO ES CONTINUACIÓN DE SELECCIÓN
+    //ESTO ES CONTINUACIÓN DE SELECCIÓN Y CAMBIAR OCUPANCIA BLOQUES
     useEffect(() => {
         if (seleccBloqueRadioArray.some(valor => valor === true) &&
             (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
             if (indexBloqueEliminado >= 0) setIndexBloqueSelecc(-1);
             else setIndexBloqueSelecc(seleccBloqueRadioArray.findIndex(valor => valor === true));
+
+            //Se analiza la nueva ocupancia bloques
+            // const auxListaBloques = new Set(bloques.reduce((acc, bloque) => {
+            //     return acc.concat([...bloque.franjas]);
+            // }, []));
+            // console.log(auxListaBloques);
+            // setOcupanciaBloques(auxListaBloques);
+
         }
     }, [seleccBloqueRadioArray]);
 
@@ -383,9 +392,16 @@ const Horario = () => {
         // console.log(indexBloqueSelecc)
         if ((indexBloqueSelecc >= 0) &&
             (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
+            //Se analiza la nueva ocupancia bloques
+            const auxListaBloques = new Set(bloques.reduce((acc, bloque) => {
+                return bloque.numBloque !== bloques[indexBloqueSelecc].numBloque ?
+                    acc.concat([...bloque.franjas]): acc;
+            }, []));
+            ocupanciaBloques.current = auxListaBloques;
             setBloqueSelecc({ ...bloques[indexBloqueSelecc] });
         }
     }, [indexBloqueSelecc]);
+
 
     //Finaliza la selección
     useEffect(() => {
@@ -417,7 +433,6 @@ const Horario = () => {
             // }
             // listaAux.push(objAux);
             // setContObjBloques(listaAux);
-            //Se calcula el tiempo total de horas en cada selección, eliminación y agregación
         } else {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
@@ -425,11 +440,17 @@ const Horario = () => {
         }
     }, [bloques]);
 
+    /**********************************************************************************************************/
+    /**************************** SECCIÓN PARA TRATAR OCUPANCIA BLOQUES ***************************************/
+
+    //Se hace para que cuando se cargue el bloque en creación hroario no haya desincronía con ocupancia bloques
+
     const ManjearReciboBloque = (bloque) => {
-        // console.log("Se recibe desde hijo...", bloque);
         setBloqueSelecc(bloque);
     }
 
+    /**********************************************************************************************************/
+    /**********************************************************************************************************/
     return (
         <div id="contCreacionHorario">
             <MarcoGralHorario titulo={"creación de horario"}>
@@ -517,7 +538,8 @@ const Horario = () => {
                                             esPrimeraCargaBloque={esPrimeraCargaBloque}
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
                                             totalHorasTomadasComp={totalHorasTomadasComp}
-                                            devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)} />
+                                            devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)}
+                                            ocupanciaBloques={ocupanciaBloques} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

@@ -1,28 +1,46 @@
-class FranjaServicio{
+class FranjaServicio {
 
-    constructor(){
+    constructor() {
 
     }
 
-   async  CargarFranjas(){
+    async CargarFranjas() {
         console.log('Cargando franjas...');
         try {
             return await window.electron.GetAllFranjas();
         } catch (error) {
             console.log("error en servicio franjas por: ", error);
-              throw error.message.split(":")[1].trim();
+            throw error.message.split(":")[1].trim();
         }
     }
 
-    async ObtenerBloquesComeptencia(idGrupo, idCompetencia){
+    async ObtenerBloquesComeptencia(idGrupo, idCompetencia) {
         console.log('Obteniendo bloques por competencia ', idCompetencia);
         try {
-            const respuesta = await window.electron.GetBloquesByCompetenciaFranjas(idGrupo, idCompetencia);
-            // console.log("Los bloques son: " + Array.isArray(respuesta));
-            return respuesta;
+            return await window.electron.GetBloquesByCompetenciaFranjas(idGrupo, idCompetencia);
         } catch (error) {
             console.log("error en servicio franjas por: ", error);
-              throw error.message.split(":")[1].trim();
+            throw error.message.split(":")[1].trim();
+        }
+    }
+
+    async GuardarHorario(idGrupo, idCompetencia, arrayFranjas) {
+        console.log("Guardando los cambios en el horario...");
+        try {
+            return await window.electron.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
+        } catch (error) {
+            console.log("error en servicio franjas por: ", error);
+            throw error;
+        }
+    }
+
+    async OcupanciaBloquesGrupo(idGrupo) {
+        console.log("Obteniendo la ocupancia de todos los bloques en todas las competencias del grupo");
+        try {
+            return await window.electron.GetOcupanciaBloquesGrupo(idGrupo);
+        } catch (error) {
+            console.log("error en servicio franjas por: ", error);
+            throw error;
         }
     }
 }

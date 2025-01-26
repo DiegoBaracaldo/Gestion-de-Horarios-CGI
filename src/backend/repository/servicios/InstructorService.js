@@ -18,7 +18,8 @@ class InstructorServicio {
     async CargarLista() {
         console.log("cargando lista...");
         try {
-          return await window.electron.GetAllInstructores();
+          const respuesta = await window.electron.GetAllInstructores();
+          return respuesta;
         } catch (error) {
           console.log("error en servicio instructor por: ", error);
           throw error.message.split(":")[1].trim();

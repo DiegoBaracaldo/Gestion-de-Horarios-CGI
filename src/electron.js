@@ -505,4 +505,20 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('DeleteAndSaveFranjas', async(event, idGrupo, idCompetencia, arrayFranjas) => {
+        try {
+            return await franjaRepo.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
+        } catch (error) {
+            console.log("Error en ipcMain  al guardar franjas en franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetOcupanciaBloquesGrupo', async(event, idGrupo) => {
+        try {
+            return await franjaRepo.GetOcupanciaFranjasGrupo(idGrupo);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener ocupancia franjas en franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
 }

@@ -40,7 +40,7 @@ class FranjaRepo {
                         let encontrado =
                             listaBloques.find(bloque => bloque.instructor.id === fila.idInstructor
                                 && bloque.ambiente.id === fila.idAmbiente);
-                        if(!encontrado){
+                        if (!encontrado) {
                             encontrado = {
                                 numBloque: listaBloques.length + 1,
                                 instructor: {
@@ -65,13 +65,89 @@ class FranjaRepo {
                                 franjas: new Set()
                             };
                             //Se agrega al array de bloques
-                            listaBloques.add(fila.encontrado);
+                            listaBloques.push(encontrado);
                         }
                         //Añadimos la franja una vez creado o encontrado el objeto y agregado a la lista
                         encontrado.franjas.add(fila.franja);
                     });
                     resolve(listaBloques);
                 }
+            });
+        });
+    }
+
+    DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas) {
+        return new Promise((resolve, reject) => {
+            this.bd.serialize(async () => {
+                try {
+                    this.bd.run("BEGIN TRANSACTION");
+
+                    const queryDelete = `DELETE FROM franjas WHERE idGrupo = ? AND idCompetencia = ?;`;
+                    const querySave = `
+                    INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia)
+                    VALUES (?, ?, ?, ? ,?);
+                    `;
+
+                    const runQuery = (query, params) => {
+                        return new Promise((resolve, reject) => {
+                            this.bd.run(query, params, function (error) {
+                                if (error) {
+                                    throw error;
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        });
+                    }
+
+                    //Se espera que se haga la eliminación para continuar con el guardado
+                    await new Promise((resolve, reject) => {
+                        this.bd.run(queryDelete, [idGrupo, idCompetencia], (error) => {
+                            if (error) {
+                                reject(error);
+                            } else{
+                                resolve();
+                            }
+                        });
+                    });
+
+                    //Entonces, se hace el guardado
+                    const savePromesas = arrayFranjas.map(franjaCompleta => {
+                        const { franja, idGrupo, idInstructor, idAmbiente, idCompetencia } = franjaCompleta;
+                        return runQuery(querySave, [franja, idGrupo, idInstructor, idAmbiente, idCompetencia]);
+                    });
+
+                    await Promise.all(savePromesas);
+
+                    //Confirmar que todo fue exitoso
+                    this.bd.run("COMMIT", function (error) {
+                        if (error) {
+                            this.bd.run("ROLLBACK");
+                            reject(error);
+                        } else {
+                            //1 Significa guardado correcto, debe interpretarse en el render
+                            resolve(1);
+                        }
+                    });
+                } catch (error) {
+                    //Error en cualquier parte de las transacciones
+                    this.bd.run("ROLLBACK");
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    GetOcupanciaFranjasGrupo(idGrupo){
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT franja, idCompetencia FROM franjas 
+                WHERE idGrupo = ?;
+            `;
+
+            this.bd.all(query, [idGrupo], function(error, filas){
+                if(error) reject(error.errno);
+                else resolve(filas);
             });
         });
     }

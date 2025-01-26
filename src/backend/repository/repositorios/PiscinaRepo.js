@@ -12,48 +12,45 @@ class PiscinaRepo {
 
                 const queryInsert = "INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (?, ?)";
                 const queryDelete = "DELETE from piscinaCompetencias WHERE idGrupo = ? AND idCompetencia = ?";
-                try {
-                    const insertPromises = agregados.map(agregado => {
-                        const idGrupo = agregado.idGrupo;
-                        const idCompetencia = agregado.idCompetencia;
-                        this.db.run(queryInsert, [idGrupo, idCompetencia], function (error) {
-                            if (error) reject(error.errno);
-                            else resolve();
+
+                const runQuery = (query, params) => {
+                    return new Promise((resolve, reject) => {
+                        this.db.run(query, params, function(error) {
+                            if(error){
+                                reject(error.errno)
+                            }else{
+                                resolve();
+                            }
                         });
                     });
-
-                    const deletePromises = eliminados.map(eliminado => {
-                        const idGrupo = eliminado.idGrupo;
-                        const idCompetencia = eliminado.idCompetencia;
-                        this.db.run(queryDelete, [idGrupo, idCompetencia], function (error) {
-                            if (error) reject(error.errno);
-                            else resolve();
-                        });
-                    });
-
-                    Promise.all([...insertPromises, ...deletePromises])
-                        .then(() => {
-                            // Si todo va bien, confirmar la transacción
-                            this.db.run("COMMIT", function (error) {
-                                if (error) {
-                                    this.db.run("ROLLBACK"); // Revertir en caso de error al hacer commit
-                                    reject(error.errno);
-                                } else {
-                                    resolve("Cambios guardados correctamente!");
-                                }
-                            });
-                        })
-                        .catch(error => {
-                            // Si ocurre algún error en cualquiera de las operaciones, revertir la transacción
-                            this.db.run("ROLLBACK");
-                            reject(error);  // Rechazar la promesa
-                        });
-
-
-                } catch (error) {
-                    this.db.run("ROLLBACK"); // Revertir en caso de error inesperado
-                    reject(error + ": Error general, no se guardó nada!");
                 }
+
+                const insertPromises = agregados.map(agregado => {
+                    return runQuery(queryInsert, [agregado.idGrupo, agregado.idCompetencia]);
+                });
+
+                const deletePromises = eliminados.map(eliminado => {
+                    return runQuery(queryDelete, [eliminado.idGrupo, eliminado.idCompetencia]);
+                });
+
+                Promise.all([...insertPromises, ...deletePromises])
+                .then(() => {
+                    //Si todo sale bien
+                    this.db.run("COMMIT", function(error){
+                        if(error){
+                            //Revertir en caso de error con el commit
+                            this.db.run("ROLLBACK");
+                            reject(error.errno);
+                        }else{
+                            resolve("Cambios Guardados Correctamente!");
+                        }
+                    });
+                })
+                .catch(error => {
+                    // Si error en alguna de las operaciones
+                    this.db.run("ROLLBACK");
+                    reject(error.errno);
+                });
             });
         });
     }

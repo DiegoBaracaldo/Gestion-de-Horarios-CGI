@@ -57,5 +57,7 @@ contextBridge.exposeInMainWorld('electron', {
     ConfirmarPiscinas: () => ipcRenderer.invoke('ConfirmarPiscinas'),
 
     GetAllFranjas: () => ipcRenderer.invoke('GetAllFranjas'),
-    GetBloquesByCompetenciaFranjas: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetBloquesByCompetenciaFranjas', idGrupo, idCompetencia)
+    GetBloquesByCompetenciaFranjas: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetBloquesByCompetenciaFranjas', idGrupo, idCompetencia),
+    DeleteAndSaveFranjas: (idGrupo, idCompetencia, arrayFranjas) => ipcRenderer.invoke('DeleteAndSaveFranjas', idGrupo, idCompetencia, arrayFranjas),
+    GetOcupanciaBloquesGrupo: (idGrupo) => ipcRenderer.invoke('GetOcupanciaBloquesGrupo', idGrupo)
 });

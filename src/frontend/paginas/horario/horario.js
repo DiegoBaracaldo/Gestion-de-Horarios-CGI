@@ -34,6 +34,7 @@ const Horario = () => {
     const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
     const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
+    const ocupanciaBloquesInicial = useRef([]);
     const ocupanciaBloques = useRef(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
     const [bloquesIniciales, setBloquesIniciales] = useState([]);
@@ -160,11 +161,24 @@ const Horario = () => {
                 bloques.reduce((acc, bloque) => {
                     return acc + ([...bloque.franjas].length / 2);
                 }, 0));
-            //console.log(competenciaSelecc.bloques);
+
             ObtenerBloques(competenciaSelecc.id);
             setBloqueSelecc({});
+            const auxIndesRadioBloque = [...seleccBloqueRadioArray.map(valor => false)];
+            setSeleccBloqueRadioArray(auxIndesRadioBloque);
         }
     }, [competenciaSelecc]);
+
+    async function GuardarCambiosHorario(franjas) {
+        try {
+            //Se espera un 1
+            console.log("Guardando...");
+            return await new FranjaServicio().GuardarHorario(grupoSeleccionado.id, competenciaSelecc.id, franjas);
+        } catch (error) {
+            Swal.fire("Error en el guardado de los cambios en el horario!");
+            return 0;
+        }
+    }
 
     async function ObtenerBloques(idCompetencia) {
         //Se arman los bloques directamente desde el repositorio de franjas, según 
@@ -172,11 +186,34 @@ const Horario = () => {
         try {
             const respuesta = await new FranjaServicio()
                 .ObtenerBloquesComeptencia(grupoSeleccionado.id, idCompetencia);
+            console.log(respuesta);
             setBloquesIniciales(respuesta);
             setBloques(respuesta);
         } catch (error) {
             Swal.fire(error);
         }
+    }
+
+    //Función para convertir bloques a franjas
+    function BloquesToFranjas(listaBloques) {
+        //Ahora con la lista de bloques actualizada se hace la transformación de bloques a franjas
+        const franjasListaAux = [];
+        listaBloques.forEach(bloque => {
+            if (bloque.franjas.size > 0 && Object.values(bloque.instructor).length > 0
+                && Object.values(bloque.ambiente).length > 0) {
+                bloque.franjas.forEach(franja => {
+                    const objAuxFranja = {
+                        franja: franja,
+                        idGrupo: grupoSeleccionado.id,
+                        idInstructor: bloque.instructor.id,
+                        idAmbiente: bloque.ambiente.id,
+                        idCompetencia: competenciaSelecc.id
+                    };
+                    franjasListaAux.push(objAuxFranja);
+                });
+            }
+        });
+        return franjasListaAux;
     }
 
     //CADA QUE SE SELECCIONA UN BLOQUE
@@ -261,9 +298,63 @@ const Horario = () => {
         }
     }
 
-    const ManejarSeleccCompetencia = (competencia) => {
+    const ManejarSeleccCompetencia = async (competencia) => {
+        //Primero se guardan los cambios del ultimo bloque sobre el que se está trabajando
+        //// Si es que ya se ha seleccionado una competencia al menos para no borrar en primera selección
+        if (Object.values(competenciaSelecc).length > 0) {
+            const auxBloques = [...bloques];
+            if (indexBloqueSelecc >= 0) auxBloques[indexBloqueSelecc] = { ...bloqueSelecc };
+            console.log(auxBloques);
+            //Guarda las franjas actuales incluso si son cero para poder eliminar en repositorio
+            //// y si las franjas obtenidas por los bloques son mayores a 0 también
+            const franjasObtenidas = BloquesToFranjas(auxBloques)
+            const respuesta =  await GuardarCambiosHorario(franjasObtenidas);
+            // console.log(respuesta);
+            if (respuesta <= 0) {
+                Swal.fire("Error al guardar los bloques...");
+                setCompetenciaSelecc({});
+                setIndexBloqueSelecc(-1);
+            }else{
+                await CargarOcupBloquesYSeleccComp(competencia);
+            }
+        }else{
+            await CargarOcupBloquesYSeleccComp(competencia);
+        }
+    }
+
+    async function CargarOcupBloquesYSeleccComp(competencia) {
+        //Se selecciona la competencia de esta manera para garantizar que la asincronía de la 
+        //// búsqueda de ocupancia en los bloques no afecte el renderizado
+        try {
+            const respuesta = await new FranjaServicio()
+                .OcupanciaBloquesGrupo(grupoSeleccionado.id);
+            const auxListaOcupanciaGrupo = [];
+            respuesta.forEach(franjaParcial => {
+                let encontrado = auxListaOcupanciaGrupo
+                    .find(bloqueOcup => bloqueOcup.idCompetencia === franjaParcial.idCompetencia);
+                if (!encontrado) {
+                    encontrado = {
+                        idCompetencia: franjaParcial.idCompetencia,
+                        franjas: new Set()
+                    }
+                    auxListaOcupanciaGrupo.push(encontrado);
+                }
+                encontrado.franjas.add(franjaParcial.franja);
+            });
+            // console.log(auxListaOcupanciaGrupo);
+            //Terminada la iteración, aplico el resultado a la ocupancia inicial
+            ocupanciaBloquesInicial.current = auxListaOcupanciaGrupo;
+            //Ahora hago la lista de solo las franjas ocupancia
+            ocupanciaBloques.current = new Set([...ocupanciaBloquesInicial.current].reduce((acc, obj) => {
+                return acc.concat([...obj.franjas]);
+            }, []));
+            // console.log(ocupanciaBloques.current);
+            setCompetenciaSelecc(competencia);
+        } catch (error) {
+            Swal.fire(error);
+            setCompetenciaSelecc({});
+        }
         setIndexBloqueSelecc(-1);
-        setCompetenciaSelecc(competencia);
     }
 
     //SECCIÓN AGREGAR NUEVO BLOQUE
@@ -361,19 +452,12 @@ const Horario = () => {
 
     ///////////////////////// --------------- /////////////////
 
-    //ESTO ES CONTINUACIÓN DE SELECCIÓN Y CAMBIAR OCUPANCIA BLOQUES
+    //ESTO ES CONTINUACIÓN DE SELECCIÓN 
     useEffect(() => {
         if (seleccBloqueRadioArray.some(valor => valor === true) &&
             (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
             if (indexBloqueEliminado >= 0) setIndexBloqueSelecc(-1);
             else setIndexBloqueSelecc(seleccBloqueRadioArray.findIndex(valor => valor === true));
-
-            //Se analiza la nueva ocupancia bloques
-            // const auxListaBloques = new Set(bloques.reduce((acc, bloque) => {
-            //     return acc.concat([...bloque.franjas]);
-            // }, []));
-            // console.log(auxListaBloques);
-            // setOcupanciaBloques(auxListaBloques);
 
         }
     }, [seleccBloqueRadioArray]);
@@ -392,12 +476,21 @@ const Horario = () => {
         // console.log(indexBloqueSelecc)
         if ((indexBloqueSelecc >= 0) &&
             (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            //Se analiza la nueva ocupancia bloques
-            const auxListaBloques = new Set(bloques.reduce((acc, bloque) => {
-                return bloque.numBloque !== bloques[indexBloqueSelecc].numBloque ?
-                    acc.concat([...bloque.franjas]): acc;
+            //Se analiza la nueva ocupancia bloques teniendo en cuenta la inicial
+            //// Primero agrego las franjas ocupadas por bloques de otras competencias
+            ocupanciaBloques.current = new Set([...ocupanciaBloquesInicial.current].reduce((acc, obj) => {
+                return obj.idCompetencia !== competenciaSelecc.id ? acc.concat([...obj.franjas]) : acc;
             }, []));
-            ocupanciaBloques.current = auxListaBloques;
+            //// Luego se añaden los de los bloques de la competencia actual según los cambios
+            //// sin las franjas que le pertenecen al bloque seleccionado
+            const auxOcupanciaCompSelecc = bloques.reduce((acc, bloque) => {
+                return bloque.numBloque !== bloques[indexBloqueSelecc].numBloque ?
+                    acc.concat([...bloque.franjas]) : acc;
+            }, []);
+
+            ocupanciaBloques.current = new Set([...ocupanciaBloques.current, ...auxOcupanciaCompSelecc]);
+
+            //Se selecciona el objeto según el index
             setBloqueSelecc({ ...bloques[indexBloqueSelecc] });
         }
     }, [indexBloqueSelecc]);
@@ -426,18 +519,17 @@ const Horario = () => {
     useEffect(() => {
         // console.log(bloques);
         if (bloques.length > 0) {
-            // const objAux = {
-            //     idGrupo: grupoSeleccionado.id,
-            //     idCompetencia: competenciaSelecc.id,
-            //     bloques: bloques
-            // }
-            // listaAux.push(objAux);
-            // setContObjBloques(listaAux);
+
         } else {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
             setIndexBloqueSelecc(-1);
         }
+        setTotalHorasTomadasComp(
+            bloques.reduce((acc, bloque) => {
+                return acc + ([...bloque.franjas].length / 2);
+            }, 0)
+        );
     }, [bloques]);
 
     /**********************************************************************************************************/
@@ -512,7 +604,7 @@ const Horario = () => {
                                                                             X
                                                                         </button>
                                                                         <span>
-                                                                            Bloque {bloque.numBloque}
+                                                                            Bloque {bloque?.numBloque}
                                                                         </span>
                                                                     </label>
                                                                 </td>

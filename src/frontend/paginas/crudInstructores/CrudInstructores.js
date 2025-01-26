@@ -84,7 +84,7 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
                 objetoAux.especialidad = element.especialidad;
-                objetoAux.topeHoras = `${element.listaOcupancia.length / 2} / ${element.topeHoras}`;
+                objetoAux.topeHoras = `${element.listaOcupancia.length /2} / ${element.topeHoras}`;
                 if (modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
                 listaAux.push(objetoAux);
             });

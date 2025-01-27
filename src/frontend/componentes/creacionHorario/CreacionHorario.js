@@ -204,7 +204,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         if (bloque && Object.values(bloque).length > 0) {
             // console.log(bloque);
             //Se pintan las celdas de su color correspondiente pero se obtienen
-            ///primero las libres para completar las 3 (verdes, blancas, rojas)
+            ///primero las libres para completar las 4 (verdes, blancas, rojas, grises)
             const auxFranjasLibres = new Set(franjasLibres);
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
             bloque?.franjas?.forEach(franja => auxFranjasLibres.delete(franja));

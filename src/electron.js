@@ -280,6 +280,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllByIdInstructor', async (event, arrayIds) => {
+        try {
+            return await instructorRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain instructores  getAllById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('SaveNewInstructor', async (event, instructor) => {
         try {
             return await instructorRepo.SaveNew(instructor);
@@ -376,6 +384,14 @@ function RegistrarIPC() {
             return await ambienteRepo.GetById(id);
         } catch (error) {
             console.log("Error en ipcMain  getById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetAllByIdAmbiente', async (event, arrayIds) => {
+        try {
+            return await ambienteRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain ambientes  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

@@ -43,6 +43,23 @@ class AmbienteRepo {
         });
     }
 
+    async GetAllById(arrayIds){
+        return new Promise((resolve, reject) => {
+            const placeHolders = arrayIds.map(()  => '?').join(', ');
+
+            const query = `
+                SELECT * FROM ambientes
+                WHERE id IN (${placeHolders});
+            `;
+
+            this.db.all(query, arrayIds, (error, filas) => {
+                if(error) reject(error.errno);
+                else resolve(filas);
+            });
+        });
+    }
+
+
     async SaveNew(ambiente) {
         const { nombre, idTorre, capacidad, franjaDisponibilidad } = ambiente;
         return new Promise((resolve, reject) => {

@@ -14,6 +14,8 @@ import FranjaServicio from '../../../backend/repository/servicios/FranjaService'
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
 import { FranjasToBloques } from './UtilidadesHorario';
+import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 
 
 const Horario = () => {
@@ -43,6 +45,9 @@ const Horario = () => {
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState(new Array(bloques).fill(false));
     const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
 
+    /***************************************************************************/
+    /**************** SECCIÓN CARGA LISTA PRINCIPAL ****************************/
+
     useLayoutEffect(() => {
         GetListas();
     }, []);
@@ -51,9 +56,45 @@ const Horario = () => {
         setListaGruposDinammica([...listaGruposInicial]);
     }, [listaGruposInicial]);
 
+
+    //LISTA PRINCIPAL
     async function GetListas() {
         try {
             //-- falta Mostrar mensaje que indica que se está generando la acción de cargar información
+
+            //Funciones para usar en obtener lista anidada, deben estar declaradas de primeras
+            //Variables para optimizar las consultas de ambientes e instructores para franjas personalizadas
+            const idsInstructoresUnicos = new Set();
+            const idsAmbientesUnicos = new Set();
+
+            const CargarCompetencias = async (grupoBusqueda) => {
+                try {
+                    const competencias = await new CompetenciaServicio().CargarListaSegunPiscina(grupoBusqueda.id);
+                    return Promise.all(
+                        competencias.map(async (comp) => ({
+                            ...comp,
+                            franjas: await CargarFranjasCompetencia(grupoBusqueda.id, comp.id)
+                        }))
+                    );
+                } catch (error) {
+                    console.log("Error al obtener competencias", error);
+                    return [];
+                }
+            };
+
+            const CargarFranjasCompetencia = async (grupoId, competenciaId) => {
+                try {
+                    const franjas = await new FranjaServicio().ObtenerFranjasCompetenciaGrupo(grupoId, competenciaId);
+                    //Se van guardando los ids sin repetir de ambientes e instructores
+                    franjas.forEach(franja => idsInstructoresUnicos.add(franja.idInstructor));
+                    franjas.forEach(franja => idsAmbientesUnicos.add(franja.idAmbiente));
+                    return franjas;
+                } catch (error) {
+                    console.log("Error al obtener las franjas", error);
+                    return [];  // Devolvemos un arreglo vacío en caso de error
+                }
+            };
+
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
             const respuesta = await Promise.all([programas, grupos]);
@@ -61,36 +102,52 @@ const Horario = () => {
             let auxGrupos = respuesta[1];
             auxGrupos = await Promise.all(
                 auxGrupos.map(async (grupo) => {
-                    let auxCompetenciasLista = [];
-                    try {
-                        auxCompetenciasLista = await new CompetenciaServicio().CargarListaSegunPiscina(grupo.id);
-                        auxCompetenciasLista = await Promise.all(
-                            auxCompetenciasLista.map(async (comp) => {
-                                let auxFranjasComp = [];
-                                try {
-                                    auxFranjasComp = await new FranjaServicio()
-                                        .ObtenerFranjasCompetenciaGrupo(grupo.id, comp.id);
-                                } catch (error) {
-                                    console.log("Error al obtener las franjas según competencia y grupo");
-                                    throw error;
-                                }
-                                return {
-                                    ...comp,
-                                    franjas: auxFranjasComp
-                                }
-                            })
-                        );
-                    } catch (error) {
-                        console.log("Error al obtener lista de compentencias para el grupo por: " + error);
-                        throw error;
-                    }
+                    const auxCompetenciasLista = await CargarCompetencias(grupo);
                     return {
                         ...grupo,
                         competencias: auxCompetenciasLista
                     }
                 })
             );
-            // console.log(auxGrupos);
+
+            //Luego, cuando se han cargado todos los grupos, y se han recopilado todos los ids
+            //// de ambientes e instructores sin repetir, se consiguen desde el repositorio los
+            //// objetos correspondientes
+            const [instructoresUnicos, ambientesUnicos] = await Promise.all([
+                new InstructorServicio().CargarInstructores([...idsInstructoresUnicos]),
+                new AmbienteServicio().CargarAmbientes([...idsAmbientesUnicos])
+            ]);
+            console.log([...idsInstructoresUnicos]);
+
+            //Ahora se forman los objetos franja Personalizados cuyo index es la franja
+            //// y el dato es un objeto con el instructor y el ambiente y el idCompetencia
+            auxGrupos = auxGrupos.map(grupo => {
+                const franjasPersonalizadas = [];
+                grupo.competencias.forEach(comp => {
+                    comp.franjas.forEach(franja => {
+                        //--Aquí se puede cambiar la lógica en caso de almacenar franjas
+                        //// incompletas en persistencia
+                        const nuevoObj = {
+                            idCompetencia: comp.id,
+                            //La búsqueda de instructor y ambiente se realiza con ayuda de los sets en los array
+                            instructor:
+                                instructoresUnicos[[...idsInstructoresUnicos].indexOf(franja.idInstructor)],
+                            ambiente:
+                                ambientesUnicos[[...idsAmbientesUnicos].indexOf(franja.idAmbiente)]
+                        }
+                        //Aquí se forma el array de franjas personalizado donde la franja es el index
+                        //// y los objetos estánd entro de un objeto en ese índice, y los índices que 
+                        //// no tienen franja serán Undefined
+                        franjasPersonalizadas[franja.franja] = nuevoObj;
+                    });
+                });
+                return {
+                    ...grupo,
+                    franjasPersonalizadas: franjasPersonalizadas
+                }
+            });
+
+            console.log(auxGrupos);
             setListaGruposInicial([...auxGrupos]);
             //setListaProgramas de último ya que activa todo 
             setListaProgramas([...auxProgramas]);
@@ -109,7 +166,7 @@ const Horario = () => {
                 listaCombinadaInicial.current = auxListaCombinada;
             }
         }
-    }, [listaProgramas]);
+    }, [listaProgramas, listaGruposInicial]);
 
     useEffect(() => {
         //Esto crea una estructura de una lista de objetos programa que tienen
@@ -157,6 +214,10 @@ const Horario = () => {
             }
         });
     }
+
+
+    /***************************************************************************/
+    /***************************************************************************/
 
     //Index de objetos seleccionados
     const indexProgramaSelecc = useRef(-1);
@@ -236,7 +297,7 @@ const Horario = () => {
     // SE ESPERA QUE SEA PUNTO CLAVE QUE ABSORA CAMBIOS DE BLOQUES Y LOS RENDERICE POR MEDIO DE FRANJAS
     //Para que se activen los cambios de renderizado en cadena al modificar los bloques
     //// pero no al seleccionar una competencia
-    
+
     //Espero que este hook sea la clave renderizadora de cambios con clickUP, cambio de ambiente o instructor
     const [franjasCompetencia, setFranjasCompetencia] = useState([]);
     useEffect(() => {
@@ -380,7 +441,7 @@ const Horario = () => {
         setIndexBloqueEliminado(index);
         let listaAux = [...bloques];
 
-        //Reiniciar valores si se elimina el último de la lista
+        //Reiniciar valores si se elimina el último existente de la lista
         if (listaAux.length === 1) {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
@@ -589,8 +650,8 @@ const Horario = () => {
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
                                             totalHorasTomadasComp={totalHorasTomadasComp}
                                             devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)}
-                                            ocupanciaBloques={ocupanciaBloques} 
-                                            listaCompleta={listaCombinada}/>
+                                            ocupanciaBloques={ocupanciaBloques}
+                                            listaCompleta={listaCombinada} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

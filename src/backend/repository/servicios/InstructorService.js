@@ -46,6 +46,17 @@ class InstructorServicio {
       }
     }
 
+    async CargarInstructores(arrayIds){
+      console.log('Cargando instructores por id');
+      try {
+        return await window.electron.GetAllByIdInstructor(arrayIds);
+      } catch (error) {
+        console.log("error en servicio instructor por: ", error);
+        throw error.message.split(":")[1].trim();
+      }
+    }
+
+
     async ActualizarInstructor(idViejo, instructor){
       console.log("Actualizando instructor...");
       try {

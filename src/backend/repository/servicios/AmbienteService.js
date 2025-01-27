@@ -45,6 +45,16 @@ class AmbienteServicio {
       }
     }
 
+    async CargarAmbientes(arrayIds){
+      console.log('Cargando ambientes por id');
+      try {
+        return await window.electron.GetAllByIdAmbiente(arrayIds);
+      } catch (error) {
+        console.log("error en servicio ambiente por: ", error);
+        throw error.message.split(":")[1].trim();
+      }
+    }
+
     async ActualizarAmbiente(idViejo, ambiente){
       console.log("Actualizando ambiente...");
       try {

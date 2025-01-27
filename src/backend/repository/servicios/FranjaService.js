@@ -43,5 +43,15 @@ class FranjaServicio {
             throw error;
         }
     }
+
+    async ObtenerFranjasCompetenciaGrupo(idGrupo, idCompetencia){
+        // console.log("Obteniendo las franjas de la competencia ", idCompetencia);
+        try {
+            return await window.electron.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("error en servicio franjas por: ", error);
+            throw error;
+        }
+    }
 }
 export default FranjaServicio;

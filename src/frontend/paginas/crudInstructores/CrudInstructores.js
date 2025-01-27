@@ -10,7 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, franjasDeseadas }) => {
+const CrudInstructores = ({ 
+    modoSeleccion,
+     onClose, 
+     responsableSeleccionado, 
+     franjasDeseadas,
+    listaCompletaGrupos }) => {
 
     const subs = modoSeleccion ?
         ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
@@ -27,8 +32,7 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
                 {
                     ...instr,
                     franjaDisponibilidad: DeserealizarDisponibilidad(instr.franjaDisponibilidad),
-                    listaOcupancia:
-                        instr.listaOcupancia === null ? [] : DeserealizarDisponibilidad(instr.listaOcupancia)
+                    listaOcupancia: AnalizarListaOcupancia(instr.id)
                 }
             ));
             //La variable franjasdDeseadas se usa  para  filtrar la lista por su disponibilidad
@@ -36,17 +40,32 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
             if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0 ) {
                 respuesta = respuesta.filter(instr =>
                     franjasDeseadas.every(franja =>
-                        instr.franjaDisponibilidad.includes(franja) &&
+                        instr.franjaDisponibilidad.includes(franja) && !instr.listaOcupancia.includes(franja) &&
                         franjasDeseadas.length <= instr.franjaDisponibilidad.length - instr.listaOcupancia.length)
                 );
             }
-            console.log(respuesta);
+            // console.log(respuesta);
             setListaObjetos(respuesta);
 
         } catch (error) {
             Swal.fire(error);
             navegar(-1);
         }
+    }
+
+    function AnalizarListaOcupancia(idInstructor){
+        const listaAux = [];
+        listaCompletaGrupos.forEach(programa => {
+            programa.grupos.forEach(grupo => {
+                grupo.competencias.forEach(comp => {
+                    comp.franjas.forEach(franja => {
+                        if(franja.idInstructor === idInstructor) listaAux.push(franja.franja);
+                    });
+                });
+            });
+        });
+        // console.log(listaAux);
+        return listaAux;
     }
 
     function DeserealizarDisponibilidad(texto) {

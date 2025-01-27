@@ -151,6 +151,19 @@ class FranjaRepo {
             });
         });
     }
+
+    GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia){
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT * FROM franjas
+                WHERE idGrupo = ? AND idCompetencia = ?;
+            `;
+            this.bd.all(query, [idGrupo, idCompetencia], function(error, filas){
+                if(error) reject(error.errno);
+                else resolve(filas);
+            });
+        });
+    }
 }
 
 module.exports = FranjaRepo;

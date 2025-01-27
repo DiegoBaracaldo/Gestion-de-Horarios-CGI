@@ -10,14 +10,13 @@ import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     ocupanciaJornada, ocupanciaBloques, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
-    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp
+    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp, listaCompleta
 }) => {
 
     //Manejo de bloques
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
     const [franjasBloque, setFranjasBloque] = useState(new Set());
-    const [ocupanciaBloquesInterno, setOcupanciaBloquesInterno] = useState(ocupanciaBloques.current);
     const [franjasLibres, setFranjasLibres] = useState(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
 
     useLayoutEffect(() => {
@@ -59,7 +58,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque) {
+        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque
+            && Object.values(bloque).length > 0) {
             // console.log("El objeto antes de acomodar es: ", bloque);
             const bloqueAux = {
                 ...bloque,
@@ -200,7 +200,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     //CADA QUE CAMBIA EL BLOQUE o se modifica el actual
     useLayoutEffect(() => {
-        // console.log("se recibe desde padre...", bloque);
+        // console.log(bloque);
         if (bloque && Object.values(bloque).length > 0) {
             // console.log(bloque);
             //Se pintan las celdas de su color correspondiente pero se obtienen
@@ -323,7 +323,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                                                                 onMouseDown={() => ManejarClickDownFranja(colum.colorCelda)}
                                                                 onMouseMove={arrastrandoBlanco || arrastrandoVerde ?
                                                                     () => ManejarArrastreFranjas(colum.valor) : null}>
-                                                                {/* {colum.valor} */}
+                                                                {colum.valor}
                                                             </td>
                                                         ))}
                                                     </tr>
@@ -344,7 +344,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         onClose={() => setOpenListaInstructores(false)}
                         modoSeleccion={true}
                         responsableSeleccionado={(r) => setInstructorBloque(r)}
-                        franjasDeseadas={[...franjasBloque]} />
+                        franjasDeseadas={[...franjasBloque]} 
+                        listaCompletaGrupos={listaCompleta}/>
                     : null
             }
             {
@@ -353,7 +354,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         modoSeleccion={true}
                         ambienteSelecc={(a) => setAmbienteBloque(a)}
                         onClose={() => setOpenListaAmbientes(false)}
-                        franjasDeseadas={[...franjasBloque]} />
+                        franjasDeseadas={[...franjasBloque]}  
+                        listaCompletaGrupos={listaCompleta}/>
                     : null
             }
         </div>

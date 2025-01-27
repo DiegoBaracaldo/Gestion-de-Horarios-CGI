@@ -21,10 +21,7 @@ class InstructorRepo {
                 SELECT i.*,
                 (SELECT COUNT(g.idResponsable)
                 FROM grupos g
-                WHERE g.idResponsable = i.id) AS cantidadGruposACargo,
-                (SELECT GROUP_CONCAT(f.franja)
-                FROM franjas f
-                WHERE f.idInstructor = i.id)  AS listaOcupancia
+                WHERE g.idResponsable = i.id) AS cantidadGruposACargo
                 FROM  instructores i;
             `;
             this.db.all(query, [], (error, filas) => {

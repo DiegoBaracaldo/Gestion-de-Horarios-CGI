@@ -17,15 +17,15 @@ class AmbienteRepo {
 
     async GetAll() {
         return new Promise((resolve, reject) => {
-            const query =
-                "SELECT " +
-                "ambientes.*, " +
-                "torres.nombre AS nombreTorre " +
-                "FROM " +
-                "ambientes " +
-                "JOIN " +
-                "torres ON ambientes.idTorre = torres.id ";
-
+            const query =`
+                SELECT 
+                ambientes.*, 
+                torres.nombre AS nombreTorre  
+                FROM  
+                ambientes  
+                JOIN  
+                torres ON ambientes.idTorre = torres.id ;
+            `;
             this.db.all(query, [], (err, filas) => {
                 if (err) reject(err.errno);
                 else resolve(filas);

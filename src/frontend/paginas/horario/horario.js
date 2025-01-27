@@ -13,6 +13,7 @@ import CreacionHorario from '../../componentes/creacionHorario/CreacionHorario';
 import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
 import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
+import { FranjasToBloques } from './UtilidadesHorario';
 
 
 const Horario = () => {
@@ -22,6 +23,7 @@ const Horario = () => {
     const [listaProgramas, setListaProgramas] = useState([]);
     const [listaGruposInicial, setListaGruposInicial] = useState([]);
     const [listaGruposDinamica, setListaGruposDinammica] = useState([...listaGruposInicial]);
+    const listaCombinadaInicial = useRef([]);
     const [listaCombinada, setListaCombinada] = useState([]);
     //Para pintar los grupos y programas según si han sido completados o no
     //Se supone que de esta manera se sincroniza la estructura de índices en la lista
@@ -31,15 +33,15 @@ const Horario = () => {
     const [grupoSeleccionado, setGrupoSeleccionado] = useState({});
     const [competenciaSelecc, setCompetenciaSelecc] = useState({});
     const [bloqueSelecc, setBloqueSelecc] = useState({});
-    const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
     const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const ocupanciaBloquesInicial = useRef([]);
     const ocupanciaBloques = useRef(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
-    const [bloquesIniciales, setBloquesIniciales] = useState([]);
+    const bloquesIniciales = useRef([]);
     const [bloques, setBloques] = useState([]);
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState(new Array(bloques).fill(false));
+    const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
 
     useLayoutEffect(() => {
         GetListas();
@@ -51,11 +53,44 @@ const Horario = () => {
 
     async function GetListas() {
         try {
+            //-- falta Mostrar mensaje que indica que se está generando la acción de cargar información
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
             const respuesta = await Promise.all([programas, grupos]);
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
+            auxGrupos = await Promise.all(
+                auxGrupos.map(async (grupo) => {
+                    let auxCompetenciasLista = [];
+                    try {
+                        auxCompetenciasLista = await new CompetenciaServicio().CargarListaSegunPiscina(grupo.id);
+                        auxCompetenciasLista = await Promise.all(
+                            auxCompetenciasLista.map(async (comp) => {
+                                let auxFranjasComp = [];
+                                try {
+                                    auxFranjasComp = await new FranjaServicio()
+                                        .ObtenerFranjasCompetenciaGrupo(grupo.id, comp.id);
+                                } catch (error) {
+                                    console.log("Error al obtener las franjas según competencia y grupo");
+                                    throw error;
+                                }
+                                return {
+                                    ...comp,
+                                    franjas: auxFranjasComp
+                                }
+                            })
+                        );
+                    } catch (error) {
+                        console.log("Error al obtener lista de compentencias para el grupo por: " + error);
+                        throw error;
+                    }
+                    return {
+                        ...grupo,
+                        competencias: auxCompetenciasLista
+                    }
+                })
+            );
+            // console.log(auxGrupos);
             setListaGruposInicial([...auxGrupos]);
             //setListaProgramas de último ya que activa todo 
             setListaProgramas([...auxProgramas]);
@@ -69,7 +104,9 @@ const Horario = () => {
     useEffect(() => {
         if (Array.isArray(listaProgramas) && listaProgramas.length > 0) {
             if (Array.isArray(listaGruposInicial) && listaGruposInicial.length > 0) {
-                setListaCombinada(CombinarLista());
+                const auxListaCombinada = CombinarLista();
+                setListaCombinada(auxListaCombinada);
+                listaCombinadaInicial.current = auxListaCombinada;
             }
         }
     }, [listaProgramas]);
@@ -121,156 +158,34 @@ const Horario = () => {
         });
     }
 
-    const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
-        setGrupoSeleccionado(grupo);
-    }
+    //Index de objetos seleccionados
+    const indexProgramaSelecc = useRef(-1);
+    const indexGrupoSelecc = useRef(-1);
+    const indexCompetenciaSelecc = useRef(-1);
+    const indexBloqueSelecc = useRef(-1);
 
     //CADA QUE SE SELECCIONA UN GRUPO
-    useEffect(() => {
-        if (Object.values(grupoSeleccionado).length > 0) {
-            //console.log(grupoSeleccionado.competencias);
-            PedirDatosForaneosGrupo();
-            PedirCompetenciasPiscina(grupoSeleccionado.id);
-            setCompetenciaSelecc({});
-            setBloques([]);
-            setBloqueSelecc({});
-        }
-    }, [grupoSeleccionado]);
 
-    //Pedir las competencias para el grupo
-    async function PedirCompetenciasPiscina(idGrupo) {
+    const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
+        indexProgramaSelecc.current = indexPrograma;
+        indexGrupoSelecc.current = indexGrupo;
+        setGrupoSeleccionado({ ...grupo });
+        indexCompetenciaSelecc.current = -1;
+        setCompetenciaSelecc({});
+        setCompetenciasGrupo(grupo.competencias);
+        indexBloqueSelecc.current = -1;
+        setBloqueSelecc({});
+        setBloques([]);
+        bloquesIniciales.current = [];
+        setTotalHorasTomadasComp(0);
+        setTipoJornada('');
+        setSeleccBloqueRadioArray(seleccBloqueRadioArray.map(() => false));
+        PedirDatosForaneosGrupo(grupo);
+    }
+
+    async function PedirDatosForaneosGrupo(grupo) {
         try {
-            let respuesta = await new CompetenciaServicio().CargarListaSegunPiscina(idGrupo);
-            respuesta = respuesta.map(competencia => (
-                {
-                    ...competencia,
-                    bloques: []
-                }
-            ));
-            setCompetenciasGrupo(respuesta);
-        } catch (error) {
-            Swal.fire("Error al obtener competencias de la piscina para el grupo!");
-            setCompetenciasGrupo([]);
-        }
-    }
-
-    //CADA QUE SE SELECCIONA UNA COMPETENCIA
-    useEffect(() => {
-        if (Array.isArray(bloques) && Object.values(competenciaSelecc).length > 0) {
-            setTotalHorasTomadasComp(
-                bloques.reduce((acc, bloque) => {
-                    return acc + ([...bloque.franjas].length / 2);
-                }, 0));
-
-            ObtenerBloques(competenciaSelecc.id);
-            setBloqueSelecc({});
-            const auxIndesRadioBloque = [...seleccBloqueRadioArray.map(valor => false)];
-            setSeleccBloqueRadioArray(auxIndesRadioBloque);
-        }
-    }, [competenciaSelecc]);
-
-    async function GuardarCambiosHorario(franjas) {
-        try {
-            //Se espera un 1
-            console.log("Guardando...");
-            return await new FranjaServicio().GuardarHorario(grupoSeleccionado.id, competenciaSelecc.id, franjas);
-        } catch (error) {
-            Swal.fire("Error en el guardado de los cambios en el horario!");
-            return 0;
-        }
-    }
-
-    async function ObtenerBloques(idCompetencia) {
-        //Se arman los bloques directamente desde el repositorio de franjas, según 
-        //// el grupo y la competencia seleccionados 
-        try {
-            const respuesta = await new FranjaServicio()
-                .ObtenerBloquesComeptencia(grupoSeleccionado.id, idCompetencia);
-            console.log(respuesta);
-            setBloquesIniciales(respuesta);
-            setBloques(respuesta);
-        } catch (error) {
-            Swal.fire(error);
-        }
-    }
-
-    //Función para convertir bloques a franjas
-    function BloquesToFranjas(listaBloques) {
-        //Ahora con la lista de bloques actualizada se hace la transformación de bloques a franjas
-        const franjasListaAux = [];
-        listaBloques.forEach(bloque => {
-            if (bloque.franjas.size > 0 && Object.values(bloque.instructor).length > 0
-                && Object.values(bloque.ambiente).length > 0) {
-                bloque.franjas.forEach(franja => {
-                    const objAuxFranja = {
-                        franja: franja,
-                        idGrupo: grupoSeleccionado.id,
-                        idInstructor: bloque.instructor.id,
-                        idAmbiente: bloque.ambiente.id,
-                        idCompetencia: competenciaSelecc.id
-                    };
-                    franjasListaAux.push(objAuxFranja);
-                });
-            }
-        });
-        return franjasListaAux;
-    }
-
-    //CADA QUE SE SELECCIONA UN BLOQUE
-    const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
-    const [seleccionandoBloque, setSeleccionandoBloque] = useState(false);
-    const [guardandoBloqueSelecc, setGuardandoBloqueSelecc] = useState(false);
-    //HOOK PARA ELIMINAR BLOQUE
-    const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
-
-    const ManejarCheckBloque = (bloque, i) => {
-        //El bloque recibido como parámetro es el último seleccionado
-        //// y sirve solamente para detectar redundamente que se ha seleccionado
-        // console.log("indice de check es: " + i);
-        setSeleccionandoBloque(true);
-        let auxBloques = [...bloques];
-        //SI ES ADD Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
-        ////en su index correspondiente antes de cambiar la selección a uno nuevo
-        ////Si el anterior no es vacío, si es uno diferente (numBloque) y si no es eliminación
-        if (Object.values(bloqueSelecc).length > 1 &&
-            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado < 0) {
-            // console.log("Guardando bloque anterior");
-            setGuardandoBloqueSelecc(true);
-            auxBloques[indexBloqueSelecc] = { ...bloqueSelecc };
-            setBloques(auxBloques);
-        }
-        //Se se debe guardar bloque seleccionado por eliminación de diferente bloque
-        else if (Object.values(bloqueSelecc).length > 1 &&
-            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado >= 0
-            && indexBloqueEliminado !== indexBloqueSelecc) {
-            // console.log("Guardando bloque seleccionado");
-            setGuardandoBloqueSelecc(true);
-            //Se le cambia el nombre dle bloque para que se acomo  d e con los otros
-            auxBloques[i] = {
-                ...bloqueSelecc,
-                numBloque: i + 1
-            };
-            setBloques(auxBloques);
-        }
-        setSeleccBloqueRadioArray(auxBloques.map((selecc, j) => (i === j ? true : false)));
-    }
-
-    // useEffect(() => {
-    //     console.log(bloqueSelecc);
-    // }, [bloqueSelecc]);
-
-    //Si vino por guardar bloque anterior
-    //No borrar, se necesita
-    useEffect(() => {
-        if (guardandoBloqueSelecc) {
-            setGuardandoBloqueSelecc(false);
-        }
-    }, [bloques, guardandoBloqueSelecc]);
-
-
-    async function PedirDatosForaneosGrupo() {
-        try {
-            const JornadaAux = new JornadaServicio().CargarJornada(grupoSeleccionado.idJornada);
+            const JornadaAux = new JornadaServicio().CargarJornada(grupo.idJornada);
 
             const resultadoAux = await Promise.all([JornadaAux]);
             setTipoJornada(resultadoAux[0].tipo);
@@ -298,69 +213,125 @@ const Horario = () => {
         }
     }
 
-    const ManejarSeleccCompetencia = async (competencia) => {
-        //Primero se guardan los cambios del ultimo bloque sobre el que se está trabajando
-        //// Si es que ya se ha seleccionado una competencia al menos para no borrar en primera selección
-        if (Object.values(competenciaSelecc).length > 0) {
-            const auxBloques = [...bloques];
-            if (indexBloqueSelecc >= 0) auxBloques[indexBloqueSelecc] = { ...bloqueSelecc };
-            console.log(auxBloques);
-            //Guarda las franjas actuales incluso si son cero para poder eliminar en repositorio
-            //// y si las franjas obtenidas por los bloques son mayores a 0 también
-            const franjasObtenidas = BloquesToFranjas(auxBloques)
-            const respuesta =  await GuardarCambiosHorario(franjasObtenidas);
-            // console.log(respuesta);
-            if (respuesta <= 0) {
-                Swal.fire("Error al guardar los bloques...");
-                setCompetenciaSelecc({});
-                setIndexBloqueSelecc(-1);
-            }else{
-                await CargarOcupBloquesYSeleccComp(competencia);
-            }
-        }else{
-            await CargarOcupBloquesYSeleccComp(competencia);
-        }
+    //CADA QUE SE SELECCIONA UNA COMPETENCIA
+
+    const ManejarSeleccCompetencia = async (competencia, index) => {
+
+        setCompetenciaSelecc({ ...competencia });
+        indexCompetenciaSelecc.current = index;
+        indexBloqueSelecc.current = -1;
+        setBloqueSelecc({});
+        setSeleccBloqueRadioArray(seleccBloqueRadioArray.map(() => false));
+
+        setFranjasCompetencia([...competencia.franjas]);
+        const auxGetBloques = await ObtenerBloques(competencia.franjas);
+        setBloques(auxGetBloques);
+        bloquesIniciales.current = auxGetBloques;
+        setTotalHorasTomadasComp(
+            auxGetBloques.reduce((acc, bloque) => {
+                return acc + ([...bloque.franjas].length / 2);
+            }, 0));
     }
 
-    async function CargarOcupBloquesYSeleccComp(competencia) {
-        //Se selecciona la competencia de esta manera para garantizar que la asincronía de la 
-        //// búsqueda de ocupancia en los bloques no afecte el renderizado
+    // SE ESPERA QUE SEA PUNTO CLAVE QUE ABSORA CAMBIOS DE BLOQUES Y LOS RENDERICE POR MEDIO DE FRANJAS
+    //Para que se activen los cambios de renderizado en cadena al modificar los bloques
+    //// pero no al seleccionar una competencia
+    
+    //Espero que este hook sea la clave renderizadora de cambios con clickUP, cambio de ambiente o instructor
+    const [franjasCompetencia, setFranjasCompetencia] = useState([]);
+    useEffect(() => {
+        console.log(franjasCompetencia);
+        if (franjasCompetencia.length > 0 && indexBloqueSelecc.current >= 0) {
+            const auxGetBloques = ObtenerBloques(franjasCompetencia);
+            setBloques(auxGetBloques);
+            setTotalHorasTomadasComp(
+                auxGetBloques.reduce((acc, bloque) => {
+                    return acc + ([...bloque.franjas].length / 2);
+                }, 0));
+        }
+    }, [franjasCompetencia]);
+
+    async function ObtenerBloques(listaFranjas) {
         try {
-            const respuesta = await new FranjaServicio()
-                .OcupanciaBloquesGrupo(grupoSeleccionado.id);
-            const auxListaOcupanciaGrupo = [];
-            respuesta.forEach(franjaParcial => {
-                let encontrado = auxListaOcupanciaGrupo
-                    .find(bloqueOcup => bloqueOcup.idCompetencia === franjaParcial.idCompetencia);
-                if (!encontrado) {
-                    encontrado = {
-                        idCompetencia: franjaParcial.idCompetencia,
-                        franjas: new Set()
-                    }
-                    auxListaOcupanciaGrupo.push(encontrado);
-                }
-                encontrado.franjas.add(franjaParcial.franja);
-            });
-            // console.log(auxListaOcupanciaGrupo);
-            //Terminada la iteración, aplico el resultado a la ocupancia inicial
-            ocupanciaBloquesInicial.current = auxListaOcupanciaGrupo;
-            //Ahora hago la lista de solo las franjas ocupancia
-            ocupanciaBloques.current = new Set([...ocupanciaBloquesInicial.current].reduce((acc, obj) => {
-                return acc.concat([...obj.franjas]);
-            }, []));
-            // console.log(ocupanciaBloques.current);
-            setCompetenciaSelecc(competencia);
+            const respuesta = await FranjasToBloques(listaFranjas);
+            bloquesIniciales.current = respuesta;
+            // console.log(respuesta);
+            return respuesta;
         } catch (error) {
             Swal.fire(error);
-            setCompetenciaSelecc({});
+            return [];
         }
-        setIndexBloqueSelecc(-1);
     }
 
+    async function GuardarCambiosHorario(franjas) {
+        try {
+            //Se espera un 1
+            console.log("Guardando...");
+            return await new FranjaServicio().GuardarHorario(grupoSeleccionado.id, competenciaSelecc.id, franjas);
+        } catch (error) {
+            Swal.fire("Error en el guardado de los cambios en el horario!");
+            return 0;
+        }
+    }
+
+
+    //CADA QUE SE SELECCIONA UN BLOQUE
+    const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
+    const [seleccionandoBloque, setSeleccionandoBloque] = useState(false);
+    const guardandoBloqueSelecc = useRef(false);
+    //HOOK PARA ELIMINAR BLOQUE
+    const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
+
+    const ManejarCheckBloque = (bloque, i) => {
+        //El bloque recibido como parámetro es el último seleccionado
+        //// y sirve solamente para detectar redundamente que se ha seleccionado
+        // console.log("indice de check es: " + i);
+        setSeleccionandoBloque(true);
+        let auxBloques = [...bloques];
+        //SI ES ADD Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
+        ////en su index correspondiente antes de cambiar la selección a uno nuevo
+        ////Si el anterior no es vacío, si es uno diferente (numBloque) y si no es eliminación
+
+        if (Object.values(bloqueSelecc).length > 1 &&
+            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado < 0) {
+            // console.log("Guardando bloque anterior");
+            guardandoBloqueSelecc.current = true;
+            auxBloques[indexBloqueSelecc.current] = { ...bloqueSelecc };
+            setBloques(auxBloques);
+        }
+        //Se se debe guardar bloque seleccionado por eliminación de diferente bloque
+        else if (Object.values(bloqueSelecc).length > 1 &&
+            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado >= 0
+            && indexBloqueEliminado !== indexBloqueSelecc.current) {
+            // console.log("Guardando bloque seleccionado");
+            guardandoBloqueSelecc.current = true;
+            //Se le cambia el nombre dle bloque para que se acomo  d e con los otros
+            auxBloques[i] = {
+                ...bloqueSelecc,
+                numBloque: i + 1
+            };
+            setBloques(auxBloques);
+        }
+        setSeleccBloqueRadioArray(auxBloques.map((selecc, j) => (i === j ? true : false)));
+    }
+
+    // useEffect(() => {
+    //     console.log(bloqueSelecc);
+    // }, [bloqueSelecc]);
+
+    //Si vino por guardar bloque anterior
+    //No borrar, se necesita
+    useEffect(() => {
+        if (guardandoBloqueSelecc.current) {
+            guardandoBloqueSelecc.current = false;
+        }
+    }, [bloques]);
+
+
+
     //SECCIÓN AGREGAR NUEVO BLOQUE
-    const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
     //Hook para detectar que es una agregación
-    const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
+    const indexBloqueAdd = useRef(-1);
 
     const ManejarAddBloque = () => {
         // console.log(bloques);
@@ -378,7 +349,8 @@ const Horario = () => {
             //Agrego el nuevo bloque a los bloques
             auxBloques.push(objAux);
             //Se asigna el índice del bloque recién agregado
-            setIndexBloqueAdd(auxBloques.length - 1);
+            indexBloqueAdd.current = auxBloques.length - 1;
+            // setIndexBloqueAdd(auxBloques.length - 1);
             setBloques(auxBloques);
         } else {
             Swal.fire(`Ya están completas las horas requeridas para esta competencia,
@@ -389,23 +361,21 @@ const Horario = () => {
 
     //Cambio de bloques por agregar nuevo bloque
     useEffect(() => {
-        if (bloques.length > 0 && indexBloqueAdd >= 0 && !guardandoBloqueSelecc) {
+        if (bloques.length > 0 && indexBloqueAdd.current >= 0 && !guardandoBloqueSelecc.current) {
             console.log("agregando...");
             //El hook indexBloqueAdd es redundante pero sirve para detectar cuando el cambio
             ////de bloques es por agregación
-            const i = indexBloqueAdd;
+            const i = indexBloqueAdd.current;
             //Ahora se aplica selección con la sección dedicada a ello
             ManejarCheckBloque(bloques[i], i);
         }
-    }, [bloques, indexBloqueAdd]);
+    }, [bloques]);
 
 
     // SECCIÓN PARA ELIMINAR EL BLOQUE, EL HOOK SE ENCUENTRA EN LA PARTE DE SELECCIÓN
     const [futuriIndexSelecc, setFuturoIndexSelecc] = useState(-1);
 
     const ManejarRemoveBloque = (bloque, index) => {
-        //Se agrega e bloque eliminado solo si es diferente al seleccionado para guardar
-        ////los datos del bloque seleccionado al cambiar la estructura de bloques
         //Primero elimino y luego selecciono
         setIndexBloqueEliminado(index);
         let listaAux = [...bloques];
@@ -414,18 +384,18 @@ const Horario = () => {
         if (listaAux.length === 1) {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
-            setIndexBloqueSelecc(-1);
+            indexBloqueSelecc.current = -1;
             setBloques([]);
             setIndexBloqueEliminado(-1);
         } else {
-            let i = indexBloqueSelecc;
+            let i = indexBloqueSelecc.current;
 
             //Si se elimina el seleccionado y es el último de la lista Ó 
             //// si se elimina otro que está por encima del seleccionado
-            if ((index === indexBloqueSelecc && index === listaAux.length - 1) ||
-                (index < indexBloqueSelecc)
+            if ((index === indexBloqueSelecc.current && index === listaAux.length - 1) ||
+                (index < indexBloqueSelecc.current)
             )
-                i = indexBloqueSelecc - 1;
+                i = indexBloqueSelecc.current - 1;
 
             console.log("i vale ", i);
 
@@ -455,46 +425,34 @@ const Horario = () => {
     //ESTO ES CONTINUACIÓN DE SELECCIÓN 
     useEffect(() => {
         if (seleccBloqueRadioArray.some(valor => valor === true) &&
-            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            if (indexBloqueEliminado >= 0) setIndexBloqueSelecc(-1);
-            else setIndexBloqueSelecc(seleccBloqueRadioArray.findIndex(valor => valor === true));
+            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd.current >= 0)) {
+            if (indexBloqueEliminado >= 0) indexBloqueSelecc.current = -1;
+            else indexBloqueSelecc.current = seleccBloqueRadioArray.findIndex(valor => valor === true);
+            //Solo para reiniciar el indexSelecc para poder seguir con la selección al eliminar
+            if (indexBloqueSelecc.current < 0 && indexBloqueEliminado >= 0 && indexBloqueAdd.current < 0) {
+                const seleccAux = seleccBloqueRadioArray.findIndex(valor => valor === true);
+                indexBloqueSelecc.current = seleccAux;
+            }
+            if (indexBloqueSelecc.current >= 0) {
+                //Se analiza la nueva ocupancia bloques teniendo en cuenta la inicial
+                //// Primero agrego las franjas ocupadas por bloques de otras competencias
+                ocupanciaBloques.current = new Set([...ocupanciaBloquesInicial.current].reduce((acc, obj) => {
+                    return obj.idCompetencia !== competenciaSelecc.id ? acc.concat([...obj.franjas]) : acc;
+                }, []));
+                //// Luego se añaden los de los bloques de la competencia actual según los cambios
+                //// sin las franjas que le pertenecen al bloque seleccionado
+                const auxOcupanciaCompSelecc = bloques.reduce((acc, bloque) => {
+                    return bloque.numBloque !== bloques[indexBloqueSelecc.current].numBloque ?
+                        acc.concat([...bloque.franjas]) : acc;
+                }, []);
 
+                ocupanciaBloques.current = new Set([...ocupanciaBloques.current, ...auxOcupanciaCompSelecc]);
+
+                //Se selecciona el objeto según el index
+                setBloqueSelecc({ ...bloques[indexBloqueSelecc.current] });
+            }
         }
     }, [seleccBloqueRadioArray]);
-
-    //Solo para reiniciar el indexSelecc para poder seguir con la selección al eliminar
-    useEffect(() => {
-        if (indexBloqueSelecc < 0 && seleccBloqueRadioArray.some(valor => valor === true) &&
-            indexBloqueEliminado >= 0 && indexBloqueAdd < 0) {
-            const seleccAux = seleccBloqueRadioArray.findIndex(valor => valor === true);
-            setIndexBloqueSelecc(seleccAux);
-        }
-    }, [indexBloqueSelecc]);
-
-    //ESTO ES CONTINUACIÓN DE SELECCIÓN
-    useEffect(() => {
-        // console.log(indexBloqueSelecc)
-        if ((indexBloqueSelecc >= 0) &&
-            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            //Se analiza la nueva ocupancia bloques teniendo en cuenta la inicial
-            //// Primero agrego las franjas ocupadas por bloques de otras competencias
-            ocupanciaBloques.current = new Set([...ocupanciaBloquesInicial.current].reduce((acc, obj) => {
-                return obj.idCompetencia !== competenciaSelecc.id ? acc.concat([...obj.franjas]) : acc;
-            }, []));
-            //// Luego se añaden los de los bloques de la competencia actual según los cambios
-            //// sin las franjas que le pertenecen al bloque seleccionado
-            const auxOcupanciaCompSelecc = bloques.reduce((acc, bloque) => {
-                return bloque.numBloque !== bloques[indexBloqueSelecc].numBloque ?
-                    acc.concat([...bloque.franjas]) : acc;
-            }, []);
-
-            ocupanciaBloques.current = new Set([...ocupanciaBloques.current, ...auxOcupanciaCompSelecc]);
-
-            //Se selecciona el objeto según el index
-            setBloqueSelecc({ ...bloques[indexBloqueSelecc] });
-        }
-    }, [indexBloqueSelecc]);
-
 
     //Finaliza la selección
     useEffect(() => {
@@ -503,7 +461,7 @@ const Horario = () => {
             (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
             // console.log("El objeto final seleccionado es: ", bloqueSelecc)
             setEsPrimeraCargaBloque(true);
-            setIndexBloqueAdd(-1);
+            indexBloqueAdd.current = -1;
             setIndexBloqueEliminado(-1);
             setFuturoIndexSelecc(-1);
             setSeleccionandoBloque(false);
@@ -523,7 +481,7 @@ const Horario = () => {
         } else {
             setSeleccBloqueRadioArray([]);
             setBloqueSelecc({});
-            setIndexBloqueSelecc(-1);
+            indexBloqueSelecc.current = -1;
         }
         setTotalHorasTomadasComp(
             bloques.reduce((acc, bloque) => {
@@ -565,7 +523,7 @@ const Horario = () => {
                                                     <td>
                                                         <input type='radio' name='compSeleccGrupo'
                                                             id={grupoSeleccionado.codigoGrupo + comp.id}
-                                                            onChange={() => ManejarSeleccCompetencia(comp)}>
+                                                            onChange={() => ManejarSeleccCompetencia(comp, index)}>
                                                         </input>
                                                         <label htmlFor={grupoSeleccionado.codigoGrupo + comp.id}>
                                                             {comp.id}
@@ -631,7 +589,8 @@ const Horario = () => {
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
                                             totalHorasTomadasComp={totalHorasTomadasComp}
                                             devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)}
-                                            ocupanciaBloques={ocupanciaBloques} />
+                                            ocupanciaBloques={ocupanciaBloques} 
+                                            listaCompleta={listaCombinada}/>
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

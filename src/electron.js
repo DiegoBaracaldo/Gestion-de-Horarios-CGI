@@ -521,4 +521,12 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetFranjasByCompetenciaAndGrupo', async(event, idGrupo, idCompetencia) => {
+        try {
+            return await franjaRepo.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener franjas de competencia por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
 }

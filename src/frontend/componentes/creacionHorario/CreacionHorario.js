@@ -8,10 +8,12 @@ import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
 import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
-const CreacionHorario = ({ competencia, bloque, bloqueNumero,
+const CreacionHorario = ({competencia, bloque, bloqueNumero,
     ocupanciaJornada, ocupanciaBloques, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
-    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp, listaCompleta
+    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp, listaCompleta,
+    indexProgramaSelecc, indexGrupoSelecc, indexCompetenciaSelecc, indexBloqueSelecc
 }) => {
+
 
     //Manejo de bloques
     const [instructorBloque, setInstructorBloque] = useState({});
@@ -213,6 +215,17 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         }
     }, [bloque]);
 
+    //Cada que se altera la lista completa
+    // // // useLayoutEffect(() => {
+    // // //     const auxFranjasLibres = new Set(franjasLibres);
+    // // //     ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
+    // // //     //Las franjas dependen del grupo-competencia-instruc y ambiente (eso forma un bloque)
+    // // //     //// por lo tanto se puede formar un bloque rapidamente
+    // // //     const bloque = {
+    // // //         instructor: 
+    // // //     }
+    // // // }, [listaCompleta]);
+
     function GetMatrizIndexFromValue(valor) {
         // (Convertir bloque en índice de celda)
         //primero calculamos i
@@ -257,7 +270,9 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                             Horas: <span className='datoDinamico'>
                                 {totalHorasTomadasComp}
                                 {" / "}
-                                {competencia ? competencia.horasRequeridas : 0}
+                                {
+                                    competencia.horasRequeridas
+                                }
                             </span>
                         </label>
                     </div>
@@ -344,8 +359,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         onClose={() => setOpenListaInstructores(false)}
                         modoSeleccion={true}
                         responsableSeleccionado={(r) => setInstructorBloque(r)}
-                        franjasDeseadas={[...franjasBloque]} 
-                        listaCompletaGrupos={listaCompleta}/>
+                        franjasDeseadas={[...franjasBloque]}
+                        listaCompletaGrupos={listaCompleta} />
                     : null
             }
             {
@@ -354,8 +369,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                         modoSeleccion={true}
                         ambienteSelecc={(a) => setAmbienteBloque(a)}
                         onClose={() => setOpenListaAmbientes(false)}
-                        franjasDeseadas={[...franjasBloque]}  
-                        listaCompletaGrupos={listaCompleta}/>
+                        franjasDeseadas={[...franjasBloque]}
+                        listaCompletaGrupos={listaCompleta} />
                     : null
             }
         </div>

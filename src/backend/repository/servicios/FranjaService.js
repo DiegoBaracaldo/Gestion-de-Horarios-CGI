@@ -5,7 +5,6 @@ class FranjaServicio {
     }
 
     async CargarFranjas() {
-        console.log('Cargando franjas...');
         try {
             return await window.electron.GetAllFranjas();
         } catch (error) {
@@ -15,7 +14,6 @@ class FranjaServicio {
     }
 
     async ObtenerBloquesComeptencia(idGrupo, idCompetencia) {
-        console.log('Obteniendo bloques por competencia ', idCompetencia);
         try {
             return await window.electron.GetBloquesByCompetenciaFranjas(idGrupo, idCompetencia);
         } catch (error) {
@@ -25,7 +23,6 @@ class FranjaServicio {
     }
 
     async GuardarHorario(idGrupo, idCompetencia, arrayFranjas) {
-        console.log("Guardando los cambios en el horario...");
         try {
             return await window.electron.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
         } catch (error) {
@@ -35,7 +32,6 @@ class FranjaServicio {
     }
 
     async OcupanciaBloquesGrupo(idGrupo) {
-        console.log("Obteniendo la ocupancia de todos los bloques en todas las competencias del grupo");
         try {
             return await window.electron.GetOcupanciaBloquesGrupo(idGrupo);
         } catch (error) {
@@ -45,7 +41,6 @@ class FranjaServicio {
     }
 
     async ObtenerFranjasCompetenciaGrupo(idGrupo, idCompetencia){
-        // console.log("Obteniendo las franjas de la competencia ", idCompetencia);
         try {
             return await window.electron.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
         } catch (error) {

@@ -6,7 +6,6 @@ class JornadaServicio {
   }
 
   async ExisteUno() {
-    console.log("buscando existencia...");
     try {
       return await window.electron.AtLeastOneJornada();
     } catch (error) {
@@ -16,7 +15,6 @@ class JornadaServicio {
   }
 
   async CargarLista() {
-    console.log("cargando lista...");
     try {
       return await window.electron.GetAllJornadas();
     } catch (error) {
@@ -26,7 +24,6 @@ class JornadaServicio {
   }
 
   async GuardarJornada(jornada) {
-    console.log("guardando jornada...");
     try {
       return await window.electron.SaveNewJornada(jornada);
     } catch (error) {
@@ -36,7 +33,6 @@ class JornadaServicio {
   }
 
   async CargarJornada(id) {
-    console.log("Cargando jornada...");
     try {
       return await window.electron.GetJornadaByID(id);
     } catch (error) {
@@ -46,7 +42,6 @@ class JornadaServicio {
   }
 
   async CargarAllFranjas() {
-    console.log('Obteniendo todas las franjas horarias de las jornadas...');
     try {
       const respuesta = await window.electron.GetAllFranjasJornada();
       if(Array.isArray(respuesta) && respuesta.length > 0){
@@ -65,7 +60,6 @@ class JornadaServicio {
   }
 
   async ActualizarJornada(idViejo, jornada) {
-    console.log("Actualizando jornada...");
     try {
       return await window.electron.SaveJornada(idViejo, jornada);
     } catch (error) {
@@ -75,7 +69,6 @@ class JornadaServicio {
   }
 
   async EliminarJornada(listaIDs) {
-    console.log("Eliminando jornada...");
     try {
       return await window.electron.RemoveJornada(listaIDs);
     } catch (error) {

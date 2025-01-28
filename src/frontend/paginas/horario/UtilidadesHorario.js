@@ -40,7 +40,7 @@ export async function FranjasToBloques(listaFranjas) {
                 auxInstruc = respuestaPromesa[0];
                 auxAmbiente = respuestaPromesa[1];
             } catch (error) {
-                console.log("Error al obtener ambiente o instructor del bloque por: " +  error);
+                console.log("Error al obtener ambiente o instructor del bloque por: " + error);
                 throw error;
             }
             encontrado = {
@@ -54,4 +54,29 @@ export async function FranjasToBloques(listaFranjas) {
         encontrado.franjas.add(franja.franja);
     }
     return auxBloquesLista;
+}
+
+export function FranjasPersonalizadasToBloques(franjasGrupoCompletas, idCompetencia) {
+    //Se necesitan las franjas completas del grupo para no perder el índice
+    const listaBloques = [];
+    franjasGrupoCompletas.forEach((franja, index) => {
+        //Para tomar solo las franjas de la competencia seleccionada
+        if (franja.idCompetencia === idCompetencia) {
+            let encontrado = listaBloques.find(bloque => bloque.instructor.id === franja.instructor.id
+                && bloque.ambiente.id === franja.ambiente.id
+            );
+            if (!encontrado) {
+                encontrado = {
+                    numBloque: listaBloques.length + 1,
+                    instructor: franja.instructor,
+                    ambiente: franja.ambiente,
+                    franjas: new Set()
+                }
+                listaBloques.push(encontrado);
+            }
+            encontrado.franjas.add(index);
+        }
+
+    });
+    return listaBloques;
 }

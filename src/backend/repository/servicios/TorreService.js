@@ -6,7 +6,6 @@ class TorreServicio {
     }
 
     async ExisteUno(){
-      console.log("buscando existencia...");
       try {
         return await window.electron.AtLeastOneTorre();
       } catch (error) {
@@ -16,7 +15,6 @@ class TorreServicio {
     }
 
     async CargarLista() {
-        console.log("cargando lista de torres...");
         try {
           return await window.electron.GetAllTorres();
         } catch (error) {
@@ -26,7 +24,6 @@ class TorreServicio {
     }
 
     async GuardarTorre(nombreTorre){
-        console.log("guardando torre...");
         try {
           return await window.electron.SaveNewTorre(nombreTorre);
         } catch (error) {
@@ -36,7 +33,6 @@ class TorreServicio {
     }
 
     async CargarTorre(idTorre){
-        console.log("Cargando torre...");
         try {
           return await window.electron.GetTorreByID(idTorre);
         } catch (error) {
@@ -46,7 +42,6 @@ class TorreServicio {
     }
 
     async ActualizarTorre (idViejo, torre){
-        console.log("Actualizando torre...");
         try {
           return await window.electron.SaveTorre(idViejo, torre);
         } catch (error) {
@@ -56,7 +51,6 @@ class TorreServicio {
     }
 
     async EliminarTorre(listaIDs){
-        console.log("Eliminando torre...");
         try {
           return await window.electron.RemoveTorre(listaIDs);
         } catch (error) {

@@ -6,7 +6,6 @@ class InstructorServicio {
     }
 
     async ExisteUno(){
-      console.log("buscando existencia...");
       try {
         return await window.electron.AtLeastOneInstructor();
       } catch (error) {
@@ -16,7 +15,6 @@ class InstructorServicio {
     }
 
     async CargarLista() {
-        console.log("cargando lista...");
         try {
           const respuesta = await window.electron.GetAllInstructores();
           return respuesta;
@@ -27,7 +25,6 @@ class InstructorServicio {
     }
 
     async GuardarInstructor(instructor){
-      console.log("guardando instructor...");
       try {
         return await window.electron.SaveNewInstructor(instructor);
       } catch (error) {
@@ -37,7 +34,6 @@ class InstructorServicio {
     }
 
     async CargarInstructor(id){
-      console.log("Cargando instructor...");
       try {
         return await window.electron.GetInstructorByID(id);
       } catch (error) {
@@ -47,7 +43,6 @@ class InstructorServicio {
     }
 
     async CargarInstructores(arrayIds){
-      console.log('Cargando instructores por id');
       try {
         return await window.electron.GetAllByIdInstructor(arrayIds);
       } catch (error) {
@@ -58,7 +53,6 @@ class InstructorServicio {
 
 
     async ActualizarInstructor(idViejo, instructor){
-      console.log("Actualizando instructor...");
       try {
         return await window.electron.SaveInstructor(idViejo, instructor);
       } catch (error) {
@@ -68,7 +62,6 @@ class InstructorServicio {
     }
 
     async EliminarInstructor(listaIDs){
-      console.log("Eliminando instructor...");
       try {
         return await window.electron.RemoveInstructor(listaIDs);
       } catch (error) {

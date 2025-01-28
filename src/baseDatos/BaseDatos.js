@@ -179,9 +179,10 @@ class ConexionBD {
             CREATE TABLE IF NOT EXISTS franjas (
             franja INTEGER,
             idGrupo INTEGER NOT NULL,
-            idInstructor INTEGER NOT NULL,
-            idAmbiente INTEGER NOT NULL,
+            idInstructor INTEGER NULL,
+            idAmbiente INTEGER NULL,
             idCompetencia INTEGER NOT NULL,
+            numBloque INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (franja, idGrupo),
             FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import BotonDispHoraria from '../botonDIspHoraria/BotonDispHoraria';
 import './CreacionHorario.css';
 import Swal from 'sweetalert2';
@@ -8,38 +8,29 @@ import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
 import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
-const CreacionHorario = ({competencia, bloque, bloqueNumero,
+const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     ocupanciaJornada, ocupanciaBloques, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
     devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp, listaCompleta,
-    indexProgramaSelecc, indexGrupoSelecc, indexCompetenciaSelecc, indexBloqueSelecc
+    indexProgramaSelecc, indexGrupoSelecc, indexCompetenciaSelecc, indexBloqueSelecc,
+    actualizarListaCompleta, setPintandoCelda
 }) => {
 
 
     //Manejo de bloques
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
-    const [franjasBloque, setFranjasBloque] = useState(new Set());
-    const [franjasLibres, setFranjasLibres] = useState(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
+    const [franjaAgregada, setFranjaAgregada] = useState(0);
+    const [franjaBorrada, setFranjaBorrada] = useState(0);
+    const franjasLibres = useRef(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
 
     useLayoutEffect(() => {
         if (esPrimeraCargaBloque) {
-            // console.log("Primera Carga, bloque ", bloque);
-            //Se cargan los datos del bloque en cuestión por primera vez
-            if (bloque && bloque.instructor && Object.keys(bloque.instructor).length > 0)
-                setInstructorBloque(bloque.instructor);
-            else setInstructorBloque({});
-            if (bloque && bloque.ambiente && Object.keys(bloque.ambiente).length > 0)
-                setAmbienteBloque(bloque.ambiente);
-            else setAmbienteBloque({});
-            setFranjasBloque(new Set(bloque.franjas));
+            setInstructorBloque(bloque.instructor);
+            setAmbienteBloque(bloque.ambiente);
             //Vuelo a ponerle en false
             if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
         }
     }, [esPrimeraCargaBloque, bloque]);
-
-    useEffect(() => {
-
-    }, []);
 
     //Matriz para generar la matriz visual del horario
     const [matrizHorario, setMatrizHorario] = useState(
@@ -60,17 +51,98 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
     //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque
-            && Object.values(bloque).length > 0) {
-            // console.log("El objeto antes de acomodar es: ", bloque);
-            const bloqueAux = {
-                ...bloque,
-                franjas: new Set(franjasBloque)
+        if (franjaAgregada > 0) {
+            const listaCombAux = [...listaCompleta];
+            //Si se está editando un bloque VACÍo
+            if (bloque.franjas.size <= 0) {
+                //Se crea subLista que elimina los primeros 336 índices para una búsqueda más rápida
+                //// del bloque vacío en la lista
+                const subListaBloquesPers = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.slice(337);
+                //Se busca el objeto vacío que coincida en numBloque y competencia
+                const indexObj = subListaBloquesPers
+                    .findIndex(franjaEncontrada => franjaEncontrada.numBloque === bloque.numBloque
+                        && franjaEncontrada.idCompetencia === competencia.id
+                    );
+                const objIndex = subListaBloquesPers[indexObj];
+                //Agrego el objeto a la franja
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas[franjaAgregada] = objIndex;
+                //Elimino el objeto de BLOQUES VACÍOS
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas.splice(indexObj + 337, 1);
+                //Notifico que estoy pintando celda
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+                setFranjaAgregada(0);
             }
-            // console.log("El objeto acomodado es: ", bloqueAux);
-            bloqueDevuelto(bloqueAux);
+            //Si se está editando uno LLENO o PARCIAL
+            else {
+                //Se busca el index del primer objeto que coincida en numBloque y idCompetencia
+                const indexObj = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.findIndex(franjaEncontrada =>
+                        franjaEncontrada?.numBloque === bloque.numBloque
+                        && franjaEncontrada?.idCompetencia === competencia.id
+                    );
+                //Se obtiene ese obj farnja personalizada para ser enviado al nuevo index
+                const objIndex = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[indexObj];
+                //Agrego el objeto a la franja
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas[franjaAgregada] = objIndex;
+                //Notifico que estoy pintando celda
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+                setFranjaAgregada(0);
+            }
         }
-    }, [franjasBloque]);
+    }, [franjaAgregada]);
+
+    useEffect(() => {
+        if (franjaBorrada > 0) {
+            const listaCombAux = [...listaCompleta];
+            const objFranjaABorrar = {
+                ...listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas[franjaBorrada]
+            };
+            listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas[franjaBorrada] = undefined;
+            //Verifica si era la última, y si si, obtenerla para enviarla después del 336
+            const subListaComb = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas.slice(0, 336); //Objetos solo antes del 336
+                //Así se evita que se hallen coincidencias desués del 336
+            const aunQuedan = subListaComb.some(franjaEncontrada =>
+                    franjaEncontrada?.numBloque === bloque.numBloque
+                    && franjaEncontrada?.idCompetencia === competencia.id
+                );
+            console.log(aunQuedan);
+            console.log(objFranjaABorrar);
+            //Si ya no quedan, lo mando después del 336
+            if (!aunQuedan) {
+                const ultimoIndice = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.length > 0 ?
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas.length - 1
+                    : 0;
+                if (ultimoIndice <= 336) {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[337] = objFranjaABorrar;
+                } else {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[ultimoIndice + 1] = objFranjaABorrar;
+                }
+            }
+            //Notifico que estoy pintando celda
+            if (typeof setPintandoCelda === 'function') setPintandoCelda();
+            //Actualizo la listaCompleta
+            if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            setFranjaBorrada(0);
+        }
+    }, [franjaBorrada]);
 
     useEffect(() => {
         // console.log(instructorBloque);
@@ -106,15 +178,11 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
 
     //Para clic individual sin arrastre
     const ManejarClickFranja = (valor, color) => {
-        const auxFranjasBloque = new Set(franjasBloque);
         if (color === 'white' && totalHorasTomadasComp < competencia.horasRequeridas) {
-            devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
-            auxFranjasBloque.add(valor);
+            setFranjaAgregada(valor);
         } else if (color === 'green') {
-            devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
-            auxFranjasBloque.delete(valor);
+            setFranjaBorrada(valor);
         }
-        setFranjasBloque(auxFranjasBloque);
     }
 
     const ManejarClickDownFranja = (colorPintado) => {
@@ -135,15 +203,9 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
         if (valorArrastre >= 0) {
             // console.log(datosFranjaArrastre);
             if (arrastrandoBlanco) {
-                if (totalHorasTomadasComp >= 0.5) devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
-                setFranjasBloque(() => {
-                    const auxLista = new Set(franjasBloque);
-                    auxLista.delete(valorArrastre);
-                    return auxLista;
-                });
+                setFranjaBorrada(valorArrastre);
             } else if (arrastrandoVerde && totalHorasTomadasComp < competencia.horasRequeridas) {
-                devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
-                setFranjasBloque(new Set(franjasBloque).add(valorArrastre));
+                setFranjaAgregada(valorArrastre);
             }
         }
     }, [valorArrastre]);
@@ -207,24 +269,16 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
             // console.log(bloque);
             //Se pintan las celdas de su color correspondiente pero se obtienen
             ///primero las libres para completar las 4 (verdes, blancas, rojas, grises)
-            const auxFranjasLibres = new Set(franjasLibres);
+            const auxFranjasLibres = new Set(franjasLibres.current);
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
             bloque?.franjas?.forEach(franja => auxFranjasLibres.delete(franja));
-            ocupanciaBloques.current.forEach(franja => auxFranjasLibres.delete(franja));
-            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada, ocupanciaBloques.current);
+            //Se acomoda la ocupancia para el bloque actual
+            const ocupanciaNueva = new Set(ocupanciaBloques);
+            bloque.franjas.forEach(franja => ocupanciaNueva.delete(franja));
+            ocupanciaNueva.forEach(franja => auxFranjasLibres.delete(franja));
+            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada, ocupanciaNueva);
         }
     }, [bloque]);
-
-    //Cada que se altera la lista completa
-    // // // useLayoutEffect(() => {
-    // // //     const auxFranjasLibres = new Set(franjasLibres);
-    // // //     ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
-    // // //     //Las franjas dependen del grupo-competencia-instruc y ambiente (eso forma un bloque)
-    // // //     //// por lo tanto se puede formar un bloque rapidamente
-    // // //     const bloque = {
-    // // //         instructor: 
-    // // //     }
-    // // // }, [listaCompleta]);
 
     function GetMatrizIndexFromValue(valor) {
         // (Convertir bloque en índice de celda)
@@ -281,7 +335,7 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
             {
                 bloque && Object.values(bloque).length > 0 ?
                     <div className='seleccInstrucAmbienteCompSelecc'>
-                        <button className={franjasBloque.size <= 0 ?
+                        <button className={bloque.franjas.size <= 0 ?
                             'seleccInstructorBtn btnOff'
                             : 'seleccInstructorBtn'}
                             style={{ backgroundColor: Object.values(instructorBloque).length > 0 ? '#39A900' : '#385C57' }}
@@ -290,7 +344,7 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
                                 `${instructorBloque.nombre}`
                                 : 'seleccionar instructor '}
                         </button>
-                        <button className={franjasBloque.size <= 0 ?
+                        <button className={bloque.franjas.size <= 0 ?
                             'seleccAmbienteBtn btnOff'
                             : 'seleccAmbienteBtn'}
                             style={{ backgroundColor: Object.values(ambienteBloque).length > 0 ? '#39A900' : '#385C57' }}
@@ -359,7 +413,7 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
                         onClose={() => setOpenListaInstructores(false)}
                         modoSeleccion={true}
                         responsableSeleccionado={(r) => setInstructorBloque(r)}
-                        franjasDeseadas={[...franjasBloque]}
+                        franjasDeseadas={[...bloque.franjas]}
                         listaCompletaGrupos={listaCompleta} />
                     : null
             }
@@ -369,7 +423,7 @@ const CreacionHorario = ({competencia, bloque, bloqueNumero,
                         modoSeleccion={true}
                         ambienteSelecc={(a) => setAmbienteBloque(a)}
                         onClose={() => setOpenListaAmbientes(false)}
-                        franjasDeseadas={[...franjasBloque]}
+                        franjasDeseadas={[...bloque.franjas]}
                         listaCompletaGrupos={listaCompleta} />
                     : null
             }

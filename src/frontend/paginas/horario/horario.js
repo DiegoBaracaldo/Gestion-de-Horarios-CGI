@@ -33,9 +33,10 @@ const Horario = () => {
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
-    // useEffect(() => {
-    //     console.log(seleccBloqueRadioArray)
-    // }, [seleccBloqueRadioArray]);
+    const arrayIndexSeleccBloque = useRef(null);
+    useEffect(() => {
+        console.log(seleccBloqueRadioArray)
+    }, [seleccBloqueRadioArray]);
 
     /***************************************************************************/
     /**************** SECCIÓN CARGA LISTA PRINCIPAL ****************************/
@@ -127,7 +128,7 @@ const Horario = () => {
                                 ambientesUnicos[[...idsAmbientesUnicos].indexOf(franja.idAmbiente)]
                         }
                         //Aquí se forma el array de franjas personalizado donde la franja es el index
-                        //// y los objetos estánd entro de un objeto en ese índice, y los índices que 
+                        //// y los objetos estánd entro de un objeto en ese índice, y los índices que
                         //// no tienen franja serán Undefined
                         franjasPersonalizadas[franja.franja] = nuevoObj;
                     });
@@ -140,7 +141,7 @@ const Horario = () => {
 
             // console.log(auxGrupos);
             setListaGruposInicial([...auxGrupos]);
-            //setListaProgramas de último ya que activa todo 
+            //setListaProgramas de último ya que activa todo
             setListaProgramas([...auxProgramas]);
         } catch (error) {
             console.log(error);
@@ -155,6 +156,17 @@ const Horario = () => {
                 const auxListaCombinada = CombinarLista();
                 setListaCombinada(auxListaCombinada);
                 listaCombinadaInicial.current = auxListaCombinada;
+
+                //Creo el array de indices para guardar la selección de cada competencia
+                arrayIndexSeleccBloque.current = auxListaCombinada.map(programa => (
+                    programa.grupos.map(grupo => (
+                        {
+                            indexComp: -1,
+                            competencias: grupo.competencias.map(comp => -1)
+                        }
+                    ))
+                ));
+                // console.log(arrayIndexSeleccBloque.current);
             }
         }
     }, [listaProgramas, listaGruposInicial]);
@@ -234,9 +246,17 @@ const Horario = () => {
 
     const [indexCompetenciaSelecc, setIndexCompetenciaSelecc] = useState(-1);
     useEffect(() => {
+        //Guardo la selección en el array de selecciones
+        if (arrayIndexSeleccBloque.current !== null && indexGrupoSelecc >= 0) {
+            arrayIndexSeleccBloque.current[indexProgramaSelecc][indexGrupoSelecc]
+                .indexComp = indexCompetenciaSelecc;
+        }
         if (indexCompetenciaSelecc >= 0) {
             cargandoBloques.current = true;
             setBloques(ObtenerBloques());
+        }else{
+            setBloques([]);
+            cargandoBloques.current = true;
         }
     }, [indexCompetenciaSelecc]);
     function ObtenerCompetenciaSelecc() {
@@ -250,13 +270,20 @@ const Horario = () => {
     useLayoutEffect(() => {
         //En caso de que sea carga de bloques para acomodar selecCRadioBloques
         if (cargandoBloques.current) {
-            //Si hay al menos un bloque, se selecciona automáticamente
-            if(bloques.length > 0 && indexCompetenciaSelecc >= 0)
-                 setIndexBloqueSelecc({...indexBloqueSelecc, valor: 0});
+            //Se retoma el index almacenado para seleccionar el que se había dejado seleccionado
+            if (indexCompetenciaSelecc >= 0) {
+                const indexRecuperado =
+                    arrayIndexSeleccBloque
+                        .current[indexProgramaSelecc][indexGrupoSelecc]
+                        .competencias[indexCompetenciaSelecc];
+                // console.log(indexRecuperado)
+            setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
+                setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: indexRecuperado });
+            }
             cargandoBloques.current = false;
         }
         //En caso de alteración de bloques por agregar nuevo bloque
-        if (agregandoBloque.current) {
+        else if (agregandoBloque.current) {
             //Primero acomodo el tamaño de de la tabla de bloques
             setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
             //Selección real del bloque
@@ -295,6 +322,12 @@ const Horario = () => {
     const [indexBloqueSelecc, setIndexBloqueSelecc] = useState({ valor: -1 });
     const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
     useEffect(() => {
+        //almaceno el valor en el array de seleccIndexBloque
+        if (arrayIndexSeleccBloque.current !== null && indexCompetenciaSelecc >= 0) {
+            arrayIndexSeleccBloque
+                .current[indexProgramaSelecc][indexGrupoSelecc]
+                .competencias[indexCompetenciaSelecc] = indexBloqueSelecc.valor;
+        }
         // console.log(indexBloqueSelecc.valor);
         if (indexBloqueSelecc.valor >= 0) {
             setBloqueSelecc(ObtenerBloqueSelecc());
@@ -339,6 +372,7 @@ const Horario = () => {
     const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
         setIndexProgramaSelecc(indexPrograma);
         setIndexGrupoSelecc(indexGrupo);
+        //Se reinicia selecc competencia
         setIndexCompetenciaSelecc(-1);
         setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: -1 });
         PedirDatosForaneosGrupo(grupo);
@@ -376,15 +410,12 @@ const Horario = () => {
 
     //CADA QUE SE SELECCIONA UNA COMPETENCIA
     const cargandoBloques = useRef(false);
+
     const ManejarSeleccCompetencia = async (competencia, index) => {
         setIndexCompetenciaSelecc(index);
-        // setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: -1 });
-        setBloqueSelecc({});
     }
 
     //CADA QUE SE SELECCIONA UN BLOQUE
-    //HOOK PARA ELIMINAR BLOQUE
-
     const ManejarCheckBloque = (bloque, i) => {
         setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: i });
     }
@@ -463,7 +494,7 @@ const Horario = () => {
 
         //Se calcula el nuevo índice de seleccion por haber elimminado
         let iAux = indexBloqueSelecc.valor;
-        //Si se elimina el seleccionado y es el último de la lista Ó 
+        //Si se elimina el seleccionado y es el último de la lista Ó
         //// si se elimina otro que está por encima del seleccionado
         if ((index === indexBloqueSelecc.valor && index === bloques.length - 1) ||
             (index < indexBloqueSelecc.valor)) {

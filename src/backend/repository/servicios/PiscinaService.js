@@ -5,7 +5,6 @@ class PiscinaServicio {
     }
 
     async CargarPiscinas() {
-        console.log("Cargando listas piscina...");
         try {
             return await window.electron.CargarPiscinas();
         } catch (error) {
@@ -15,7 +14,6 @@ class PiscinaServicio {
     }
 
     async GuardarPiscinas(agregados, eliminados) {
-        console.log("Guardando piscinas...");
         try {
             return await window.electron.GuardarPiscinas(agregados, eliminados);
         } catch (error) {
@@ -25,7 +23,6 @@ class PiscinaServicio {
     }
 
     async PiscinasConfirmadas(){
-        console.log("Confirmando piscinas...");
         try {
             return await window.electron.ConfirmarPiscinas();
         } catch (error) {

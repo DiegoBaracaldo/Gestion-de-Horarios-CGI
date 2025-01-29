@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import BotonDispHoraria from '../botonDIspHoraria/BotonDispHoraria';
 import './CreacionHorario.css';
 import Swal from 'sweetalert2';
@@ -9,33 +9,57 @@ import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
-    ocupanciaJornada, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
-    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp
+    ocupanciaJornada, ocupanciaBloques, tipoJornada, esPrimeraCargaBloque,
+    devolverFalsePrimeraCarga, totalHorasTomadasComp, listaCompleta,
+    indexProgramaSelecc, indexGrupoSelecc, indexCompetenciaSelecc, indexBloqueSelecc,
+    actualizarListaCompleta, setPintandoCelda
 }) => {
+
 
     //Manejo de bloques
     const [instructorBloque, setInstructorBloque] = useState({});
     const [ambienteBloque, setAmbienteBloque] = useState({});
-    const [franjasBloque, setFranjasBloque] = useState(new Set());
-    const [franjasLibres, setFranjasLibres] = useState(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
+    const [franjaAgregada, setFranjaAgregada] = useState(0);
+    const [franjaBorrada, setFranjaBorrada] = useState(0);
+    const reiniciandoObjetos = useRef(false);
+    const franjasLibres = useRef(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
+    const tablaMatrizCont = useRef(null);
+    const filasRef = useRef([]);
+    const filaComienzaDispJornada = useRef(Math.floor(PuntoDeQuiebreOcupanciaJornada() / 7));
 
-    useEffect(() => {
+    //Función para detectar quiebre en secuencia de números de franjas para detectar
+    //// la celda en la que ya hay color blanco (teniendo en cuenta que nos basamos en
+    //// la ocupancia de la jornada)
+    function PuntoDeQuiebreOcupanciaJornada() {
+        let numeroEsperado = 1;
+        for (const numFranja of ocupanciaJornada) {
+            if (numeroEsperado === numFranja) {
+                numeroEsperado++;
+            }
+            else {
+                break;
+            }
+        }
+        return numeroEsperado;
+    }
+
+    useLayoutEffect(() => {
         if (esPrimeraCargaBloque) {
-            // console.log("Primera Carga!");
-            //Se cargan los datos del bloque en cuestión por primera vez
-            setInstructorBloque(bloque?.idInstructor > 0 ? ObtenerInstructor() : 0);
-            setAmbienteBloque(bloque?.idAmbiente > 0 ? ObtenerAmbiente() : 0);
-            setFranjasBloque(new Set(bloque.franjas));
+            setInstructorBloque({ ...bloque.instructor });
+            setAmbienteBloque({ ...bloque.ambiente });
             //Vuelo a ponerle en false
             if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
+            //Pongo la vista de la matriz do9nde comienza lo disponible
+            if (tablaMatrizCont.current && filasRef.current.length > 0) {
+                const alturaFila = filasRef.current[0].offsetHeight;
+                const posicionFilaRequerida = (filaComienzaDispJornada.current) * alturaFila;
+                tablaMatrizCont.current.scrollTop = posicionFilaRequerida;
+            }
         }
-    }, [esPrimeraCargaBloque]);
-
-    useEffect(() => {
-
-    }, []);
+    }, [esPrimeraCargaBloque, bloque]);
 
     //Matriz para generar la matriz visual del horario
+    //Este agoritmo es importante, TENERLO PRESENTE!
     const [matrizHorario, setMatrizHorario] = useState(
         new Array(48).fill(null).map((valorFila, i) => {
             const arrayAux = [];
@@ -54,40 +78,158 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //**********     ENVIANDO DE VUELTA EL BLOQUE CON NUEVOS DATOS     ***************//
 
     useEffect(() => {
-        //Se reinician el instructor y ambiente dada la modificación de las franjas
-        setInstructorBloque({});
-        setAmbienteBloque({});
-
-        if (typeof bloqueDevuelto === 'function') {
-            // console.log("El objeto antes de acomodar es: ", bloque);
-            const bloqueAux = {
-                ...bloque,
-                idInstructor: 0,
-                idAmbiente: 0,
-                franjas: new Set(franjasBloque)
+        if (franjaAgregada > 0) {
+            const listaCombAux = [...listaCompleta];
+            //Si se está editando un bloque VACÍo
+            if (bloque.franjas.size <= 0) {
+                //Se crea subLista que elimina los primeros 336 índices para una búsqueda más rápida
+                //// del bloque vacío en la lista
+                const subListaBloquesPers = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.slice(337);
+                //Se busca el objeto vacío que coincida en numBloque y competencia
+                const indexObj = subListaBloquesPers
+                    .findIndex(franjaEncontrada => franjaEncontrada.numBloque === bloque.numBloque
+                        && franjaEncontrada.idCompetencia === competencia.id
+                    );
+                const objIndex = subListaBloquesPers[indexObj];
+                //Agrego el objeto a la franja
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas[franjaAgregada] = objIndex;
+                //Elimino el objeto de BLOQUES VACÍOS
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas.splice(indexObj + 337, 1);
+                //Notifico que estoy pintando celda
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+                setFranjaAgregada(0);
             }
-            // console.log("El objeto acomodado es: ", bloqueAux);
-            bloqueDevuelto(bloqueAux);
+            //Si se está editando uno LLENO o PARCIAL
+            else {
+                //Reinicio instructor y ambiente
+                if (Object.values(instructorBloque).length > 0 || Object.values(ambienteBloque).length > 0) {
+                    reiniciandoObjetos.current = true;
+                    bloque.franjas.forEach(franja => {
+                        listaCombAux[indexProgramaSelecc]
+                            .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].ambiente = {};
+                        listaCombAux[indexProgramaSelecc]
+                            .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].instructor = {};
+                    });
+                }
+                //Se busca el index del primer objeto que coincida en numBloque y idCompetencia
+                const indexObj = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.findIndex(franjaEncontrada =>
+                        franjaEncontrada?.numBloque === bloque.numBloque
+                        && franjaEncontrada?.idCompetencia === competencia.id
+                    );
+                //Se obtiene ese obj farnja personalizada para ser enviado al nuevo index
+                const objIndex = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[indexObj];
+                //Agrego el objeto a la franja
+                listaCombAux[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc].franjasPersonalizadas[franjaAgregada] = objIndex;
+                //Notifico que estoy pintando celda
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+                setFranjaAgregada(0);
+            }
         }
-    }, [franjasBloque]);
+    }, [franjaAgregada]);
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function') {
-            const bloqueAux = {
-                ...bloque,
-                idInstructor: instructorBloque.id
+        if (franjaBorrada > 0) {
+            const listaCombAux = [...listaCompleta];
+            //Atrapo el objeto a borrar
+            const objFranjaABorrar = {
+                ...listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[franjaBorrada]
+            };
+            //Reinicio instructor y ambiente
+            if(Object.values(instructorBloque).length > 0 || Object.values(ambienteBloque).length > 0) {
+                reiniciandoObjetos.current = true;
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].ambiente = {};
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].instructor = {};
+                });
             }
-            bloqueDevuelto(bloqueAux);
+            //"Borro" el objeto
+            listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas[franjaBorrada] = undefined;
+            //Verifica si era la última, y si si, obtenerla para enviarla después del 336
+            const subListaComb = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas.slice(0, 336); //Objetos solo antes del 336
+            //Así se evita que se hallen coincidencias desués del 336
+            const aunQuedan = subListaComb.some(franjaEncontrada =>
+                franjaEncontrada?.numBloque === bloque.numBloque
+                && franjaEncontrada?.idCompetencia === competencia.id
+            );
+            //Si ya no quedan, lo mando después del 336
+            if (!aunQuedan) {
+                const ultimoIndice = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas.length > 0 ?
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas.length - 1
+                    : 0;
+                if (ultimoIndice <= 336) {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[337] = objFranjaABorrar;
+                } else {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[ultimoIndice + 1] = objFranjaABorrar;
+                }
+            }
+            //Notifico que estoy pintando celda
+            if (typeof setPintandoCelda === 'function') setPintandoCelda();
+            //Actualizo la listaCompleta
+            if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            setFranjaBorrada(0);
+        }
+    }, [franjaBorrada]);
+
+    useEffect(() => {
+        if (!esPrimeraCargaBloque && !reiniciandoObjetos.current) {
+            if (Object.values(instructorBloque).length > 0) {
+                const listaCombAux = [...listaCompleta];
+                //Se repasa la lista de franjas personalizadas
+                //por cada coincidencia con las franjas del bloque se añade el objeto en el objeto en el index
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[franja].instructor = { ...instructorBloque };
+                });
+                //Se setea la lista completa con todo lo pertinente
+                //Uso "pintandoCelda" para que se rendericen los cambios
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            } else {
+                //Si se reinició tal vez por cambio en las franjas
+            }
         }
     }, [instructorBloque]);
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function') {
-            const bloqueAux = {
-                ...bloque,
-                idAmbiente: ambienteBloque.id
+        if (!esPrimeraCargaBloque && !reiniciandoObjetos.current) {
+            if (Object.values(ambienteBloque).length > 0) {
+                const listaCombAux = [...listaCompleta];
+                //Se repasa la lista de franjas personalizadas
+                //por cada coincidencia con las franjas del bloque se añade el objeto en el objeto en el index
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[franja].ambiente = { ...ambienteBloque };
+                });
+                //Se setea la lista completa con todo lo pertinente
+                //Uso "pintandoCelda" para que se rendericen los cambios
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            } else {
+                //Si se reinició tal vez por cambio en las franjas
             }
-            bloqueDevuelto(bloqueAux);
         }
     }, [ambienteBloque]);
     //******************************************************************************************//
@@ -102,15 +244,11 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
 
     //Para clic individual sin arrastre
     const ManejarClickFranja = (valor, color) => {
-        const auxFranjasBloque = new Set(franjasBloque);
         if (color === 'white' && totalHorasTomadasComp < competencia.horasRequeridas) {
-            devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
-            auxFranjasBloque.add(valor);
+            setFranjaAgregada(valor);
         } else if (color === 'green') {
-            devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
-            auxFranjasBloque.delete(valor);
+            setFranjaBorrada(valor);
         }
-        setFranjasBloque(auxFranjasBloque);
     }
 
     const ManejarClickDownFranja = (colorPintado) => {
@@ -129,15 +267,9 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         if (valorArrastre >= 0) {
             // console.log(datosFranjaArrastre);
             if (arrastrandoBlanco) {
-                if(totalHorasTomadasComp >= 0.5)devolverTotalHorasBloques(totalHorasTomadasComp - 0.5)
-                setFranjasBloque(() => {
-                    const auxLista = new Set(franjasBloque);
-                    auxLista.delete(valorArrastre);
-                    return auxLista;
-                });
+                setFranjaBorrada(valorArrastre);
             } else if (arrastrandoVerde && totalHorasTomadasComp < competencia.horasRequeridas) {
-                devolverTotalHorasBloques(totalHorasTomadasComp + 0.5)
-                setFranjasBloque(new Set(franjasBloque).add(valorArrastre));
+                setFranjaAgregada(valorArrastre);
             }
         }
     }, [valorArrastre]);
@@ -152,7 +284,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     //******************************************************************************************//
 
 
-    function PintarFranjas(verdes, blancas, rojas) {
+    function PintarFranjas(verdes, blancas, rojas, grises) {
         //algortimo para entrar de una vez al índice y cambiarlo
         ////en lugar de recorrer todo el array buscando la coincidencia
         const auxMatriz = [...matrizHorario];
@@ -175,6 +307,12 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             const jAux = indexMatriz[1];
             auxMatriz[iAux][jAux].colorCelda = 'red';
         });
+        grises.forEach(franja => {
+            const indexMatriz = GetMatrizIndexFromValue(franja);
+            const iAux = indexMatriz[0];
+            const jAux = indexMatriz[1];
+            auxMatriz[iAux][jAux].colorCelda = 'gray';
+        });
         setMatrizHorario([...auxMatriz]);
     }
 
@@ -188,34 +326,27 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         return `${desdeHora}:${desdeMinutos} - ${hastaHora}:${hastaMinutos}`;
     }
 
-    async function ObtenerInstructor(idInstructor) {
-        try {
-            return await new InstructorServicio().CargarInstructor(idInstructor);
-        } catch (error) {
-            Swal.fire(error);
-        }
-    }
-
-    async function ObtenerAmbiente(idAmbiente) {
-        try {
-            return await new AmbienteServicio().CargarAmbiente(idAmbiente);
-        } catch (error) {
-            Swal.fire(error);
-        }
-    }
-
-    //CADA QUE CAMBIA EL BLOQUE 
+    //CADA QUE CAMBIA EL BLOQUE o se modifica el actual
     useLayoutEffect(() => {
-        // console.log("se recibe desde padre...", bloque);
+        // console.log(bloque);
         if (bloque && Object.values(bloque).length > 0) {
-            // console.log(bloque.franjas);
+            // console.log(bloque);
             //Se pintan las celdas de su color correspondiente pero se obtienen
-            ///primero las libres para completar las 3 (verdes, blancas, rojas)
-            const auxFranjasLibres = new Set(franjasLibres);
+            ///primero las libres para completar las 4 (verdes, blancas, rojas, grises)
+            const auxFranjasLibres = new Set(franjasLibres.current);
             ocupanciaJornada.forEach(franja => auxFranjasLibres.delete(franja));
-            bloque.franjas.forEach(franja => auxFranjasLibres.delete(franja));
-            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada);
-
+            bloque?.franjas?.forEach(franja => auxFranjasLibres.delete(franja));
+            //Se acomoda la ocupancia para el bloque actual
+            const ocupanciaNueva = new Set(ocupanciaBloques);
+            bloque.franjas.forEach(franja => ocupanciaNueva.delete(franja));
+            ocupanciaNueva.forEach(franja => auxFranjasLibres.delete(franja));
+            PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada, ocupanciaNueva);
+            //Para poner el ambiente y el instructor si es que se reinician los valores
+            if(reiniciandoObjetos.current){
+                setInstructorBloque(bloque.instructor);
+                setAmbienteBloque(bloque.ambiente);
+                reiniciandoObjetos.current = false
+            }
         }
     }, [bloque]);
 
@@ -230,7 +361,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
         return [iReal, jReal];
     }
 
-    
+
     //******************************************************************************************//
     //************************* ÁREA DE SELECCIÓN DE AMBIENTE E INSTRUCTOR *********************//
 
@@ -263,7 +394,9 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                             Horas: <span className='datoDinamico'>
                                 {totalHorasTomadasComp}
                                 {" / "}
-                                {competencia ? competencia.horasRequeridas : 0}
+                                {
+                                    competencia.horasRequeridas
+                                }
                             </span>
                         </label>
                     </div>
@@ -272,19 +405,19 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             {
                 bloque && Object.values(bloque).length > 0 ?
                     <div className='seleccInstrucAmbienteCompSelecc'>
-                        <button className={franjasBloque.size <= 0 ?
+                        <button className={bloque.franjas.size <= 0 ?
                             'seleccInstructorBtn btnOff'
                             : 'seleccInstructorBtn'}
-                            style={{ backgroundColor: bloque.idInstructor ? '#39A900' : '#385C57' }}
+                            style={{ backgroundColor: Object.values(instructorBloque).length > 0 ? '#39A900' : '#385C57' }}
                             onClick={() => setOpenListaInstructores(true)}>
                             {instructorBloque && Object.values(instructorBloque).length > 0 ?
                                 `${instructorBloque.nombre}`
                                 : 'seleccionar instructor '}
                         </button>
-                        <button className={franjasBloque.size <= 0 ?
+                        <button className={bloque.franjas.size <= 0 ?
                             'seleccAmbienteBtn btnOff'
                             : 'seleccAmbienteBtn'}
-                            style={{ backgroundColor: bloque.idAmbiente ? '#39A900' : '#385C57' }}
+                            style={{ backgroundColor: Object.values(ambienteBloque).length > 0 ? '#39A900' : '#385C57' }}
                             onClick={() => setOpenListaAmbientes(true)}>
                             {ambienteBloque && Object.values(ambienteBloque).length > 0 ?
                                 ambienteBloque.nombre
@@ -301,7 +434,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                     <div className='SeccionHorarioCompSelecc'>
                         {
                             bloque.franjas ?
-                                <div className='contTablaMatrizHorarioCreacion'>
+                                <div className='contTablaMatrizHorarioCreacion'
+                                    ref={tablaMatrizCont}>
                                     <table className='tablaMatrizHorarioCreacion'>
                                         <thead>
                                             <tr>
@@ -319,7 +453,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                                             onMouseLeave={ManejarClickUpFranja}>
                                             {
                                                 matrizHorario.map((fila, i) => (
-                                                    <tr key={i}>
+                                                    <tr key={i} ref={(el) => (filasRef.current[i] = el)}>
                                                         <td className='colRango'>{GetRango(i)}</td>
                                                         {fila.map((colum, j) => (
                                                             <td key={j}
@@ -345,22 +479,24 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                     : null
             }
             {
-                openListaInstructores ? 
-                <CrudInstructores 
-                onClose={ () => setOpenListaInstructores(false)}
-                modoSeleccion={true}
-                responsableSeleccionado={(r) => setInstructorBloque(r)}
-                franjasDeseadas={[...franjasBloque]}/>
-                : null
+                openListaInstructores ?
+                    <CrudInstructores
+                        onClose={() => setOpenListaInstructores(false)}
+                        modoSeleccion={true}
+                        responsableSeleccionado={(r) => setInstructorBloque(r)}
+                        franjasDeseadas={[...bloque.franjas]}
+                        listaCompletaGrupos={listaCompleta} />
+                    : null
             }
             {
                 openListaAmbientes ?
-                <CrudAmbientes
-                modoSeleccion={true}
-                ambienteSelecc={(a) => setAmbienteBloque(a)}
-                onClose={() => setOpenListaAmbientes(false)}
-                franjasDeseadas={[...franjasBloque]}/>
-                : null
+                    <CrudAmbientes
+                        modoSeleccion={true}
+                        ambienteSelecc={(a) => setAmbienteBloque(a)}
+                        onClose={() => setOpenListaAmbientes(false)}
+                        franjasDeseadas={[...bloque.franjas]}
+                        listaCompletaGrupos={listaCompleta} />
+                    : null
             }
         </div>
     );

@@ -10,7 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas }) => {
+const CrudAmbientes = ({
+    onClose,
+    modoSeleccion,
+    ambienteSelecc,
+    franjasDeseadas,
+    listaCompletaGrupos }) => {
 
     const subs = ['id', 'Ambiente', 'Torre', 'Capacidad de Estudiantes'];
     const navegar = useNavigate();
@@ -22,12 +27,14 @@ const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas
             respuesta = respuesta.map(ambiente => (
                 {
                     ...ambiente,
-                    franjaDisponibilidad: DeserealizarDisponibilidad(ambiente.franjaDisponibilidad)
+                    franjaDisponibilidad: DeserealizarDisponibilidad(ambiente.franjaDisponibilidad),
+                    listaOcupancia: AnalizarListaOcupancia(ambiente.id)
                 }
             ));
-            if(Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0){
-                respuesta = respuesta.filter(ambiente => 
-                    franjasDeseadas.every(franja => ambiente.franjaDisponibilidad.includes(franja))
+            if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0) {
+                respuesta = respuesta.filter(ambiente =>
+                    franjasDeseadas.every(franja => ambiente.franjaDisponibilidad.includes(franja)
+                        && !ambiente.listaOcupancia.includes(franja))
                 );
             }
             setListaObjetos(respuesta);
@@ -35,6 +42,21 @@ const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas
             Swal.fire(error);
             navegar(-1);
         }
+    }
+
+    function AnalizarListaOcupancia(idAmbiente){
+        const listaAux = [];
+        listaCompletaGrupos?.forEach(programa => {
+            programa.grupos.forEach(grupo => {
+                grupo.franjasPersonalizadas.forEach((franja, index) => {
+                    if(franja){
+                        if(franja?.ambiente.id === idAmbiente) listaAux.push(index);
+                    }
+                });
+            });
+        });
+        // console.log(listaAux);
+        return listaAux;
     }
 
     function DeserealizarDisponibilidad(texto) {
@@ -115,8 +137,8 @@ const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas
             if (!modoSeleccion) {
                 setAbrirConsulta(true);
             } else {
-                if(typeof ambienteSelecc === 'function') ambienteSelecc(ambienteConsultado);
-                if(typeof onClose === 'function') onClose();
+                if (typeof ambienteSelecc === 'function') ambienteSelecc(ambienteConsultado);
+                if (typeof onClose === 'function') onClose();
             }
         }
     }, [ambienteConsultado]);
@@ -185,9 +207,9 @@ const CrudAmbientes = ({ onClose, modoSeleccion, ambienteSelecc, franjasDeseadas
                 clicFila={e => ManejarClicFila(e)}
                 onClicPositivo={AbrirRegistro}
                 datosJson={listaAdaptada} subtitulos={subs}
-                onCLicDestructivo={modoSeleccion ? () => onClose() : OnClicDestructivo} 
-                vaciarListaSelecc={vaciarListaSelecc} 
-                modoSeleccion={modoSeleccion}/>
+                onCLicDestructivo={modoSeleccion ? () => onClose() : OnClicDestructivo}
+                vaciarListaSelecc={vaciarListaSelecc}
+                modoSeleccion={modoSeleccion} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalAmbientes abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

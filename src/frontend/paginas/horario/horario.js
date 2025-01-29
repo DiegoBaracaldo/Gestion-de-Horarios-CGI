@@ -3,7 +3,7 @@ import BotonDestructivo from "../../componentes/botonDestructivo/BotonDestructiv
 import BotonPositivo from "../../componentes/botonPositivo/BotonPositivo";
 import MarcoGralHorario from "../../componentes/marcoGeneralHorario/MarcoGralHorario";
 import ProgramasGrupos from "../../componentes/programasGrupos/ProgramasGrupos";
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import GrupoServicio from '../../../backend/repository/servicios/GrupoService';
@@ -12,7 +12,9 @@ import CompetenciaServicio from '../../../backend/repository/servicios/Competenc
 import CreacionHorario from '../../componentes/creacionHorario/CreacionHorario';
 import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
-import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
+import { FranjasPersonalizadasToBloques, FranjasToBloques } from './UtilidadesHorario';
+import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
+import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
 
 
 const Horario = () => {
@@ -22,21 +24,22 @@ const Horario = () => {
     const [listaProgramas, setListaProgramas] = useState([]);
     const [listaGruposInicial, setListaGruposInicial] = useState([]);
     const [listaGruposDinamica, setListaGruposDinammica] = useState([...listaGruposInicial]);
+    const listaCombinadaInicial = useRef([]);
     const [listaCombinada, setListaCombinada] = useState([]);
     //Para pintar los grupos y programas según si han sido completados o no
     //Se supone que de esta manera se sincroniza la estructura de índices en la lista
     //con la listaCombinada.
     const [programasGruposCompletados, setProgramasGruposCompletados] = useState([]);
-
-    const [grupoSeleccionado, setGrupoSeleccionado] = useState({});
-    const [competenciaSelecc, setCompetenciaSelecc] = useState({});
-    const [bloqueSelecc, setBloqueSelecc] = useState({});
-    const [indexBloqueSelecc, setIndexBloqueSelecc] = useState(-1);
-    const [competenciasGrupo, setCompetenciasGrupo] = useState([]);
     const [ocupanciaJornada, setOcupanciaJornada] = useState(new Set());
     const [tipoJornada, setTipoJornada] = useState('');
-    const [bloques, setBloques] = useState([]);
-    const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState(new Array(bloques).fill(false));
+    const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
+    const arrayIndexSeleccBloque = useRef(null);
+    useEffect(() => {
+        console.log(seleccBloqueRadioArray)
+    }, [seleccBloqueRadioArray]);
+
+    /***************************************************************************/
+    /**************** SECCIÓN CARGA LISTA PRINCIPAL ****************************/
 
     useLayoutEffect(() => {
         GetListas();
@@ -46,60 +49,99 @@ const Horario = () => {
         setListaGruposDinammica([...listaGruposInicial]);
     }, [listaGruposInicial]);
 
+
+    //LISTA PRINCIPAL
     async function GetListas() {
         try {
+            //-- falta Mostrar mensaje que indica que se está generando la acción de cargar información
+
+            //Funciones para usar en obtener lista anidada, deben estar declaradas de primeras
+            //Variables para optimizar las consultas de ambientes e instructores para franjas personalizadas
+            const idsInstructoresUnicos = new Set();
+            const idsAmbientesUnicos = new Set();
+
+            const CargarCompetencias = async (grupoBusqueda) => {
+                try {
+                    const competencias = await new CompetenciaServicio().CargarListaSegunPiscina(grupoBusqueda.id);
+                    return Promise.all(
+                        competencias.map(async (comp) => ({
+                            ...comp,
+                            franjas: await CargarFranjasCompetencia(grupoBusqueda.id, comp.id)
+                        }))
+                    );
+                } catch (error) {
+                    console.log("Error al obtener competencias", error);
+                    return [];
+                }
+            };
+
+            const CargarFranjasCompetencia = async (grupoId, competenciaId) => {
+                try {
+                    const franjas = await new FranjaServicio().ObtenerFranjasCompetenciaGrupo(grupoId, competenciaId);
+                    //Se van guardando los ids sin repetir de ambientes e instructores si no son null
+                    franjas.forEach(franja => franja.idInstructor !== null && idsInstructoresUnicos.add(franja.idInstructor));
+                    franjas.forEach(franja => franja.idAmbiente !== null && idsAmbientesUnicos.add(franja.idAmbiente));
+                    return franjas;
+                } catch (error) {
+                    console.log("Error al obtener las franjas", error);
+                    return [];  // Devolvemos un arreglo vacío en caso de error
+                }
+            };
+
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
-            const franjas = new FranjaServicio().CargarFranjas();
-            const respuesta = await Promise.all([programas, grupos, franjas]);
+            const respuesta = await Promise.all([programas, grupos]);
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
-            const auxArrayPiscinasComp = await Promise.all
-                (auxGrupos.map((grupo) => new CompetenciaServicio().CargarListaSegunPiscina(grupo.id)));
-            const auxFranjas = respuesta[2];
-            //Con ayuda de las franjas sacamos bloques para mejorar el algoritmos
-            ////a la hora de agregar los bloques a las competencias dentro de los grupos
-            //los bloques los saco según coincidencia entre grupo  competencia
-            let agrupados = {};
-            auxFranjas.forEach(obj => {
-                const claveUnica = `${obj.idGrupo}-${obj.idInstructor}-${obj.idCompetencia}-${obj.idAmbiente}`;
-
-                if (!agrupados[claveUnica]) {
-                    agrupados[claveUnica] = {
-                        idGrupo: obj.idGrupo,
-                        idAmbiente: obj.idAmbiente,
-                        idInstructor: obj.idInstructor,
-                        idCompetencia: obj.idCompetencia,
-                        franjas: []
+            auxGrupos = await Promise.all(
+                auxGrupos.map(async (grupo) => {
+                    const auxCompetenciasLista = await CargarCompetencias(grupo);
+                    return {
+                        ...grupo,
+                        competencias: auxCompetenciasLista
                     }
+                })
+            );
 
-                }
-                agrupados[claveUnica].franjas.push(obj.franja);
-            });
-            const arrayBloques = Object.values(agrupados);
-            //Agrego las competencias que cada grupo debe ver (piscina) y las franjas completas
-            ////y a su vez en cada competencias, los bloques.
-            auxGrupos = auxGrupos.map((grupo, index) => (
-                {
-                    ...grupo,
-                    competencias: auxArrayPiscinasComp[index].map(compet => (
-                        {
-                            ...compet,
-                            //Agrego los bloques pertinentes a la competencia en este grupo
-                            bloques: arrayBloques
-                                .filter(bloque => bloque.idGrupo === grupo.id
-                                    && bloque.idCompetencia === compet.id)
-                                .map((bloque, j) => ({
-                                    ...bloque,
-                                    numBloque: j + 1
-                                }))
+            //Luego, cuando se han cargado todos los grupos, y se han recopilado todos los ids
+            //// de ambientes e instructores sin repetir, se consiguen desde el repositorio los
+            //// objetos correspondientes
+            const [instructoresUnicos, ambientesUnicos] = await Promise.all([
+                new InstructorServicio().CargarInstructores([...idsInstructoresUnicos]),
+                new AmbienteServicio().CargarAmbientes([...idsAmbientesUnicos])
+            ]);
+
+            //Ahora se forman los objetos franja Personalizados cuyo index es la franja
+            //// y el dato es un objeto con el instructor y el ambiente y el idCompetencia
+            auxGrupos = auxGrupos.map(grupo => {
+                const franjasPersonalizadas = [];
+                grupo.competencias.forEach(comp => {
+
+                    comp.franjas.forEach(franja => {
+                        const nuevoObj = {
+                            numBloque: franja.numBloque,
+                            idCompetencia: comp.id,
+                            //La búsqueda de instructor y ambiente se realiza con ayuda de los sets en los array
+                            instructor: franja.idInstructor === null ? {} :
+                                instructoresUnicos[[...idsInstructoresUnicos].indexOf(franja.idInstructor)],
+                            ambiente: franja.idAmbiente === null ? {} :
+                                ambientesUnicos[[...idsAmbientesUnicos].indexOf(franja.idAmbiente)]
                         }
-                    ))
-                }));
+                        //Aquí se forma el array de franjas personalizado donde la franja es el index
+                        //// y los objetos estánd entro de un objeto en ese índice, y los índices que
+                        //// no tienen franja serán Undefined
+                        franjasPersonalizadas[franja.franja] = nuevoObj;
+                    });
+                });
+                return {
+                    ...grupo,
+                    franjasPersonalizadas: franjasPersonalizadas
+                }
+            });
 
-
+            // console.log(auxGrupos);
             setListaGruposInicial([...auxGrupos]);
-            //setListaProgramas de último ya que activa todo 
+            //setListaProgramas de último ya que activa todo
             setListaProgramas([...auxProgramas]);
         } catch (error) {
             console.log(error);
@@ -111,10 +153,23 @@ const Horario = () => {
     useEffect(() => {
         if (Array.isArray(listaProgramas) && listaProgramas.length > 0) {
             if (Array.isArray(listaGruposInicial) && listaGruposInicial.length > 0) {
-                setListaCombinada(CombinarLista());
+                const auxListaCombinada = CombinarLista();
+                setListaCombinada(auxListaCombinada);
+                listaCombinadaInicial.current = auxListaCombinada;
+
+                //Creo el array de indices para guardar la selección de cada competencia
+                arrayIndexSeleccBloque.current = auxListaCombinada.map(programa => (
+                    programa.grupos.map(grupo => (
+                        {
+                            indexComp: -1,
+                            competencias: grupo.competencias.map(comp => -1)
+                        }
+                    ))
+                ));
+                // console.log(arrayIndexSeleccBloque.current);
             }
         }
-    }, [listaProgramas]);
+    }, [listaProgramas, listaGruposInicial]);
 
     useEffect(() => {
         //Esto crea una estructura de una lista de objetos programa que tienen
@@ -122,28 +177,26 @@ const Horario = () => {
         //del mismo tamaño de los grupos que contiene, y un false por cada uno de ellos
         //para que coincida con la estructura de la lista
         if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
-            if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
-                const listaAux = new Array(listaCombinada.length).fill(null).map(() => ({
-                    completado: false,
-                    gruposCompletados: []
-                }));
-                listaCombinada.forEach((programa, index) => {
-                    if (Array.isArray(programa.grupos)) {
-                        listaAux[index].gruposCompletados =
-                            listaCombinada[index]
-                                .grupos.map(grupo => {
-                                    return false;
-                                });
-                    }
-                });
-                //Pintar programas si están completados
-                listaAux.forEach(programa => {
-                    if (programa.gruposCompletados.every(valor => valor === true)) {
-                        programa.completado = true
-                    }
-                });
-                setProgramasGruposCompletados([...listaAux]);
-            }
+            const listaAux = new Array(listaCombinada.length).fill(null).map(() => ({
+                completado: false,
+                gruposCompletados: []
+            }));
+            listaCombinada.forEach((programa, index) => {
+                if (Array.isArray(programa.grupos)) {
+                    listaAux[index].gruposCompletados =
+                        listaCombinada[index]
+                            .grupos.map(grupo => {
+                                return false;
+                            });
+                }
+            });
+            //Pintar programas si están completados
+            listaAux.forEach(programa => {
+                if (programa.gruposCompletados.every(valor => valor === true)) {
+                    programa.completado = true
+                }
+            });
+            setProgramasGruposCompletados([...listaAux]);
         }
     }, [listaCombinada]);
 
@@ -163,91 +216,171 @@ const Horario = () => {
         });
     }
 
-    const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
-        setGrupoSeleccionado(grupo);
+
+    /***************************************************************************/
+    /***************************************************************************/
+
+
+    //FUNCIÓN CLAVE PARA RE-RENDERIZAR AL MODIFICAR BLOQUES
+
+    //Modificación Directa completa
+    useEffect(() => {
+        if (listaCombinada.length > 0
+            && indexProgramaSelecc >= 0
+            && indexGrupoSelecc >= 0
+            && indexCompetenciaSelecc >= 0) {
+            setBloques(ObtenerBloques());
+        }
+    }, [listaCombinada]);
+
+    //Index y objetos seleccionados
+    const [indexProgramaSelecc, setIndexProgramaSelecc] = useState(-1);
+    function ObtenerProgramaSelecc() {
+        return listaCombinada[indexProgramaSelecc];
+    }
+
+    const [indexGrupoSelecc, setIndexGrupoSelecc] = useState(-1);
+    function ObtenerGrupoSelecc() {
+        return listaCombinada[indexProgramaSelecc]?.grupos[indexGrupoSelecc];
+    }
+
+    const [indexCompetenciaSelecc, setIndexCompetenciaSelecc] = useState(-1);
+    useEffect(() => {
+        //Guardo la selección en el array de selecciones
+        if (arrayIndexSeleccBloque.current !== null && indexGrupoSelecc >= 0) {
+            arrayIndexSeleccBloque.current[indexProgramaSelecc][indexGrupoSelecc]
+                .indexComp = indexCompetenciaSelecc;
+        }
+        if (indexCompetenciaSelecc >= 0) {
+            cargandoBloques.current = true;
+            setBloques(ObtenerBloques());
+        }else{
+            setBloques([]);
+            cargandoBloques.current = true;
+        }
+    }, [indexCompetenciaSelecc]);
+    function ObtenerCompetenciaSelecc() {
+        return listaCombinada[indexProgramaSelecc].grupos[indexGrupoSelecc].competencias[indexCompetenciaSelecc];
+    }
+
+    //De los bloques para abajo se manejan con useState, ya que son los que cambian
+    //// así se garantiza que se rendericen solo cuando se modifican y no cuando solo se seleccionan
+    const pintandoCelda = useRef(false);
+    const [bloques, setBloques] = useState([]);
+    useLayoutEffect(() => {
+        //En caso de que sea carga de bloques para acomodar selecCRadioBloques
+        if (cargandoBloques.current) {
+            //Se retoma el index almacenado para seleccionar el que se había dejado seleccionado
+            if (indexCompetenciaSelecc >= 0) {
+                const indexRecuperado =
+                    arrayIndexSeleccBloque
+                        .current[indexProgramaSelecc][indexGrupoSelecc]
+                        .competencias[indexCompetenciaSelecc];
+                // console.log(indexRecuperado)
+            setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
+                setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: indexRecuperado });
+            }
+            cargandoBloques.current = false;
+        }
+        //En caso de alteración de bloques por agregar nuevo bloque
+        else if (agregandoBloque.current) {
+            //Primero acomodo el tamaño de de la tabla de bloques
+            setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
+            //Selección real del bloque
+            setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: bloques.length - 1 });
+            agregandoBloque.current = false;
+        }
+        //En caso de alteración de bloques por pintado o despintado de celda
+        else if (pintandoCelda.current) {
+            setBloqueSelecc(ObtenerBloqueSelecc());
+            pintandoCelda.current = false;
+        }
+        //En caso de eliminación
+        else if (eliminando.current) {
+            //Primero acomodo el tamaño de de la tabla de bloques
+            setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
+            //Si los bloques quedan vacíos, se reinician los valores
+            if (bloques.length <= 0) {
+                setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: -1 });
+            } else {
+                //Luego, selección real de objeto
+                setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: nuevoIndexSelecc.current });
+            }
+            nuevoIndexSelecc.current = -1;
+            eliminando.current = false;
+        }
+        setOcupanciaBloques(ObtenerOcupanciaBloques());
+        setTotalHorasTomadasComp(ObtenerHorasTomadasInstruc());
+    }, [bloques]);
+    function ObtenerBloques() {
+        return FranjasPersonalizadasToBloques(
+            ObtenerGrupoSelecc().franjasPersonalizadas,
+            ObtenerCompetenciaSelecc().id);
+    }
+
+    const [bloqueSelecc, setBloqueSelecc] = useState({});
+    const [indexBloqueSelecc, setIndexBloqueSelecc] = useState({ valor: -1 });
+    const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
+    useEffect(() => {
+        //almaceno el valor en el array de seleccIndexBloque
+        if (arrayIndexSeleccBloque.current !== null && indexCompetenciaSelecc >= 0) {
+            arrayIndexSeleccBloque
+                .current[indexProgramaSelecc][indexGrupoSelecc]
+                .competencias[indexCompetenciaSelecc] = indexBloqueSelecc.valor;
+        }
+        // console.log(indexBloqueSelecc.valor);
+        if (indexBloqueSelecc.valor >= 0) {
+            setBloqueSelecc(ObtenerBloqueSelecc());
+            setSeleccBloqueRadioArray([
+                ...seleccBloqueRadioArray.map((_, index) => index === indexBloqueSelecc.valor ? true : false)
+            ]);
+            setEsPrimeraCargaBloque(true);
+        }
+        else {
+            setSeleccBloqueRadioArray(new Array(seleccBloqueRadioArray.length).fill(false));
+            setBloqueSelecc({});
+        }
+    }, [indexBloqueSelecc]);
+    function ObtenerBloqueSelecc() {
+        return bloques[indexBloqueSelecc.valor];
+    }
+
+
+    const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
+    function ObtenerHorasTomadasInstruc() {
+        return bloques.reduce((acc, bloque) => {
+            return acc + ([...bloque.franjas].length / 2);
+        }, 0)
+    }
+
+    const [ocupanciaBloques, setOcupanciaBloques] = useState(new Set());
+    function ObtenerOcupanciaBloques() {
+        const setAux = new Set();
+        ObtenerGrupoSelecc()?.franjasPersonalizadas?.forEach((franja, index) => {
+            if (index <= 336) {
+                if (franja) setAux.add(index);
+            } else {
+                return;
+            }
+        });
+        // console.log(setAux);
+        return setAux;
     }
 
     //CADA QUE SE SELECCIONA UN GRUPO
-    useEffect(() => {
-        if (Object.values(grupoSeleccionado).length > 0
-            && Array.isArray(grupoSeleccionado.competencias)) {
-            //console.log(grupoSeleccionado.competencias);
-            PedirDatosForaneosGrupo();
-            setCompetenciasGrupo([...grupoSeleccionado.competencias]);
-            setCompetenciaSelecc({});
-            setBloques([]);
-            setBloqueSelecc({});
-        }
-    }, [grupoSeleccionado]);
 
-    //CADA QUE SE SELECCIONA UNA COMPETENCIA
-    useEffect(() => {
-        if (Array.isArray(competenciaSelecc.bloques)) {
-            setTotalHorasTomadasComp(
-                bloques.reduce((acc, bloque) => {
-                    return acc + ([...bloque.franjas].length / 2);
-                }, 0));
-            //console.log(competenciaSelecc.bloques);
-            setBloques([...competenciaSelecc.bloques]);
-            setBloqueSelecc({});
-        }
-    }, [competenciaSelecc]);
-
-    //CADA QUE SE SELECCIONA UN BLOQUE
-    const [esPrimeraCargaBloque, setEsPrimeraCargaBloque] = useState(false)
-    const [seleccionandoBloque, setSeleccionandoBloque] = useState(false);
-    const [guardandoBloqueSelecc, setGuardandoBloqueSelecc] = useState(false);
-    //HOOK PARA ELIMINAR BLOQUE
-    const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
-
-    const ManejarCheckBloque = (bloque, i) => {
-        //El bloque recibido como parámetro es el último seleccionado
-        //// y sirve solamente para detectar redundamente que se ha seleccionado
-        // console.log("indice de check es: " + i);
-        setSeleccionandoBloque(true);
-        let auxBloques = [...bloques];
-        //SI ES ADD Se almacenan los cambios del bloque, mandandolo a la lsita de bloques
-        ////en su index correspondiente antes de cambiar la selección a uno nuevo
-        ////Si el anterior no es vacío, si es uno diferente (numBloque) y si no es eliminación
-        if (Object.values(bloqueSelecc).length > 1 &&
-            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado < 0) {
-            // console.log("Guardando bloque anterior");
-            setGuardandoBloqueSelecc(true);
-            auxBloques[indexBloqueSelecc] = { ...bloqueSelecc };
-            setBloques(auxBloques);
-        }
-        //Se se debe guardar bloque seleccionado por eliminación de diferente bloque
-        else if (Object.values(bloqueSelecc).length > 1 &&
-            bloque.numBloque !== bloqueSelecc.numBloque && indexBloqueEliminado >= 0
-            && indexBloqueEliminado !== indexBloqueSelecc) {
-            // console.log("Guardando bloque seleccionado");
-            setGuardandoBloqueSelecc(true);
-            //Se le cambia el nombre dle bloque para que se acomo  d e con los otros
-            auxBloques[i] = { 
-                ...bloqueSelecc, 
-                numBloque: i + 1
-            };
-            setBloques(auxBloques);
-        }
-        setSeleccBloqueRadioArray(auxBloques.map((selecc, j) => (i === j ? true : false)));
+    const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
+        setIndexProgramaSelecc(indexPrograma);
+        setIndexGrupoSelecc(indexGrupo);
+        //Se reinicia selecc competencia
+        setIndexCompetenciaSelecc(-1);
+        setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: -1 });
+        PedirDatosForaneosGrupo(grupo);
     }
 
-    // useEffect(() => {
-    //     console.log(bloqueSelecc);
-    // }, [bloqueSelecc]);
-
-    //Si vino por guardar bloque anterior
-    //No borrar, se necesita
-    useEffect(() => {
-        if (guardandoBloqueSelecc) {
-            setGuardandoBloqueSelecc(false);
-        }
-    }, [bloques, guardandoBloqueSelecc]);
-
-
-    async function PedirDatosForaneosGrupo() {
+    async function PedirDatosForaneosGrupo(grupo) {
         try {
-            const JornadaAux = new JornadaServicio().CargarJornada(grupoSeleccionado.idJornada);
+            const JornadaAux = new JornadaServicio().CargarJornada(grupo.idJornada);
 
             const resultadoAux = await Promise.all([JornadaAux]);
             setTipoJornada(resultadoAux[0].tipo);
@@ -275,181 +408,104 @@ const Horario = () => {
         }
     }
 
-    const ManejarSeleccCompetencia = (competencia) => {
-        setIndexBloqueSelecc(-1);
-        setCompetenciaSelecc(competencia);
+    //CADA QUE SE SELECCIONA UNA COMPETENCIA
+    const cargandoBloques = useRef(false);
+
+    const ManejarSeleccCompetencia = async (competencia, index) => {
+        setIndexCompetenciaSelecc(index);
+    }
+
+    //CADA QUE SE SELECCIONA UN BLOQUE
+    const ManejarCheckBloque = (bloque, i) => {
+        setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: i });
     }
 
     //SECCIÓN AGREGAR NUEVO BLOQUE
-    const [totalHorasTomadasComp, setTotalHorasTomadasComp] = useState(0);
     //Hook para detectar que es una agregación
-    const [indexBloqueAdd, setIndexBloqueAdd] = useState(-1);
+    const agregandoBloque = useRef(false);
 
     const ManejarAddBloque = () => {
-        if (bloques[bloques.length - 1]?.franjas?.size > 0 || bloques.length === 0 ||
-            (indexBloqueSelecc === bloques?.length - 1 && bloqueSelecc?.franjas?.size > 0)
-        ) {
-            if (totalHorasTomadasComp < competenciaSelecc.horasRequeridas) {
-                const auxBloques = [...bloques];
-                const cantidadObj = auxBloques.length;
-                const objAux = {
-                    idInstructor: 0,
-                    idAmbiente: 0,
-                    idCompetencia: competenciaSelecc.id,
-                    idGrupo: grupoSeleccionado.id,
-                    franjas: new Set()
-
-                };
-                if (cantidadObj > 0) objAux.numBloque = Math.max(...auxBloques.map(bloque => (bloque.numBloque))) + 1;
-                else objAux.numBloque = 1;
-                //Agrego el nuevo bloque a los bloques
-                auxBloques.push(objAux);
-                //Se asigna el índice del bloque recién agregado
-                setIndexBloqueAdd(auxBloques.length - 1);
-                setBloques(auxBloques);
+        // console.log(bloques);
+        if (ObtenerHorasTomadasInstruc() < ObtenerCompetenciaSelecc().horasRequeridas) {
+            agregandoBloque.current = true;
+            //Insertar franjas personalizadas en blanco para que se carguen en los bloques
+            //// Se guardan después del índice 336 así que se obtiene primero el ultimo
+            //// índice ocupado
+            const ultimoIndice = ObtenerGrupoSelecc().franjasPersonalizadas.length > 0 ?
+                ObtenerGrupoSelecc().franjasPersonalizadas.length - 1 : 0;
+            //Calcular numero de bloque
+            const numDeBloque = bloques.length > 0 ? bloques[bloques.length - 1].numBloque + 1 : 1;
+            // console.log(ultimoIndice);
+            const franjaVacia =
+            {
+                numBloque: numDeBloque,
+                idCompetencia: ObtenerCompetenciaSelecc().id,
+                ambiente: {},
+                instructor: {}
+            };
+            if (ultimoIndice <= 336) {
+                const auxListaCombinada = [...listaCombinada];
+                auxListaCombinada[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[337] = franjaVacia;
+                setListaCombinada(auxListaCombinada);
             } else {
-                Swal.fire(`Ya están completas las horas requeridas para esta competencia,
-                    debes liberar un bloque para poder crear otro.`);
+                const auxListaCombinada = [...listaCombinada];
+                auxListaCombinada[indexProgramaSelecc]
+                    .grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[ultimoIndice + 1] = franjaVacia;
+                setListaCombinada(auxListaCombinada);
             }
+
         } else {
-            Swal.fire(`Rellena el último bloque con al menos 1 franja!`);
+            Swal.fire(`Ya están completas las horas requeridas para esta competencia,
+                        debes liberar un bloque para poder crear otro.`);
         }
+
     }
-
-    //Cambio de bloques por agregar nuevo bloque
-    useEffect(() => {
-        if (bloques.length > 0 && indexBloqueAdd >= 0 && !guardandoBloqueSelecc) {
-            console.log("agregando...");
-            //El hook indexBloqueAdd es redundante pero sirve para detectar cuando el cambio
-            ////de bloques es por agregación
-            const i = indexBloqueAdd;
-            //Ahora se aplica selección con la sección dedicada a ello
-            ManejarCheckBloque(bloques[i], i);
-        }
-    }, [bloques, indexBloqueAdd]);
-
 
     // SECCIÓN PARA ELIMINAR EL BLOQUE, EL HOOK SE ENCUENTRA EN LA PARTE DE SELECCIÓN
-    const [futuriIndexSelecc, setFuturoIndexSelecc] = useState(-1);
+
+    // const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
+    const nuevoIndexSelecc = useRef(-1);
+    const eliminando = useRef(false);
 
     const ManejarRemoveBloque = (bloque, index) => {
-        //Se agrega e bloque eliminado solo si es diferente al seleccionado para guardar
-        ////los datos del bloque seleccionado al cambiar la estructura de bloques
-        //Primero elimino y luego selecciono
-        setIndexBloqueEliminado(index);
-        let listaAux = [...bloques];
-
-        //Reiniciar valores si se elimina el último de la lista
-        if (listaAux.length === 1) {
-            setSeleccBloqueRadioArray([]);
-            setBloqueSelecc({});
-            setIndexBloqueSelecc(-1);
-            setBloques([]);
-            setIndexBloqueEliminado(-1);
-        } else {
-            let i = indexBloqueSelecc;
-
-            //Si se elimina el seleccionado y es el último de la lista Ó 
-            //// si se elimina otro que está por encima del seleccionado
-            if ((index === indexBloqueSelecc && index === listaAux.length - 1) ||
-                (index < indexBloqueSelecc)
-            )
-                i = indexBloqueSelecc - 1;
-
-            console.log("i vale ", i);
-
-            //Se eliminan los bloques
-            listaAux.splice(index, 1);
-            //Se reorganiza el nombre de los bloques
-            listaAux = listaAux.map((bloque, index) => {
-                return {
-                    ...bloque,
-                    numBloque: index + 1
-                }
+        eliminando.current = true;
+        const listaCombAux = [...listaCombinada];
+        //Si es un bloque lleno  o parcial
+        if (bloques[index].franjas.size > 0) {
+            bloques[index].franjas.forEach(franja => {
+                listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                    .franjasPersonalizadas[franja] = undefined;
             });
-            setFuturoIndexSelecc(i);
-            setBloques(listaAux);
         }
-    }
-
-    useEffect(() => {
-        if (bloques.length > 0 && indexBloqueEliminado >= 0 && futuriIndexSelecc >= 0) {
-            //// (el objeto enviado no importa ya que será ignorado)
-            ManejarCheckBloque(bloques[futuriIndexSelecc], futuriIndexSelecc);
-        }
-    }, [bloques, indexBloqueEliminado, futuriIndexSelecc]);
-
-    ///////////////////////// --------------- /////////////////
-
-    //ESTO ES CONTINUACIÓN DE SELECCIÓN
-    useEffect(() => {
-        if (seleccBloqueRadioArray.some(valor => valor === true) &&
-            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            if (indexBloqueEliminado >= 0) setIndexBloqueSelecc(-1);
-            else setIndexBloqueSelecc(seleccBloqueRadioArray.findIndex(valor => valor === true));
-        }
-    }, [seleccBloqueRadioArray]);
-
-    //Solo para reiniciar el indexSelecc para poder seguir con la selección al eliminar
-    useEffect(() => {
-        if (indexBloqueSelecc < 0 && seleccBloqueRadioArray.some(valor => valor === true) &&
-            indexBloqueEliminado >= 0 && indexBloqueAdd < 0) {
-            const seleccAux = seleccBloqueRadioArray.findIndex(valor => valor === true);
-            setIndexBloqueSelecc(seleccAux);
-        }
-    }, [indexBloqueSelecc]);
-
-    //ESTO ES CONTINUACIÓN DE SELECCIÓN
-    useEffect(() => {
-        // console.log(indexBloqueSelecc)
-        if ((indexBloqueSelecc >= 0) &&
-            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            setBloqueSelecc({ ...bloques[indexBloqueSelecc] });
-        }
-    }, [indexBloqueSelecc]);
-
-    //Finaliza la selección
-    useEffect(() => {
-        // console.log(bloqueSelecc);
-        if ((Object.values(bloqueSelecc).length >= 0) &&
-            (seleccionandoBloque || indexBloqueEliminado >= 0 || indexBloqueAdd >= 0)) {
-            // console.log("El objeto final seleccionado es: ", bloqueSelecc)
-            setEsPrimeraCargaBloque(true);
-            setIndexBloqueAdd(-1);
-            setIndexBloqueEliminado(-1);
-            setFuturoIndexSelecc(-1);
-            setSeleccionandoBloque(false);
-            setTotalHorasTomadasComp(
-                bloques.reduce((acc, bloque) => {
-                    return acc + ([...bloque.franjas].length / 2);
-                }, 0)
+        //Si es un bloque vacío
+        else {
+            const subLista = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas.slice(337);
+            const indexObj = subLista.findIndex(objFranja =>
+                objFranja.idCompetencia === ObtenerCompetenciaSelecc().id
+                && objFranja.numBloque === bloque.numBloque
             );
+            listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                .franjasPersonalizadas.splice(indexObj + 337, 1);
         }
-    }, [bloqueSelecc]);
 
-    //CADA QUE SE MODIFICAN LOS BLOQUES
-    useEffect(() => {
-        // console.log(bloques);
-        if (bloques.length > 0) {
-            // const objAux = {
-            //     idGrupo: grupoSeleccionado.id,
-            //     idCompetencia: competenciaSelecc.id,
-            //     bloques: bloques
-            // }
-            // listaAux.push(objAux);
-            // setContObjBloques(listaAux);
-            //Se calcula el tiempo total de horas en cada selección, eliminación y agregación
-        } else {
-            setSeleccBloqueRadioArray([]);
-            setBloqueSelecc({});
-            setIndexBloqueSelecc(-1);
+        //Se calcula el nuevo índice de seleccion por haber elimminado
+        let iAux = indexBloqueSelecc.valor;
+        //Si se elimina el seleccionado y es el último de la lista Ó
+        //// si se elimina otro que está por encima del seleccionado
+        if ((index === indexBloqueSelecc.valor && index === bloques.length - 1) ||
+            (index < indexBloqueSelecc.valor)) {
+            iAux = indexBloqueSelecc.valor - 1;
         }
-    }, [bloques]);
 
-    const ManjearReciboBloque = (bloque) => {
-        // console.log("Se recibe desde hijo...", bloque);
-        setBloqueSelecc(bloque);
+        // console.log("i vale ", iAux);
+        nuevoIndexSelecc.current = iAux;
+        setListaCombinada(listaCombAux);
     }
+
 
     return (
         <div id="contCreacionHorario">
@@ -457,7 +513,7 @@ const Horario = () => {
                 <ProgramasGrupos listaProgramas={listaCombinada} grupoSelecc={ManejarSeleccGrupo}
                     listaParaListaCompletado={programasGruposCompletados} />
                 {
-                    Object.values(grupoSeleccionado).length > 0 ?
+                    indexProgramaSelecc >= 0 && indexGrupoSelecc >= 0 ?
                         <div className='ladoDerechoMarcoHorario'>
                             <div className='ladoIzqInterno'>
                                 <table className='tablaCompetenciasPiscina'>
@@ -468,14 +524,15 @@ const Horario = () => {
                                     </thead>
                                     <tbody>
                                         {
-                                            competenciasGrupo.map((comp, index) => (
-                                                <tr key={comp.id.toString() + grupoSeleccionado.codigoGrupo.toString()}>
+                                            ObtenerGrupoSelecc().competencias.map((comp, index) => (
+                                                <tr key={comp.id.toString() +
+                                                    ObtenerGrupoSelecc().codigoGrupo.toString()}>
                                                     <td>
                                                         <input type='radio' name='compSeleccGrupo'
-                                                            id={grupoSeleccionado.codigoGrupo + comp.id}
-                                                            onChange={() => ManejarSeleccCompetencia(comp)}>
+                                                            id={ObtenerGrupoSelecc().codigoGrupo + comp.id}
+                                                            onChange={() => ManejarSeleccCompetencia(comp, index)}>
                                                         </input>
-                                                        <label htmlFor={grupoSeleccionado.codigoGrupo + comp.id}>
+                                                        <label htmlFor={ObtenerGrupoSelecc().codigoGrupo + comp.id}>
                                                             {comp.id}
                                                         </label>
                                                     </td>
@@ -485,7 +542,7 @@ const Horario = () => {
                                     </tbody>
                                 </table>
                                 {
-                                    Object.keys(competenciaSelecc).length > 0 ?
+                                    indexCompetenciaSelecc >= 0 ?
                                         <table className='tablaBloquesCompetencia'>
                                             <thead>
                                                 <tr>
@@ -498,27 +555,27 @@ const Horario = () => {
                                             </thead>
                                             <tbody>
                                                 {
-                                                    bloques?.length > 0 ?
-                                                        bloques.map((bloque, index) => (
-                                                            <tr key={grupoSeleccionado.codigoGrupo + competenciaSelecc.id + index}>
-                                                                <td className='colBloque'>
-                                                                    <input type='radio' name='seleccBloque'
-                                                                        id={'bloqueComp' + index}
-                                                                        onChange={() => ManejarCheckBloque(bloque, index)}
-                                                                        checked={seleccBloqueRadioArray[index]}>
-                                                                    </input>
-                                                                    <label htmlFor={'bloqueComp' + index}>
-                                                                        <button onClick={() => ManejarRemoveBloque(bloque, index)}>
-                                                                            X
-                                                                        </button>
-                                                                        <span>
-                                                                            Bloque {bloque.numBloque}
-                                                                        </span>
-                                                                    </label>
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                        : null
+                                                    //Se hace la carga de bloques totalmente desde la lista combinada original
+                                                    bloques.map((bloque, index) => (
+                                                        <tr key={ObtenerGrupoSelecc().codigoGrupo
+                                                            + ObtenerCompetenciaSelecc().id + index}>
+                                                            <td className='colBloque'>
+                                                                <input type='radio' name='seleccBloque'
+                                                                    id={'bloqueComp' + index}
+                                                                    onChange={() => ManejarCheckBloque(bloque, index)}
+                                                                    checked={seleccBloqueRadioArray[index]}>
+                                                                </input>
+                                                                <label htmlFor={'bloqueComp' + index}>
+                                                                    <button onClick={() => ManejarRemoveBloque(bloque, index)}>
+                                                                        X
+                                                                    </button>
+                                                                    <span>
+                                                                        Bloque {bloque?.numBloque}
+                                                                    </span>
+                                                                </label>
+                                                            </td>
+                                                        </tr>
+                                                    ))
                                                 }
                                             </tbody>
                                         </table>
@@ -528,17 +585,24 @@ const Horario = () => {
                             </div>
                             <div className='ladoDerInterno'>
                                 {
-                                    Object.keys(competenciaSelecc).length > 0 ?
-                                        <CreacionHorario competencia={competenciaSelecc}
-                                            bloque={bloqueSelecc}
-                                            bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
+                                    indexCompetenciaSelecc >= 0 ?
+                                        <CreacionHorario
                                             ocupanciaJornada={ocupanciaJornada}
                                             tipoJornada={tipoJornada}
-                                            bloqueDevuelto={(b) => ManjearReciboBloque(b)}
+                                            competencia={ObtenerCompetenciaSelecc()}
+                                            totalHorasTomadasComp={totalHorasTomadasComp}
+                                            indexProgramaSelecc={indexProgramaSelecc}
+                                            indexGrupoSelecc={indexGrupoSelecc}
+                                            indexCompetenciaSelecc={indexCompetenciaSelecc}
+                                            indexBloqueSelecc={indexBloqueSelecc.valor}
+                                            bloque={bloqueSelecc}
+                                            bloqueNumero={bloqueSelecc ? bloqueSelecc.numBloque : '?'}
+                                            ocupanciaBloques={ocupanciaBloques}
                                             esPrimeraCargaBloque={esPrimeraCargaBloque}
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
-                                            totalHorasTomadasComp={totalHorasTomadasComp}
-                                            devolverTotalHorasBloques={(h) => setTotalHorasTomadasComp(h)} />
+                                            listaCompleta={listaCombinada}
+                                            actualizarListaCompleta={(lista) => setListaCombinada(lista)}
+                                            setPintandoCelda={() => { return pintandoCelda.current = true }} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...

@@ -145,6 +145,10 @@
                 .celdagreen{
                     background-color: var(--colorPrincipal);
                 }
+                .celdagray{
+                    background-color: var(--colorNegativoHorario);
+                    pointer-events: none;
+                }
             }
         }
     }

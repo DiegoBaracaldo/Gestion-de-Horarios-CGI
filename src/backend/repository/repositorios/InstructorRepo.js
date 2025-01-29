@@ -18,14 +18,12 @@ class InstructorRepo {
     async GetAll() {
         return new Promise((resolve, reject) => {
             const query = `
-            SELECT i.*, 
-            COUNT(g.idResponsable) AS cantidadGruposACargo,
-            GROUP_CONCAT(f.franja) AS listaOcupancia
-            FROM instructores i
-            LEFT JOIN grupos g ON i.id = g.idResponsable
-            LEFT JOIN franjas f ON i.id = f.idInstructor
-            GROUP BY i.id
-        `;
+                SELECT i.*,
+                (SELECT COUNT(g.idResponsable)
+                FROM grupos g
+                WHERE g.idResponsable = i.id) AS cantidadGruposACargo
+                FROM  instructores i;
+            `;
             this.db.all(query, [], (error, filas) => {
                 if (error) reject(error.errno);
                 else resolve(filas);
@@ -39,6 +37,22 @@ class InstructorRepo {
             this.db.get(query, [id], (error, fila) => {
                 if (error) reject(error.errno);
                 else resolve(fila);
+            });
+        });
+    }
+
+    async GetAllById(arrayIds){
+        return new Promise((resolve, reject) => {
+            const placeHolders = arrayIds.map(()  => '?').join(', ');
+
+            const query = `
+                SELECT * FROM instructores
+                WHERE id IN (${placeHolders});
+            `;
+
+            this.db.all(query, arrayIds, (error, filas) => {
+                if(error) reject(error.errno);
+                else resolve(filas);
             });
         });
     }

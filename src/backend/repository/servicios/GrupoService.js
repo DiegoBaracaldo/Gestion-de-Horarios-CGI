@@ -6,7 +6,6 @@ class GrupoServicio {
     }
 
     async ExisteUno(){
-      console.log("buscando existencia...");
       try {
         return await window.electron.AtLeastOneGrupo();
       } catch (error) {
@@ -16,7 +15,6 @@ class GrupoServicio {
     }
 
     async CargarLista() {
-        console.log("Cargando lista...");
         try {
             return await window.electron.GetAllGrupos();
         } catch (error) {
@@ -26,7 +24,6 @@ class GrupoServicio {
     }
 
     async GuardarGrupo(grupo){
-        console.log("guardando grupo...");
         try {
           return await window.electron.SaveNewGrupo(grupo);
         } catch (error) {
@@ -36,7 +33,6 @@ class GrupoServicio {
       }
   
       async CargarGrupo(id){
-        console.log("Cargando grupo...");
         try {
           return await window.electron.GetGrupoByID(id);
         } catch (error) {
@@ -46,7 +42,6 @@ class GrupoServicio {
       }
   
       async ActualizarGrupo(idViejo, grupo){
-        console.log("Actualizando grupo...");
         try {
           return await window.electron.SaveGrupo(idViejo, grupo);
         } catch (error) {
@@ -56,7 +51,6 @@ class GrupoServicio {
       }
   
       async EliminarGrupo(listaIDs){
-        console.log("Eliminando grupo...");
         try {
           return await window.electron.RemoveGrupo(listaIDs);
         } catch (error) {

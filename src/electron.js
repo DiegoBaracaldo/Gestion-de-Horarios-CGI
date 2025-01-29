@@ -280,6 +280,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllByIdInstructor', async (event, arrayIds) => {
+        try {
+            return await instructorRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain instructores  getAllById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('SaveNewInstructor', async (event, instructor) => {
         try {
             return await instructorRepo.SaveNew(instructor);
@@ -376,6 +384,14 @@ function RegistrarIPC() {
             return await ambienteRepo.GetById(id);
         } catch (error) {
             console.log("Error en ipcMain  getById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetAllByIdAmbiente', async (event, arrayIds) => {
+        try {
+            return await ambienteRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain ambientes  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -491,9 +507,41 @@ function RegistrarIPC() {
     //Franjas
     ipcMain.handle('GetAllFranjas', async() => {
         try {
-            return franjaRepo.GetAll();
+            return await franjaRepo.GetAll();
         } catch (error) {
             console.log("Error en ipcMain  al obtener franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetBloquesByCompetenciaFranjas', async(event, idGrupo, idCompetencia) => {
+        try {
+            return await franjaRepo.GetBloquesByCompetencia(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener bloques en franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('DeleteAndSaveFranjas', async(event, idGrupo, idCompetencia, arrayFranjas) => {
+        try {
+            return await franjaRepo.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
+        } catch (error) {
+            console.log("Error en ipcMain  al guardar franjas en franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetOcupanciaBloquesGrupo', async(event, idGrupo) => {
+        try {
+            return await franjaRepo.GetOcupanciaFranjasGrupo(idGrupo);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener ocupancia franjas en franjas por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetFranjasByCompetenciaAndGrupo', async(event, idGrupo, idCompetencia) => {
+        try {
+            return await franjaRepo.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener franjas de competencia por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

@@ -6,7 +6,6 @@ class ProgramaServicio {
     }
 
     async ExisteUno(){
-      console.log("buscando existencia...");
       try {
         return await window.electron.AtLeastOnePrograma();
       } catch (error) {
@@ -16,7 +15,6 @@ class ProgramaServicio {
     }
 
     async CargarLista() {
-        console.log("cargando lista...");
         try {
           //throw new Error("error: Error intensionado");
           return await window.electron.GetAllProgramas();
@@ -27,7 +25,6 @@ class ProgramaServicio {
     }
 
     async GuardarPrograma(programa){
-      console.log("guardando programa...");
       try {
         return await window.electron.SaveNewPrograma(programa);
       } catch (error) {
@@ -37,7 +34,6 @@ class ProgramaServicio {
     }
 
     async CargarPrograma(id){
-      console.log("Cargando programa...");
       try {
         return await window.electron.GetProgramaByID(id);
       } catch (error) {
@@ -47,7 +43,6 @@ class ProgramaServicio {
     }
 
     async ActualizarPrograma(idViejo, programa){
-      console.log("Actualizando programa...");
       try {
         return await window.electron.SavePrograma(idViejo, programa);
       } catch (error) {
@@ -57,7 +52,6 @@ class ProgramaServicio {
     }
   
     async EliminarPrograma(listaIDs){
-      console.log("Eliminando programa...");
       try {
         return await window.electron.RemovePrograma(listaIDs);
       } catch (error) {

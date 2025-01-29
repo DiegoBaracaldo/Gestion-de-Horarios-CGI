@@ -5,7 +5,6 @@ class AmbienteServicio {
     }
 
     async ExisteUno(){
-      console.log("buscando existencia...");
       try {
         return await window.electron.AtLeastOneAmbiente();
       } catch (error) {
@@ -15,7 +14,6 @@ class AmbienteServicio {
     }
 
     async CargarLista() {
-        console.log("cargando lista...");
         try {
           return await window.electron.GetAllAmbientes();
         } catch (error) {
@@ -26,7 +24,6 @@ class AmbienteServicio {
     }
 
     async GuardarAmbiente(ambiente){
-      console.log("guardando ambiente...");
       try {
         return await window.electron.SaveNewAmbiente(ambiente);
       } catch (error) {
@@ -36,7 +33,6 @@ class AmbienteServicio {
     }
 
     async CargarAmbiente(id){
-      console.log("Cargando ambiente...");
       try {
         return await window.electron.GetAmbienteByID(id);
       } catch (error) {
@@ -45,8 +41,16 @@ class AmbienteServicio {
       }
     }
 
+    async CargarAmbientes(arrayIds){
+      try {
+        return await window.electron.GetAllByIdAmbiente(arrayIds);
+      } catch (error) {
+        console.log("error en servicio ambiente por: ", error);
+        throw error.message.split(":")[1].trim();
+      }
+    }
+
     async ActualizarAmbiente(idViejo, ambiente){
-      console.log("Actualizando ambiente...");
       try {
         return await window.electron.SaveAmbiente(idViejo, ambiente);
       } catch (error) {
@@ -56,7 +60,6 @@ class AmbienteServicio {
     }
 
     async EliminarAmbiente(listaIDs){
-      console.log("Eliminando ambiente...");
       try {
         return await window.electron.RemoveAmbiente(listaIDs);
       } catch (error) {

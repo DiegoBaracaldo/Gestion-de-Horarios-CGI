@@ -10,7 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, franjasDeseadas }) => {
+const CrudInstructores = ({ 
+    modoSeleccion,
+     onClose, 
+     responsableSeleccionado, 
+     franjasDeseadas,
+    listaCompletaGrupos }) => {
 
     const subs = modoSeleccion ?
         ['identificación', 'nombre completo', 'especialidad', 'tope horas', 'grupos a cargo']
@@ -27,8 +32,7 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
                 {
                     ...instr,
                     franjaDisponibilidad: DeserealizarDisponibilidad(instr.franjaDisponibilidad),
-                    listaOcupancia:
-                        instr.listaOcupancia === null ? [] : DeserealizarDisponibilidad(instr.listaOcupancia)
+                    listaOcupancia: AnalizarListaOcupancia(instr.id)
                 }
             ));
             //La variable franjasdDeseadas se usa  para  filtrar la lista por su disponibilidad
@@ -36,17 +40,33 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
             if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0 ) {
                 respuesta = respuesta.filter(instr =>
                     franjasDeseadas.every(franja =>
-                        instr.franjaDisponibilidad.includes(franja) &&
+                        instr.franjaDisponibilidad.includes(franja) && !instr.listaOcupancia.includes(franja) &&
                         franjasDeseadas.length <= instr.franjaDisponibilidad.length - instr.listaOcupancia.length)
                 );
             }
-            console.log(respuesta);
+            // console.log(respuesta);
             setListaObjetos(respuesta);
 
         } catch (error) {
+            console.log(error);
             Swal.fire(error);
             navegar(-1);
         }
+    }
+
+    function AnalizarListaOcupancia(idInstructor){
+        const listaAux = [];
+        listaCompletaGrupos?.forEach(programa => {
+            programa?.grupos?.forEach(grupo => {
+                grupo.franjasPersonalizadas.forEach((franja, index) => {
+                    if(franja){
+                        if(franja?.instructor.id === idInstructor) listaAux.push(index);
+                    }
+                });
+            });
+        });
+        // console.log(listaAux);
+        return listaAux;
     }
 
     function DeserealizarDisponibilidad(texto) {
@@ -63,9 +83,6 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
 
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
-
-    //Variable para indicar la cantidad de horas asignadas de un instructor
-    const [horasAsignadas, setHorasAsignadas] = useState(0);
 
     useEffect(() => {
         CargarLista();
@@ -84,15 +101,11 @@ const CrudInstructores = ({ modoSeleccion, onClose, responsableSeleccionado, fra
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
                 objetoAux.especialidad = element.especialidad;
-                objetoAux.topeHoras = `${element.listaOcupancia.length / 2} / ${element.topeHoras}`;
+                objetoAux.topeHoras = `${element.listaOcupancia.length /2} / ${element.topeHoras}`;
                 if (modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);
-        setHorasAsignadas(() => {
-            //Espacio para enviar la cantidad de horas asignadas a la lista CRUD
-            return 10;
-        });
     }, [listaFiltrada]);
 
     //captura de palabras para filtro y búsqueda

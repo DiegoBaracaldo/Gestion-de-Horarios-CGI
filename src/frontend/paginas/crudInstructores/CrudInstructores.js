@@ -48,6 +48,7 @@ const CrudInstructores = ({
             setListaObjetos(respuesta);
 
         } catch (error) {
+            console.log(error);
             Swal.fire(error);
             navegar(-1);
         }
@@ -55,12 +56,12 @@ const CrudInstructores = ({
 
     function AnalizarListaOcupancia(idInstructor){
         const listaAux = [];
-        listaCompletaGrupos.forEach(programa => {
-            programa.grupos.forEach(grupo => {
-                grupo.competencias.forEach(comp => {
-                    comp.franjas.forEach(franja => {
-                        if(franja.idInstructor === idInstructor) listaAux.push(franja.franja);
-                    });
+        listaCompletaGrupos?.forEach(programa => {
+            programa?.grupos?.forEach(grupo => {
+                grupo.franjasPersonalizadas.forEach((franja, index) => {
+                    if(franja){
+                        if(franja?.instructor.id === idInstructor) listaAux.push(index);
+                    }
                 });
             });
         });
@@ -82,9 +83,6 @@ const CrudInstructores = ({
 
     //Para vaciar lista de selecciones al eliminar
     const [vaciarListaSelecc, setVaciarListaSelecc] = useState(false);
-
-    //Variable para indicar la cantidad de horas asignadas de un instructor
-    const [horasAsignadas, setHorasAsignadas] = useState(0);
 
     useEffect(() => {
         CargarLista();
@@ -108,10 +106,6 @@ const CrudInstructores = ({
                 listaAux.push(objetoAux);
             });
         setListaAdaptada(listaAux);
-        setHorasAsignadas(() => {
-            //Espacio para enviar la cantidad de horas asignadas a la lista CRUD
-            return 10;
-        });
     }, [listaFiltrada]);
 
     //captura de palabras para filtro y búsqueda

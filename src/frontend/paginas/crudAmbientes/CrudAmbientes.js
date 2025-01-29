@@ -46,12 +46,12 @@ const CrudAmbientes = ({
 
     function AnalizarListaOcupancia(idAmbiente){
         const listaAux = [];
-        listaCompletaGrupos.forEach(programa => {
+        listaCompletaGrupos?.forEach(programa => {
             programa.grupos.forEach(grupo => {
-                grupo.competencias.forEach(comp => {
-                    comp.franjas.forEach(franja => {
-                        if(franja.idAmbiente === idAmbiente) listaAux.push(franja.franja);
-                    });
+                grupo.franjasPersonalizadas.forEach((franja, index) => {
+                    if(franja){
+                        if(franja?.ambiente.id === idAmbiente) listaAux.push(index);
+                    }
                 });
             });
         });

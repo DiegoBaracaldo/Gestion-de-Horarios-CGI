@@ -9,8 +9,8 @@ import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 
 const CreacionHorario = ({ competencia, bloque, bloqueNumero,
-    ocupanciaJornada, ocupanciaBloques, tipoJornada, bloqueDevuelto, esPrimeraCargaBloque,
-    devolverFalsePrimeraCarga, devolverTotalHorasBloques, totalHorasTomadasComp, listaCompleta,
+    ocupanciaJornada, ocupanciaBloques, tipoJornada, esPrimeraCargaBloque,
+    devolverFalsePrimeraCarga, totalHorasTomadasComp, listaCompleta,
     indexProgramaSelecc, indexGrupoSelecc, indexCompetenciaSelecc, indexBloqueSelecc,
     actualizarListaCompleta, setPintandoCelda
 }) => {
@@ -21,18 +21,45 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     const [ambienteBloque, setAmbienteBloque] = useState({});
     const [franjaAgregada, setFranjaAgregada] = useState(0);
     const [franjaBorrada, setFranjaBorrada] = useState(0);
+    const reiniciandoObjetos = useRef(false);
     const franjasLibres = useRef(new Set(Array.from({ length: 336 }, (_, i) => i + 1)));
+    const tablaMatrizCont = useRef(null);
+    const filasRef = useRef([]);
+    const filaComienzaDispJornada = useRef(Math.floor(PuntoDeQuiebreOcupanciaJornada() / 7));
+
+    //Función para detectar quiebre en secuencia de números de franjas para detectar
+    //// la celda en la que ya hay color blanco (teniendo en cuenta que nos basamos en
+    //// la ocupancia de la jornada)
+    function PuntoDeQuiebreOcupanciaJornada() {
+        let numeroEsperado = 1;
+        for (const numFranja of ocupanciaJornada) {
+            if (numeroEsperado === numFranja) {
+                numeroEsperado++;
+            }
+            else {
+                break;
+            }
+        }
+        return numeroEsperado;
+    }
 
     useLayoutEffect(() => {
         if (esPrimeraCargaBloque) {
-            setInstructorBloque(bloque.instructor);
-            setAmbienteBloque(bloque.ambiente);
+            setInstructorBloque({ ...bloque.instructor });
+            setAmbienteBloque({ ...bloque.ambiente });
             //Vuelo a ponerle en false
             if (typeof devolverFalsePrimeraCarga === 'function') devolverFalsePrimeraCarga();
+            //Pongo la vista de la matriz do9nde comienza lo disponible
+            if (tablaMatrizCont.current && filasRef.current.length > 0) {
+                const alturaFila = filasRef.current[0].offsetHeight;
+                const posicionFilaRequerida = (filaComienzaDispJornada.current) * alturaFila;
+                tablaMatrizCont.current.scrollTop = posicionFilaRequerida;
+            }
         }
     }, [esPrimeraCargaBloque, bloque]);
 
     //Matriz para generar la matriz visual del horario
+    //Este agoritmo es importante, TENERLO PRESENTE!
     const [matrizHorario, setMatrizHorario] = useState(
         new Array(48).fill(null).map((valorFila, i) => {
             const arrayAux = [];
@@ -79,6 +106,16 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             }
             //Si se está editando uno LLENO o PARCIAL
             else {
+                //Reinicio instructor y ambiente
+                if (Object.values(instructorBloque).length > 0 || Object.values(ambienteBloque).length > 0) {
+                    reiniciandoObjetos.current = true;
+                    bloque.franjas.forEach(franja => {
+                        listaCombAux[indexProgramaSelecc]
+                            .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].ambiente = {};
+                        listaCombAux[indexProgramaSelecc]
+                            .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].instructor = {};
+                    });
+                }
                 //Se busca el index del primer objeto que coincida en numBloque y idCompetencia
                 const indexObj = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
                     .franjasPersonalizadas.findIndex(franjaEncontrada =>
@@ -103,22 +140,32 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     useEffect(() => {
         if (franjaBorrada > 0) {
             const listaCombAux = [...listaCompleta];
+            //Atrapo el objeto a borrar
             const objFranjaABorrar = {
                 ...listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
-                .franjasPersonalizadas[franjaBorrada]
+                    .franjasPersonalizadas[franjaBorrada]
             };
+            //Reinicio instructor y ambiente
+            if(Object.values(instructorBloque).length > 0 || Object.values(ambienteBloque).length > 0) {
+                reiniciandoObjetos.current = true;
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].ambiente = {};
+                    listaCombAux[indexProgramaSelecc]
+                        .grupos[indexGrupoSelecc].franjasPersonalizadas[franja].instructor = {};
+                });
+            }
+            //"Borro" el objeto
             listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
                 .franjasPersonalizadas[franjaBorrada] = undefined;
             //Verifica si era la última, y si si, obtenerla para enviarla después del 336
             const subListaComb = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
                 .franjasPersonalizadas.slice(0, 336); //Objetos solo antes del 336
-                //Así se evita que se hallen coincidencias desués del 336
+            //Así se evita que se hallen coincidencias desués del 336
             const aunQuedan = subListaComb.some(franjaEncontrada =>
-                    franjaEncontrada?.numBloque === bloque.numBloque
-                    && franjaEncontrada?.idCompetencia === competencia.id
-                );
-            console.log(aunQuedan);
-            console.log(objFranjaABorrar);
+                franjaEncontrada?.numBloque === bloque.numBloque
+                && franjaEncontrada?.idCompetencia === competencia.id
+            );
             //Si ya no quedan, lo mando después del 336
             if (!aunQuedan) {
                 const ultimoIndice = listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
@@ -145,25 +192,44 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     }, [franjaBorrada]);
 
     useEffect(() => {
-        // console.log(instructorBloque);
-        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque
-            && Object.values(bloque).length > 0) {
-            const bloqueAux = {
-                ...bloque,
-                instructor: instructorBloque
+        if (!esPrimeraCargaBloque && !reiniciandoObjetos.current) {
+            if (Object.values(instructorBloque).length > 0) {
+                const listaCombAux = [...listaCompleta];
+                //Se repasa la lista de franjas personalizadas
+                //por cada coincidencia con las franjas del bloque se añade el objeto en el objeto en el index
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[franja].instructor = { ...instructorBloque };
+                });
+                //Se setea la lista completa con todo lo pertinente
+                //Uso "pintandoCelda" para que se rendericen los cambios
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            } else {
+                //Si se reinició tal vez por cambio en las franjas
             }
-            bloqueDevuelto(bloqueAux);
         }
     }, [instructorBloque]);
 
     useEffect(() => {
-        if (typeof bloqueDevuelto === 'function' && !esPrimeraCargaBloque
-            && Object.values(bloque).length > 0) {
-            const bloqueAux = {
-                ...bloque,
-                ambiente: ambienteBloque
+        if (!esPrimeraCargaBloque && !reiniciandoObjetos.current) {
+            if (Object.values(ambienteBloque).length > 0) {
+                const listaCombAux = [...listaCompleta];
+                //Se repasa la lista de franjas personalizadas
+                //por cada coincidencia con las franjas del bloque se añade el objeto en el objeto en el index
+                bloque.franjas.forEach(franja => {
+                    listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
+                        .franjasPersonalizadas[franja].ambiente = { ...ambienteBloque };
+                });
+                //Se setea la lista completa con todo lo pertinente
+                //Uso "pintandoCelda" para que se rendericen los cambios
+                if (typeof setPintandoCelda === 'function') setPintandoCelda();
+                //Actualizo la listaCompleta
+                if (typeof actualizarListaCompleta === 'function') actualizarListaCompleta(listaCombAux);
+            } else {
+                //Si se reinició tal vez por cambio en las franjas
             }
-            bloqueDevuelto(bloqueAux);
         }
     }, [ambienteBloque]);
     //******************************************************************************************//
@@ -186,8 +252,6 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
     }
 
     const ManejarClickDownFranja = (colorPintado) => {
-        setInstructorBloque({});
-        setAmbienteBloque({});
         if (colorPintado === 'white') setArrastrandoVerde(true);
         else if (colorPintado === 'green') setArrastrandoBlanco(true);
     }
@@ -277,6 +341,12 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
             bloque.franjas.forEach(franja => ocupanciaNueva.delete(franja));
             ocupanciaNueva.forEach(franja => auxFranjasLibres.delete(franja));
             PintarFranjas(bloque.franjas, auxFranjasLibres, ocupanciaJornada, ocupanciaNueva);
+            //Para poner el ambiente y el instructor si es que se reinician los valores
+            if(reiniciandoObjetos.current){
+                setInstructorBloque(bloque.instructor);
+                setAmbienteBloque(bloque.ambiente);
+                reiniciandoObjetos.current = false
+            }
         }
     }, [bloque]);
 
@@ -364,7 +434,8 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                     <div className='SeccionHorarioCompSelecc'>
                         {
                             bloque.franjas ?
-                                <div className='contTablaMatrizHorarioCreacion'>
+                                <div className='contTablaMatrizHorarioCreacion'
+                                    ref={tablaMatrizCont}>
                                     <table className='tablaMatrizHorarioCreacion'>
                                         <thead>
                                             <tr>
@@ -382,7 +453,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                                             onMouseLeave={ManejarClickUpFranja}>
                                             {
                                                 matrizHorario.map((fila, i) => (
-                                                    <tr key={i}>
+                                                    <tr key={i} ref={(el) => (filasRef.current[i] = el)}>
                                                         <td className='colRango'>{GetRango(i)}</td>
                                                         {fila.map((colum, j) => (
                                                             <td key={j}

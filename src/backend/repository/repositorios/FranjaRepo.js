@@ -76,16 +76,20 @@ class FranjaRepo {
         });
     }
 
-    DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas) {
+    DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones) {
         return new Promise((resolve, reject) => {
             this.bd.serialize(async () => {
                 try {
                     this.bd.run("BEGIN TRANSACTION");
 
-                    const queryDelete = `DELETE FROM franjas WHERE idGrupo = ? AND idCompetencia = ?;`;
+                    const queryDelete = `DELETE FROM franjas WHERE franja = ? AND idGrupo = ?;`;
                     const querySave = `
-                    INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia)
-                    VALUES (?, ?, ?, ? ,?);
+                        INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque)
+                        VALUES (?, ?, ?, ? ,?, ?);
+                    `;
+                    const queryUpdate = `
+                        UPDATE franjas SET idInstructor = ?, idAmbiente = ?, idCompetencia = ?, numBloque = ?
+                        WHERE franja = ? AND idGrupo = ?;
                     `;
 
                     const runQuery = (query, params) => {
@@ -100,24 +104,26 @@ class FranjaRepo {
                         });
                     }
 
-                    //Se espera que se haga la eliminación para continuar con el guardado
-                    await new Promise((resolve, reject) => {
-                        this.bd.run(queryDelete, [idGrupo, idCompetencia], (error) => {
-                            if (error) {
-                                reject(error);
-                            } else{
-                                resolve();
-                            }
-                        });
+                    //Se espera que se haga la eliminación
+                    const DeletePromesas = eliminaciones.map(tupla => { 
+                        const {franja, idGrupo} = tupla;
+                        return  runQuery(queryDelete, [franja, idGrupo]);
                     });
+                    await Promise.all(DeletePromesas);
 
-                    //Entonces, se hace el guardado
-                    const savePromesas = arrayFranjas.map(franjaCompleta => {
-                        const { franja, idGrupo, idInstructor, idAmbiente, idCompetencia } = franjaCompleta;
-                        return runQuery(querySave, [franja, idGrupo, idInstructor, idAmbiente, idCompetencia]);
+                    //Se espera que se haga el guardado
+                    const savePromesas = agregaciones.map(franjaCompleta => {
+                        const {franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque} = franjaCompleta;
+                        return runQuery(querySave, [franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque]);
                     });
-
                     await Promise.all(savePromesas);
+
+                    //Se espera que se hagan las modificaciones
+                    const updatePromesas = modificaciones.map(tupla => {
+                        const {idInstructor, idAmbiente, idCompetencia, numBloque, franja, idGrupo} = tupla;
+                        return runQuery(queryUpdate, [idInstructor, idAmbiente, idCompetencia, numBloque, franja, idGrupo]);
+                    });
+                    await Promise.all(updatePromesas);
 
                     //Confirmar que todo fue exitoso
                     this.bd.run("COMMIT", function (error) {
@@ -125,8 +131,8 @@ class FranjaRepo {
                             this.bd.run("ROLLBACK");
                             reject(error);
                         } else {
-                            //1 Significa guardado correcto, debe interpretarse en el render
-                            resolve(1);
+                            //200 Significa guardado correcto, debe interpretarse en el render
+                            resolve(200);
                         }
                     });
                 } catch (error) {

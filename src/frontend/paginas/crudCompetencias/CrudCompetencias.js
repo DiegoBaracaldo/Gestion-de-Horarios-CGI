@@ -164,7 +164,7 @@ const CrudCompetencias = ({ modoSeleccionMultiple, programaBusqueda, onCloseProp
     async function EliminarCompetencias() {
         const confirmar = await new SWALConfirm()
             .ConfirmAlert("¿Confirma que desea eliminar los competencias seleccionados?");
-        if (confirmar) {
+        if (confirmar === 'si') {
             try {
                 const servicioCompetencia = new CompetenciaServicio();
                 const auxListaID = listaSelecciones.map(competencia => parseInt(competencia.id.toString()));

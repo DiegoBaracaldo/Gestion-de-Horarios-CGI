@@ -127,7 +127,7 @@ class ConexionBD {
             capacidad INTEGER NOT NULL,
             franjaDisponibilidad TEXT NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idTorre) REFERENCES torres(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idTorre) REFERENCES torres(id) ON DELETE CASCADE ON UPDATE CASCADE,
             UNIQUE(nombre, idTorre) 
             );
             `
@@ -149,9 +149,9 @@ class ConexionBD {
             fechaInicioTrimestre DATE NOT NULL,
             fechaFinTrimestre DATE NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas (id) ON DELETE RESTRICT,
-            FOREIGN KEY (idResponsable) REFERENCES instructores(id) ON DELETE RESTRICT,
-            FOREIGN KEY (idJornada) REFERENCES jornadas(id) ON DELETE RESTRICT
+            FOREIGN KEY (idPrograma) REFERENCES programas (id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (idResponsable) REFERENCES instructores(id) ON DELETE NO ACTION ON UPDATE CASCADE,
+            FOREIGN KEY (idJornada) REFERENCES jornadas(id) ON DELETE NO ACTION ON UPDATE CASCADE
             );
             `
         );
@@ -166,7 +166,7 @@ class ConexionBD {
             descripcion VARCHAR(249) NOT NULL,
             horasRequeridas INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idPrograma) REFERENCES programas(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idPrograma) REFERENCES programas(id) ON DELETE CASCADE ON UPDATE CASCADE,
             UNIQUE(idprograma, descripcion)
             );
             `
@@ -185,10 +185,10 @@ class ConexionBD {
             numBloque INTEGER NOT NULL,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (franja, idGrupo),
-            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE RESTRICT,
-            FOREIGN KEY (idInstructor) REFERENCES instructores(id) ON DELETE RESTRICT,
-            FOREIGN KEY (idAmbiente) REFERENCES ambientes(id) ON DELETE RESTRICT,
-            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE RESTRICT,
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (idInstructor) REFERENCES instructores(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (idAmbiente) REFERENCES ambientes(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE ON UPDATE CASCADE,
             UNIQUE(franja, idInstructor),
             UNIQUE(franja, idAmbiente)
             )
@@ -203,8 +203,8 @@ class ConexionBD {
             idGrupo INTEGER,
             idCompetencia INTEGER,
             fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE CASCADE,
-            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE,
+            FOREIGN KEY (idGrupo) REFERENCES grupos(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE ON UPDATE CASCADE,
             PRIMARY KEY (idGrupo, idCompetencia)
             )
             `
@@ -224,12 +224,12 @@ class ConexionBD {
 
     InsertarAmbientesMock() {
         this.db.exec(`
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 101', 1, 45, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 102', 1, 35, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 201', 2, 39, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 202', 2, 42, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 301', 3, 28, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 302', 3, 59, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 101', 1, 45, '[85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 102', 1, 35, '[169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 201', 2, 39, '[253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 202', 2, 42, '[85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 301', 3, 28, '[169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252]');
+            INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 302', 3, 59, '[253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336]');
             INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 401', 4, 44, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
             INSERT INTO ambientes (nombre, idTorre, capacidad, franjaDisponibilidad) VALUES ('Aula 402', 4, 36, '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
             `);
@@ -248,9 +248,9 @@ class ConexionBD {
     InsertarInstructoresMock() {
         this.db.exec(
             `
-            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (123456, 'John Camilo Vásquez', 40, 'john@example.com', '3214445566', 'Matemáticas', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (234567, 'Maria Gomez Castaño', 35, 'maria.gomez@example.com', '3156778890', 'Física', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
-            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (345678, 'Carlos Ruiz Muñoz', 30, 'carlos.ruiz@example.com', '3178907744', 'Química', '[1,2,3,4,5,6,7,8,9,10,11,12,13]');
+            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (123456, 'John Camilo Vásquez', 40, 'john@example.com', '3214445566', 'Matemáticas', '[85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168]');
+            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (234567, 'Maria Gomez Castaño', 35, 'maria.gomez@example.com', '3156778890', 'Física', '[169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252]');
+            INSERT INTO instructores (id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad) VALUES (345678, 'Carlos Ruiz Muñoz', 30, 'carlos.ruiz@example.com', '3178907744', 'Química', '[253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336]');
             `
         );
     }
@@ -258,9 +258,9 @@ class ConexionBD {
     InsertarJornadasMock() {
         this.db.exec(
             `
-            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Mañana', '[6,7,8,9,10,11,12]');
-            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Tarde', '[13,14,15,16,17,18]');
-            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Noche', '[19,20,21,22]');
+            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Mañana', '[85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168]');
+            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Tarde', '[169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252]');
+            INSERT INTO jornadas (tipo, franjaDisponibilidad) VALUES ('Noche', '[253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336]');
             `
         );
     }
@@ -296,6 +296,10 @@ class ConexionBD {
             `
             INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (849387, 123456);
             INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (520949, 234567);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (263798, 678912);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (096724, 567891);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (674589, 345678);
+            INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (478302, 456789);
             `
         );
     }

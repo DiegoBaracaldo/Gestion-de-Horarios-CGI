@@ -319,7 +319,7 @@ const PiscinaCompetencias = () => {
         if (!vieneDeVolver) {
             if (agregados.length > 0 || eliminados.length > 0) {
                 const alerta = await new SWALConfirm().ConfirmAlert('¿Desea guardar el progreso actual?');
-                if (alerta) {
+                if (alerta === 'si') {
                     try {
                         const respuesta = await new PiscinaServicio().GuardarPiscinas(agregados, eliminados);
                         Swal.fire(respuesta);
@@ -345,10 +345,10 @@ const PiscinaCompetencias = () => {
     const ManejarVolver = async () => {
         if (agregados.length > 0 || eliminados.length > 0) {
             const respuesta = await new SWALConfirm().ConfirmAlert('¿Desea guardar los cambios antes de salir?');
-            if (respuesta) {
+            if (respuesta === 'si') {
                 GuardarPiscina(true);
                 navegar(-1);
-            } else {
+            } else if(respuesta === 'no') {
                 navegar(-1);
             }
         } else {

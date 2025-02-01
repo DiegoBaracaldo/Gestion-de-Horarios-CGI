@@ -5,11 +5,11 @@ class AmbienteRepo {
         this.db = db;
     }
 
-    async AtLeastOne(){
+    async AtLeastOne() {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM ambientes LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err.errno);
+                if (err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -17,7 +17,7 @@ class AmbienteRepo {
 
     async GetAll() {
         return new Promise((resolve, reject) => {
-            const query =`
+            const query = `
                 SELECT 
                 ambientes.*, 
                 torres.nombre AS nombreTorre  
@@ -43,9 +43,9 @@ class AmbienteRepo {
         });
     }
 
-    async GetAllById(arrayIds){
+    async GetAllById(arrayIds) {
         return new Promise((resolve, reject) => {
-            const placeHolders = arrayIds.map(()  => '?').join(', ');
+            const placeHolders = arrayIds.map(() => '?').join(', ');
 
             const query = `
                 SELECT * FROM ambientes
@@ -53,7 +53,7 @@ class AmbienteRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if(error) reject(error.errno);
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -76,17 +76,50 @@ class AmbienteRepo {
 
     async Save(idViejo, ambiente) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE ambientes SET " +
-                "nombre = ?, " +
-                "idTorre = ?, capacidad = ?, " +
-                "franjaDisponibilidad = ?" +
-                "WHERE id = ?";
-            const { nombre, idTorre, capacidad, franjaDisponibilidad } = ambiente; // Desestructuración del objeto torre
 
-            this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
-                if (error) reject(error.errno);
-                else resolve(this.changes); // Devuelve el número de filas modificadas
+            const { nombre, idTorre, capacidad, franjaDisponibilidad } = ambiente;
+            const franjasArray = new Set(this.DeserealizarFranjas(franjaDisponibilidad));
+            const franjasAEliminar = new Array(336).fill(null)
+                .map((_, index) => index + 1)
+                .filter(num => !franjasArray.has(num));
+            const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
+            this.db.serialize(async () => {
+                try {
+                    this.db.run("BEGIN TRANSACTION");
+
+                    const query = "UPDATE ambientes SET " +
+                        "nombre = ?, " +
+                        "idTorre = ?, capacidad = ?, " +
+                        "franjaDisponibilidad = ?" +
+                        "WHERE id = ?";
+                    const queryDeleteFranjas = `
+                        DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idAmbiente = ?; `;
+
+                    await this.db.run(queryDeleteFranjas, [...franjasAEliminar, ambiente.id], (error) => {
+                        if (error) reject(error.errno);
+                        else resolve();
+                    });
+
+                    await this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
+                        if (error) reject(error.errno);
+                        else resolve(this.changes); // Devuelve el número de filas modificadas
+                    });
+
+                    this.db.run("COMMIT", function (error) {
+                        if (error) {
+                            this.db.run("ROLLBACK");
+                            reject(error)
+                        }
+                        //Si todo fue exitoso!
+                        else resolve(200);
+                    });
+                } catch (error) {
+                    //Error en cualquier parte de las transacciones
+                    this.db.run("ROLLBACK");
+                    reject(error);
+                }
             });
+
         });
     }
 
@@ -106,6 +139,10 @@ class AmbienteRepo {
                 }
             });
         });
+    }
+
+    DeserealizarFranjas(texto) {
+        return texto.split(',').map(item => Number(item.trim())) || [];
     }
 }
 module.exports = AmbienteRepo;

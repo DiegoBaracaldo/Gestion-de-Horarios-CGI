@@ -11,12 +11,15 @@ class SWALConfirm {
             Swal.fire({
                 title: pregunta,
                 showCancelButton: true,
+                showDenyButton: true,
                 confirmButtonText: "SI",
+                denyButtonText: "NO"
             }).then((resultado) => {
-                if (resultado.isConfirmed) resolve(true);
-                else resolve(false);
+                if (resultado.isConfirmed) resolve("si");
+                else if(resultado.isDenied) resolve("no");
+                else resolve("cancel");
             }).catch(() => {
-                reject(false);
+                reject("cancel");
             }
             );
         });

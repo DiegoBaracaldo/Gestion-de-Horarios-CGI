@@ -310,7 +310,9 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                                 <th className={classCeldaTitulo + ' domingoTitulo' + ' domingoColum'}>domingo</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody
+                        onMouseLeave={TerminarArrastre}
+                        onMouseUp={TerminarArrastre}>
                             {listaHora}
                         </tbody>
                     </table>

@@ -41,9 +41,9 @@ class InstructorRepo {
         });
     }
 
-    async GetAllById(arrayIds){
+    async GetAllById(arrayIds) {
         return new Promise((resolve, reject) => {
-            const placeHolders = arrayIds.map(()  => '?').join(', ');
+            const placeHolders = arrayIds.map(() => '?').join(', ');
 
             const query = `
                 SELECT * FROM instructores
@@ -51,7 +51,7 @@ class InstructorRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if(error) reject(error.errno);
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
@@ -76,16 +76,49 @@ class InstructorRepo {
 
     async Save(idViejo, instructor) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE instructores SET " +
-                "id = ?, nombre = ?, " +
-                "topeHoras = ?, correo = ?, " +
-                "telefono = ?, especialidad = ?, franjaDisponibilidad = ?" +
-                "WHERE id = ?";
-            const { id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad } = instructor; // Desestructuración del objeto torre
 
-            this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad, idViejo], function (error) {
-                if (error) reject(error.errno);
-                else resolve(this.changes); // Devuelve el número de filas modificadas
+            const { id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad } = instructor;
+            const franjasArray = new Set(this.DeserealizarFranjas(franjaDisponibilidad));
+            const franjasAEliminar = new Array(336).fill(null)
+                .map((_, index) => index + 1)
+                .filter(num => !franjasArray.has(num));
+            const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
+            this.db.serialize(async () => {
+                try {
+                    this.db.run("BEGIN TRANSACTION");
+
+                    const query = "UPDATE instructores SET " +
+                        "id = ?, nombre = ?, " +
+                        "topeHoras = ?, correo = ?, " +
+                        "telefono = ?, especialidad = ?, franjaDisponibilidad = ?" +
+                        "WHERE id = ?";
+                    const queryDeleteFranjas = `
+                        DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idInstructor = ?; `;
+
+                    await this.db.run(queryDeleteFranjas, [...franjasAEliminar, id], (error) => {
+                        if (error) reject(error.errno);
+                        else resolve();
+                    });
+
+                    await this.db.run(query, [id, nombre, topeHoras, correo, telefono, especialidad, franjaDisponibilidad, idViejo], function (error) {
+                        if (error) reject(error.errno);
+                        else resolve(this.changes); // Devuelve el número de filas modificadas
+                    });
+
+                    this.db.run("COMMIT", function (error) {
+                        if (error) {
+                            this.db.run("ROLLBACK");
+                            reject(error.errno)
+                        }
+                        //Si todo fue exitoso!
+                        else resolve(200);
+                    });
+
+                } catch (error) {
+                    //Error en cualquier parte de las transacciones
+                    this.db.run("ROLLBACK");
+                    reject(error);
+                }
             });
         });
     }
@@ -106,6 +139,10 @@ class InstructorRepo {
                 }
             });
         });
+    }
+
+    DeserealizarFranjas(texto) {
+        return texto.split(',').map(item => Number(item.trim())) || [];
     }
 }
 module.exports = InstructorRepo;

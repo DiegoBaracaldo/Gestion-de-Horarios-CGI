@@ -137,8 +137,9 @@ function CrudPrograma({ modoSeleccion, onClose, programaSeleccionado }) {
 
   async function EliminarProgramas() {
     const confirmar = await new SWALConfirm()
-      .ConfirmAlert("¿Confirma que desea eliminar los programas seleccionados?");
-    if (confirmar) {
+      .ConfirmAlert(`Si continúa se eliminarán los GRUPOS y las COMPETENCIAS asociadas
+        a los programas seleccionados. ¿Continuar?`);
+    if (confirmar === 'si') {
       try {
         const servicioPrograma = new ProgramaServicio();
         const auxListaID = listaSelecciones.map(programa => parseInt(programa.id.toString()));

@@ -179,24 +179,28 @@ const Horario = () => {
         //el estado de completado en false, además una llave que es un array
         //del mismo tamaño de los grupos que contiene, y un false por cada uno de ellos
         //para que coincida con la estructura de la lista
+
         if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
-            const listaAux = new Array(listaCombinada.length).fill(null).map(() => ({
-                completado: false,
-                gruposCompletados: []
-            }));
-            listaCombinada.forEach((programa, index) => {
-                if (Array.isArray(programa.grupos)) {
-                    listaAux[index].gruposCompletados =
-                        listaCombinada[index]
-                            .grupos.map(grupo => {
-                                return false;
-                            });
-                }
-            });
-            //Pintar programas si están completados
-            listaAux.forEach(programa => {
-                if (programa.gruposCompletados.every(valor => valor === true)) {
-                    programa.completado = true
+
+            const listaAux = listaCombinada.map(programa => {
+                const gruposCompletados = programa.grupos?.filter(grupo => {
+                    return grupo.competencias.every(comp => {
+                        const franjasPerso = grupo.franjasPersonalizadas?.filter(franja =>
+                            franja?.idCompetencia === comp.id
+                        );
+                        const todasTienenAmbEInstruc = franjasPerso.every(franja =>
+                            Object.values(franja.instructor)?.length > 0
+                            && Object.values(franja.ambiente)?.length > 0
+                        );
+                        return franjasPerso.length / 2 === comp.horasRequeridas && todasTienenAmbEInstruc;
+                    });
+                }).map(grupo => grupo.id);
+
+                const todosGruposCompletados = programa.grupos?.length === gruposCompletados?.length;
+
+                return {
+                    completado: todosGruposCompletados,
+                    gruposCompletados: gruposCompletados
                 }
             });
             setProgramasGruposCompletados([...listaAux]);
@@ -275,6 +279,9 @@ const Horario = () => {
     const pintandoCelda = useRef(false);
     const [bloques, setBloques] = useState([]);
     useLayoutEffect(() => {
+        //Primero esto
+        setOcupanciaBloques(ObtenerOcupanciaBloques());
+        setTotalHorasTomadasComp(ObtenerHorasTomadasInstruc());
         //En caso de que sea carga de bloques para acomodar selecCRadioBloques
         if (cargandoBloques.current) {
             //Se retoma el index almacenado para seleccionar el que se había dejado seleccionado
@@ -316,8 +323,6 @@ const Horario = () => {
             nuevoIndexSelecc.current = -1;
             eliminando.current = false;
         }
-        setOcupanciaBloques(ObtenerOcupanciaBloques());
-        setTotalHorasTomadasComp(ObtenerHorasTomadasInstruc());
     }, [bloques]);
     function ObtenerBloques() {
         return FranjasPersonalizadasToBloques(

@@ -176,8 +176,9 @@ const CrudInstructores = ({
 
     const EliminarInstructores = async () => {
         const confirmar = await new SWALConfirm()
-            .ConfirmAlert("¿Confirma que desea eliminar los instructores seleccionados?");
-        if (confirmar) {
+            .ConfirmAlert(`Para eliminar los instructores seleccionados debe asegurarse que NO estén
+                referenciados como RESPONSABLES en ninguno de los grupos. ¿Continuar?`);
+        if (confirmar === 'si') {
             try {
                 const servicioInstructor = new InstructorServicio();
                 const auxListaID = listaSelecciones.map(instruc => parseInt(instruc.id.toString()));

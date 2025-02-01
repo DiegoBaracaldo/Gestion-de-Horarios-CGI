@@ -166,7 +166,7 @@ const CrudAmbientes = ({
     const EliminarAmbientes = async () => {
         const confirmar = await new SWALConfirm()
             .ConfirmAlert("¿Confirma que desea eliminar los ambientes seleccionados?");
-        if (confirmar) {
+        if (confirmar === 'si') {
             try {
                 const servicioAmbiente = new AmbienteServicio();
                 const auxListaID = listaSelecciones.map(ambiente => parseInt(ambiente.id.toString()));

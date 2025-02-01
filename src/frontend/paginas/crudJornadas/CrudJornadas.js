@@ -101,8 +101,9 @@ function CrudJornadas({ modoSeleccion, onClose, jornadaSeleccionada }) {
 
   async function EliminarJornadas() {
     const confirmar = await new SWALConfirm()
-      .ConfirmAlert("¿Confirma que desea eliminar las jornadas seleccionadas?");
-    if (confirmar) {
+      .ConfirmAlert(`Para eliminar las jornadas seleccionadas debe asegurarse que no estén
+        referenciadas en los grupos. ¿Continuar?`);
+    if (confirmar === 'si') {
       try {
         const servicioJornada = new JornadaServicio();
         const auxListaID = listaSelecciones.map(jornada => parseInt(jornada.id.toString()));

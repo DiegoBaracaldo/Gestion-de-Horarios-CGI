@@ -198,7 +198,7 @@ const CrudGrupos = () => {
     const EliminarGrupos = async () => {
         const confirmar = await new SWALConfirm()
             .ConfirmAlert("¿Confirma que desea eliminar los grupos seleccionados?");
-        if (confirmar) {
+        if (confirmar === 'si') {
             try {
                 const servicioGrupo = new GrupoServicio();
                 const auxListaID = listaSelecciones.map(grupo => parseInt(grupo.id.toString()));

@@ -86,8 +86,9 @@ function CrudTorres({ modoSeleccion, onClose, torreSeleccionada }) {
 
   async function EliminarTorres() {
     const confirmar = await new SWALConfirm()
-      .ConfirmAlert("¿Confirma que desea eliminar las torres seleccionadas?");
-    if (confirmar) {
+      .ConfirmAlert(`Al eliminar las torres seleccionadas se ELIMINARÁN automáticamente
+          los AMBIENTES asociados a la torre. ¿Continuar?`);
+    if (confirmar === 'si') {
       try {
         const servicioTorre = new TorreServicio();
         const auxListaID = listaSelecciones.map(torre => parseInt(torre.id.toString()));

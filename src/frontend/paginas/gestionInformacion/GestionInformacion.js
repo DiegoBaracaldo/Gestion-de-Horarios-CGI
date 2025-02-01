@@ -1,8 +1,15 @@
+import { useEffect } from 'react';
 import BotonAtrasExclusivo from '../../componentes/botonAtrasExclusivo/BotonAtrasExclusivo';
 import BotonProcesos from '../../componentes/botonProcesos/BotonProcesos';
 import './GestionInformacion.css';
+import Swal from 'sweetalert2';
 
 const GestionInformacion = () => {
+
+    useEffect(() => {
+        Swal.fire(`Cualquier cambio en los datos de esta página, afectará directamente
+             el horario de clases establecido!`);
+    }, []);
 
     return (
         <div id='contGestionInfo'>

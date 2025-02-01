@@ -521,9 +521,9 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('DeleteAndSaveFranjas', async(event, idGrupo, idCompetencia, arrayFranjas) => {
+    ipcMain.handle('DeleteAndSaveFranjas', async(event, agregaciones, modificaciones, eliminaciones) => {
         try {
-            return await franjaRepo.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
+            return await franjaRepo.DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones);
         } catch (error) {
             console.log("Error en ipcMain  al guardar franjas en franjas por:   " + error);
             throw ObtenerErrorSQLite(error);

@@ -22,9 +22,9 @@ class FranjaServicio {
         }
     }
 
-    async GuardarHorario(idGrupo, idCompetencia, arrayFranjas) {
+    async GuardarHorario(agregaciones, modificaciones, eliminaciones) {
         try {
-            return await window.electron.DeleteAndSaveFranjas(idGrupo, idCompetencia, arrayFranjas);
+            return await window.electron.DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones);
         } catch (error) {
             console.log("error en servicio franjas por: ", error);
             throw error;

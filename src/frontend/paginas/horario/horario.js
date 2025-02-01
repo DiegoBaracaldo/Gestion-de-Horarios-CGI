@@ -15,12 +15,15 @@ import JornadaServicio from '../../../backend/repository/servicios/JornadaServic
 import { FranjasPersonalizadasToBloques, FranjasToBloques } from './UtilidadesHorario';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
+import SWALConfirm from '../../alertas/SWALConfirm';
 
 
 const Horario = () => {
     const navegar = useNavigate();
     const [horarioConfirmado, setHorarioConfirmado] = useState(false);
 
+    const listaFranjasAlteradas = useRef(new Set());
+    const franjaAlterada = useRef([]);
     const [listaProgramas, setListaProgramas] = useState([]);
     const [listaGruposInicial, setListaGruposInicial] = useState([]);
     const [listaGruposDinamica, setListaGruposDinammica] = useState([...listaGruposInicial]);
@@ -34,9 +37,9 @@ const Horario = () => {
     const [tipoJornada, setTipoJornada] = useState('');
     const [seleccBloqueRadioArray, setSeleccBloqueRadioArray] = useState([]);
     const arrayIndexSeleccBloque = useRef(null);
-    useEffect(() => {
-        console.log(seleccBloqueRadioArray)
-    }, [seleccBloqueRadioArray]);
+    // useEffect(() => {
+    //     console.log(seleccBloqueRadioArray)
+    // }, [seleccBloqueRadioArray]);
 
     /***************************************************************************/
     /**************** SECCIÓN CARGA LISTA PRINCIPAL ****************************/
@@ -154,8 +157,8 @@ const Horario = () => {
         if (Array.isArray(listaProgramas) && listaProgramas.length > 0) {
             if (Array.isArray(listaGruposInicial) && listaGruposInicial.length > 0) {
                 const auxListaCombinada = CombinarLista();
-                setListaCombinada(auxListaCombinada);
-                listaCombinadaInicial.current = auxListaCombinada;
+                setListaCombinada(JSON.parse(JSON.stringify(auxListaCombinada)));
+                listaCombinadaInicial.current = JSON.parse(JSON.stringify(auxListaCombinada));
 
                 //Creo el array de indices para guardar la selección de cada competencia
                 arrayIndexSeleccBloque.current = auxListaCombinada.map(programa => (
@@ -230,6 +233,10 @@ const Horario = () => {
             && indexGrupoSelecc >= 0
             && indexCompetenciaSelecc >= 0) {
             setBloques(ObtenerBloques());
+            if (franjaAlterada.current.length > 0) {
+                franjaAlterada.current.forEach(franja => listaFranjasAlteradas.current.add(franja));
+                franjaAlterada.current = [];
+            }
         }
     }, [listaCombinada]);
 
@@ -254,7 +261,7 @@ const Horario = () => {
         if (indexCompetenciaSelecc >= 0) {
             cargandoBloques.current = true;
             setBloques(ObtenerBloques());
-        }else{
+        } else {
             setBloques([]);
             cargandoBloques.current = true;
         }
@@ -277,7 +284,7 @@ const Horario = () => {
                         .current[indexProgramaSelecc][indexGrupoSelecc]
                         .competencias[indexCompetenciaSelecc];
                 // console.log(indexRecuperado)
-            setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
+                setSeleccBloqueRadioArray(new Array(bloques.length).fill(false));
                 setIndexBloqueSelecc({ ...indexBloqueSelecc, valor: indexRecuperado });
             }
             cargandoBloques.current = false;
@@ -448,12 +455,15 @@ const Horario = () => {
                 auxListaCombinada[indexProgramaSelecc]
                     .grupos[indexGrupoSelecc]
                     .franjasPersonalizadas[337] = franjaVacia;
+                franjaAlterada.current = [`${indexProgramaSelecc}-${indexGrupoSelecc}-${337}`];
                 setListaCombinada(auxListaCombinada);
             } else {
                 const auxListaCombinada = [...listaCombinada];
                 auxListaCombinada[indexProgramaSelecc]
                     .grupos[indexGrupoSelecc]
                     .franjasPersonalizadas[ultimoIndice + 1] = franjaVacia;
+                franjaAlterada.current =
+                    [`${indexProgramaSelecc}-${indexGrupoSelecc}-${ultimoIndice + 1}`];
                 setListaCombinada(auxListaCombinada);
             }
 
@@ -464,20 +474,21 @@ const Horario = () => {
 
     }
 
-    // SECCIÓN PARA ELIMINAR EL BLOQUE, EL HOOK SE ENCUENTRA EN LA PARTE DE SELECCIÓN
+    // SECCIÓN PARA ELIMINAR EL BLOQUE
 
-    // const [indexBloqueEliminado, setIndexBloqueEliminado] = useState(-1);
     const nuevoIndexSelecc = useRef(-1);
     const eliminando = useRef(false);
 
     const ManejarRemoveBloque = (bloque, index) => {
         eliminando.current = true;
         const listaCombAux = [...listaCombinada];
+        const auxFranjasAlteradas = [];
         //Si es un bloque lleno  o parcial
         if (bloques[index].franjas.size > 0) {
             bloques[index].franjas.forEach(franja => {
                 listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
                     .franjasPersonalizadas[franja] = undefined;
+                auxFranjasAlteradas.push(`${indexProgramaSelecc}-${indexGrupoSelecc}-${franja}`);
             });
         }
         //Si es un bloque vacío
@@ -490,6 +501,7 @@ const Horario = () => {
             );
             listaCombAux[indexProgramaSelecc].grupos[indexGrupoSelecc]
                 .franjasPersonalizadas.splice(indexObj + 337, 1);
+            auxFranjasAlteradas.push(`${indexProgramaSelecc}-${indexGrupoSelecc}-${indexObj + 337}`);
         }
 
         //Se calcula el nuevo índice de seleccion por haber elimminado
@@ -503,9 +515,104 @@ const Horario = () => {
 
         // console.log("i vale ", iAux);
         nuevoIndexSelecc.current = iAux;
+        franjaAlterada.current = auxFranjasAlteradas;
         setListaCombinada(listaCombAux);
     }
 
+    /********************************************************************************/
+    /******************* SECCIÓN DE PERSISTENCIA ************************************/
+    const agregaciones = [];
+    const modificaciones = [];
+    const eliminaciones = [];
+
+    const GuardarHorario = async () => {
+        DetectarCambiosDatos();
+        //Luego mandar las listas a repo para ejecutar las operaciones en bd
+        try {
+            const respuesta = await new FranjaServicio().GuardarHorario(agregaciones, modificaciones, eliminaciones);
+            if (respuesta === 200) {
+                listaFranjasAlteradas.current = new Set();
+                Swal.fire("Cambios guardados correctamente!");
+                GetListas();
+                setIndexBloqueSelecc({ ...indexBloqueSelecc });
+            }
+            //GetListas(); //Se reinicia todo desde BD
+        } catch (error) {
+            Swal.fire("No se guardaron los cambios!, error de base de datos!");
+        }
+
+    }
+
+    function DetectarCambiosDatos() {
+        listaFranjasAlteradas.current.forEach(franja => {
+            const franjaArray = franja.split('-');
+            const [indexPrograma, indexGrupo, indexFranja] = franjaArray.map(num => parseInt(num, 10));
+            let franjaInicial =
+                listaCombinadaInicial.current[indexPrograma]?.grupos[indexGrupo]?.franjasPersonalizadas[indexFranja];
+            let franjaModificada =
+                listaCombinada[indexPrograma]?.grupos[indexGrupo]?.franjasPersonalizadas[indexFranja];
+            //Si era undefined y ahora tiene objeto
+            if (!franjaInicial && franjaModificada && Object.values(franjaModificada).length > 0) {
+                const auxTupla = {
+                    franja: indexFranja,
+                    idGrupo: listaCombinada[indexPrograma]?.grupos[indexGrupo].id,
+                    idCompetencia: franjaModificada.idCompetencia,
+                    numBloque: franjaModificada.numBloque,
+                    idInstructor: franjaModificada?.instructor?.id || null,
+                    idAmbiente: franjaModificada?.ambiente?.id || null
+                }
+                agregaciones.push(auxTupla);
+            }
+            //Si tenía un objeto, y ahora también, pero cambian sus datos (modificado)
+            else if (franjaInicial && Object.values(franjaInicial).length > 0
+                && franjaModificada && Object.values(franjaModificada).length > 0) {
+                let sonIguales = true;
+                for (const llave in franjaInicial) {
+                    const datoUno = typeof franjaInicial[llave] === 'object' ?
+                        JSON.stringify(franjaInicial[llave]) : String(franjaInicial[llave]);
+                    const datoDos = typeof franjaModificada[llave] === 'object' ?
+                        JSON.stringify(franjaModificada[llave]) : String(franjaModificada[llave]);
+                    if (datoUno !== datoDos)
+                        sonIguales = false
+                }
+                if (!sonIguales) {
+                    const auxObjModificacion = {
+                        franja: indexFranja,
+                        idGrupo: listaCombinada[indexPrograma]?.grupos[indexGrupo].id,
+                        idCompetencia: franjaModificada.idCompetencia,
+                        numBloque: franjaModificada.numBloque,
+                        idInstructor: franjaModificada?.instructor?.id || null,
+                        idAmbiente: franjaModificada?.ambiente?.id || null
+                    }
+                    modificaciones.push(auxObjModificacion);
+                }
+            }
+            //Si tenía objeto y ahora es undefined
+            else if (franjaInicial && Object.values(franjaInicial).length > 0 && !franjaModificada) {
+                const auxTuplaEliminacion = {
+                    franja: indexFranja,
+                    idGrupo: listaCombinada[indexPrograma]?.grupos[indexGrupo].id
+                }
+                eliminaciones.push(auxTuplaEliminacion);
+            }
+        });
+    }
+
+    const ManejarVolver = async () => {
+        if (listaFranjasAlteradas.current.size > 0) {
+            const respuesta = await new SWALConfirm().ConfirmAlert("¿Desea guardar los cambios antes de salir?");
+            if (respuesta === "si") {
+                GuardarHorario();
+                navegar(-1);
+            }
+            else if (respuesta === "no") navegar(-1);
+        } else {
+            navegar(-1);
+        }
+    }
+
+    /********************************************************************************/
+    /********************************************************************************/
 
     return (
         <div id="contCreacionHorario">
@@ -602,7 +709,8 @@ const Horario = () => {
                                             devolverFalsePrimeraCarga={() => setEsPrimeraCargaBloque(false)}
                                             listaCompleta={listaCombinada}
                                             actualizarListaCompleta={(lista) => setListaCombinada(lista)}
-                                            setPintandoCelda={() => { return pintandoCelda.current = true }} />
+                                            setPintandoCelda={() => { return pintandoCelda.current = true }}
+                                            setFranjaAlterada={(f) => franjaAlterada.current = (f)} />
                                         :
                                         <h1 style={{ paddingLeft: '15px' }}>
                                             Selecciona una competencia...
@@ -623,8 +731,11 @@ const Horario = () => {
                         {horarioConfirmado ? 'horario completo!' : 'horario incompleto...'}
                     </h3>
                 </div>
-                <BotonPositivo texto={'guardar'} />
-                <BotonDestructivo texto={'volver'} onClick={() => navegar(-1)} />
+                <BotonPositivo
+                    texto={'guardar'}
+                    disabledProp={listaFranjasAlteradas.current.size <= 0}
+                    onClick={GuardarHorario} />
+                <BotonDestructivo texto={'volver'} onClick={ManejarVolver} />
             </div>
         </div>
     );

@@ -105,22 +105,22 @@ class FranjaRepo {
                     }
 
                     //Se espera que se haga la eliminación
-                    const DeletePromesas = eliminaciones.map(tupla => { 
-                        const {franja, idGrupo} = tupla;
-                        return  runQuery(queryDelete, [franja, idGrupo]);
+                    const DeletePromesas = eliminaciones.map(tupla => {
+                        const { franja, idGrupo } = tupla;
+                        return runQuery(queryDelete, [franja, idGrupo]);
                     });
                     await Promise.all(DeletePromesas);
 
                     //Se espera que se haga el guardado
                     const savePromesas = agregaciones.map(franjaCompleta => {
-                        const {franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque} = franjaCompleta;
+                        const { franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque } = franjaCompleta;
                         return runQuery(querySave, [franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque]);
                     });
                     await Promise.all(savePromesas);
 
                     //Se espera que se hagan las modificaciones
                     const updatePromesas = modificaciones.map(tupla => {
-                        const {idInstructor, idAmbiente, idCompetencia, numBloque, franja, idGrupo} = tupla;
+                        const { idInstructor, idAmbiente, idCompetencia, numBloque, franja, idGrupo } = tupla;
                         return runQuery(queryUpdate, [idInstructor, idAmbiente, idCompetencia, numBloque, franja, idGrupo]);
                     });
                     await Promise.all(updatePromesas);
@@ -144,29 +144,70 @@ class FranjaRepo {
         });
     }
 
-    GetOcupanciaFranjasGrupo(idGrupo){
+    GetOcupanciaFranjasGrupo(idGrupo) {
         return new Promise((resolve, reject) => {
             const query = `
                 SELECT franja, idCompetencia FROM franjas 
                 WHERE idGrupo = ?;
             `;
 
-            this.bd.all(query, [idGrupo], function(error, filas){
-                if(error) reject(error.errno);
+            this.bd.all(query, [idGrupo], function (error, filas) {
+                if (error) reject(error.errno);
                 else resolve(filas);
             });
         });
     }
 
-    GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia){
+    GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia) {
         return new Promise((resolve, reject) => {
             const query = `
                 SELECT * FROM franjas
                 WHERE idGrupo = ? AND idCompetencia = ?;
             `;
-            this.bd.all(query, [idGrupo, idCompetencia], function(error, filas){
-                if(error) reject(error.errno);
+            this.bd.all(query, [idGrupo, idCompetencia], function (error, filas) {
+                if (error) reject(error.errno);
                 else resolve(filas);
+            });
+        });
+    }
+
+    ConfirmarHorarioCompleto() {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT 
+                    CASE 
+                        WHEN COUNT(P.idGrupo) = 0 THEN 0
+                        ELSE MIN(CASE 
+                                    WHEN F.franja_count / 2 = C.horasRequeridas THEN 1 
+                                    ELSE 0 
+                                 END)
+                    END AS todos_cumplen
+                FROM 
+                    piscinaCompetencias P
+                JOIN 
+                    competencias C ON P.idCompetencia = C.id
+                LEFT JOIN 
+                    (SELECT 
+                         idGrupo, 
+                         idCompetencia, 
+                         COUNT(*) AS franja_count
+                     FROM 
+                         franjas
+                     WHERE
+                          idAmbiente IS NOT NULL AND idAmbiente <> ''
+                          AND idInstructor IS NOT NULL AND idInstructor <> ''
+                     GROUP BY 
+                         idGrupo, idCompetencia) F 
+                    ON P.idGrupo = F.idGrupo AND P.idCompetencia = F.idCompetencia;
+            `;
+
+            // Usar get porque esperamos un solo valor
+            this.bd.get(query, (err, row) => {
+                if (err) {
+                    reject(err.errno);
+                } else {
+                    resolve(row.todos_cumplen);
+                }
             });
         });
     }

@@ -52,7 +52,6 @@ const Horario = () => {
         setListaGruposDinammica([...listaGruposInicial]);
     }, [listaGruposInicial]);
 
-
     //LISTA PRINCIPAL
     async function GetListas() {
         try {
@@ -354,7 +353,7 @@ const Horario = () => {
         }
     }, [indexBloqueSelecc]);
     function ObtenerBloqueSelecc() {
-        return bloques[indexBloqueSelecc.valor];
+        return { ...bloques[indexBloqueSelecc.valor] };
     }
 
 
@@ -536,12 +535,12 @@ const Horario = () => {
         try {
             const respuesta = await new FranjaServicio().GuardarHorario(agregaciones, modificaciones, eliminaciones);
             if (respuesta === 200) {
-                listaFranjasAlteradas.current = new Set();
                 Swal.fire("Cambios guardados correctamente!");
-                GetListas();
-                setIndexBloqueSelecc({ ...indexBloqueSelecc });
+                GetListas(); //Se reinicia todo desde BD
+                listaFranjasAlteradas.current = new Set();
+            } else {
+                Swal.fire("No se guardaron los cambios!, error de base de datos!");
             }
-            //GetListas(); //Se reinicia todo desde BD
         } catch (error) {
             Swal.fire("No se guardaron los cambios!, error de base de datos!");
         }
@@ -581,6 +580,7 @@ const Horario = () => {
                         sonIguales = false
                 }
                 if (!sonIguales) {
+                    // console.log("No son iguales");
                     const auxObjModificacion = {
                         franja: indexFranja,
                         idGrupo: listaCombinada[indexPrograma]?.grupos[indexGrupo].id,

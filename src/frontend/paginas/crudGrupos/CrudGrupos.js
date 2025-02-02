@@ -9,12 +9,16 @@ import FiltroGeneral from '../../../backend/filtro/FiltroGeneral';
 import ProgramaServicio from '../../../backend/repository/servicios/ProgramaService';
 import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
 import JornadaServicio from '../../../backend/repository/servicios/JornadaService';
-import TorreServicio from '../../../backend/repository/servicios/TorreService';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudGrupos = () => {
+const CrudGrupos = (
+    { modoSeleccion,
+        onCloseCrud,
+        grupoSeleccionado,
+        idHuesped,
+        idProgramaHuesped }) => {
 
     const subs = ['Ficha', 'Programa académico', 'jornada',
         'trimestre']
@@ -51,7 +55,14 @@ const CrudGrupos = () => {
     }, []);
 
     useEffect(() => {
-        setListaFiltrada(listaObjetos);
+        if (!idHuesped) {
+            setListaFiltrada(listaObjetos);
+        } else {
+            const listaAux = [...listaObjetos.filter(grupo =>
+                grupo.idPrograma === idProgramaHuesped && grupo.id !== idHuesped
+            )];
+            setListaFiltrada(listaAux);
+        }
     }, [listaObjetos]);
 
     //convierto la lista de objetos con todos los datos en una con los 4 a mostrar en la tabla
@@ -138,8 +149,16 @@ const CrudGrupos = () => {
     const [abrirConsulta, setAbrirConsulta] = useState(false);
 
     const AbrirConsulta = (e) => {
-        DefinirGrupoConsultado(e.id);
-        setAbrirConsulta(true);
+        if (modoSeleccion) {
+            if (typeof grupoSeleccionado === 'function') {
+                const grupoSeleccAux = listaFiltrada.find(grupo => grupo.id === e.id);
+                grupoSeleccionado(grupoSeleccAux);
+                if (typeof onCloseCrud === 'function') onCloseCrud();
+            }
+        } else {
+            DefinirGrupoConsultado(e.id);
+            setAbrirConsulta(true);
+        }
     }
 
     const DefinirGrupoConsultado = (numFicha) => {
@@ -215,8 +234,12 @@ const CrudGrupos = () => {
     }
 
     const onClicDestructivo = () => {
-        EliminarGrupos();
-        setVaciarListaSelecc(true);
+        if (modoSeleccion) {
+            if (typeof onCloseCrud === 'function') onCloseCrud();
+        } else {
+            EliminarGrupos();
+            setVaciarListaSelecc(true);
+        }
     }
 
     const filtroExtra = <div id='contFiltroExtraGrupos'>
@@ -240,9 +263,11 @@ const CrudGrupos = () => {
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia} titulo="Grupos" seccLibre={filtroExtra}
                 listaMenu={listaMenuGrupos} filtrarPor={(texto) => setSeleccMenuFiltro(texto)}
-                buscarPor={(texto) => setTextoBusqueda(texto)} onClicPositivo={AbrirRegistro}
+                buscarPor={(texto) => setTextoBusqueda(texto)}
+                onClicPositivo={AbrirRegistro}
                 clicFila={AbrirConsulta} datosJson={listaAdaptada} subtitulos={subs}
-                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc} />
+                onCLicDestructivo={onClicDestructivo} vaciarListaSelecc={vaciarListaSelecc}
+                modoSeleccion={modoSeleccion} />
             {
                 abrirConsulta || abrirRegistro ?
                     <ModalGrupos abrirConsulta={abrirConsulta} abrirRegistro={abrirRegistro}

@@ -12,6 +12,7 @@ const CompetenciaRepo = require('./backend/repository/repositorios/CompetenciaRe
 const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
 const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
 const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
+const FusionesRepo = require('./backend/repository/repositorios/FusionesRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -28,6 +29,7 @@ let ambienteRepo;
 let competenciaRepo;
 let piscinaRepo;
 let franjaRepo;
+let fusionesRepo;
 
 function createWindow() {
 
@@ -42,6 +44,7 @@ function createWindow() {
     competenciaRepo = new CompetenciaRepo(bd);
     piscinaRepo = new PiscinaRepo(bd);
     franjaRepo = new FranjaRepo(bd);
+    fusionesRepo = new FusionesRepo(bd);
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -330,6 +333,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllGruposByPool', async () => {
+        try {
+            return await grupoRepo.GetAllByPool();
+        } catch (error) {
+            console.log("Error en electron ipcMain Grupos  por: " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetGrupoByID', async (event, id) => {
         try {
             return await grupoRepo.GetById(id);
@@ -550,6 +561,16 @@ function RegistrarIPC() {
             return await franjaRepo.ConfirmarHorarioCompleto();
         } catch (error) {
             console.log("Error en ipcMain  al confirma horario por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //FUSIONES
+    ipcMain.handle('GetAllFusiones', async() => {
+        try {
+            return await fusionesRepo.GetAll();
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

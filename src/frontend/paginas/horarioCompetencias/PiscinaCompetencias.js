@@ -14,6 +14,7 @@ import CompetenciaServicio from '../../../backend/repository/servicios/Competenc
 import SWALConfirm from '../../alertas/SWALConfirm';
 import BotonDestructivo from '../../componentes/botonDestructivo/BotonDestructivo';
 import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService.js';
+import FusionesServicio from '../../../backend/repository/servicios/FusionesService.js';
 
 const PiscinaCompetencias = () => {
 
@@ -190,29 +191,29 @@ const PiscinaCompetencias = () => {
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarLista();
             const piscinaCompetencias = new PiscinaServicio().CargarPiscinas();
-            const respuesta = await Promise.all([programas, grupos, piscinaCompetencias]);
-            const auxProgramas = respuesta[0];
-            const auxGrupos = respuesta[1];
-            const auxPiscinas = respuesta[2];
+            const fusiones = new FusionesServicio().CargarLista();
+            let [auxProgramas, auxGrupos, auxPiscinas, auxFusiones] =
+                await Promise.all([programas, grupos, piscinaCompetencias, fusiones]);
             listaPiscinasInicial = [...auxPiscinas];
 
+
+            //Filtro grupos para que no aparezcan los que están como huéspedes
+            auxGrupos = auxGrupos
+                .filter(grupo => !auxFusiones.includes(fusion => fusion.idHuesped === grupo.id));
+
+            const idProgramasSegunPiscina = new Set();
             //analiza los programas a los cuales traer las competencias teniendo en cuenta
             //las piscinas cargadas
-
-            const auxListasProgramasPiscinas = [];
             for (const tupla of listaPiscinasInicial) {
-                //capturo el id del programa de cada grupo que está en la piscina
-                const grupoEncontrado = auxGrupos.find(grupo => grupo.id === tupla.idGrupo);
-                const idProgramaAux = grupoEncontrado ? grupoEncontrado.idPrograma : null;
-                //mirar que no se haya incluido ya y lo agrego si no se ha incluido
-                if (!auxListasProgramasPiscinas.includes(idProgramaAux) && idProgramaAux !== null)
-                    auxListasProgramasPiscinas.push(idProgramaAux);
+                auxGrupos.forEach(grupo => {
+                    if (grupo.id === tupla.idGrupo) idProgramasSegunPiscina.add(grupo.idPrograma);
+                });
             }
             //console.log(auxListasProgramasPiscinas);
 
             //con la lista de ids programa descargo un array con las listas de competencias
             let respuestaCompetencias = await Promise.all(
-                auxListasProgramasPiscinas
+                [...idProgramasSegunPiscina]
                     .map(idprograma => new CompetenciaServicio().CargarLista(idprograma))
             );
             //console.log(respuestaCompetencias);
@@ -348,7 +349,7 @@ const PiscinaCompetencias = () => {
             if (respuesta === 'si') {
                 GuardarPiscina(true);
                 navegar(-1);
-            } else if(respuesta === 'no') {
+            } else if (respuesta === 'no') {
                 navegar(-1);
             }
         } else {

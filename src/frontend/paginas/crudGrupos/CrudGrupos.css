@@ -1,6 +1,10 @@
 #contCrudGrupos{
     height: 100svh;
     width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: white;
     #contFiltroExtraGrupos{
         font-size: 24px;
         display: flex;

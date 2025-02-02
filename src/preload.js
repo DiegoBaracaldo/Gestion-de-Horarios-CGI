@@ -62,5 +62,6 @@ contextBridge.exposeInMainWorld('electron', {
     GetBloquesByCompetenciaFranjas: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetBloquesByCompetenciaFranjas', idGrupo, idCompetencia),
     DeleteAndSaveFranjas: (agregaciones, modificaciones, eliminaciones) => ipcRenderer.invoke('DeleteAndSaveFranjas', agregaciones, modificaciones, eliminaciones),
     GetOcupanciaBloquesGrupo: (idGrupo) => ipcRenderer.invoke('GetOcupanciaBloquesGrupo', idGrupo),
-    GetFranjasByCompetenciaAndGrupo: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetFranjasByCompetenciaAndGrupo', idGrupo, idCompetencia)
+    GetFranjasByCompetenciaAndGrupo: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetFranjasByCompetenciaAndGrupo', idGrupo, idCompetencia),
+    ConfirmarHorarioCompleto: () => ipcRenderer.invoke('ConfirmarHorarioCompleto')
 });

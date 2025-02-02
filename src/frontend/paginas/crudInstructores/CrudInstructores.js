@@ -10,11 +10,11 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import SWALConfirm from '../../alertas/SWALConfirm';
 
-const CrudInstructores = ({ 
+const CrudInstructores = ({
     modoSeleccion,
-     onClose, 
-     responsableSeleccionado, 
-     franjasDeseadas,
+    onClose,
+    responsableSeleccionado,
+    franjasDeseadas,
     listaCompletaGrupos }) => {
 
     const subs = modoSeleccion ?
@@ -37,7 +37,7 @@ const CrudInstructores = ({
             ));
             //La variable franjasdDeseadas se usa  para  filtrar la lista por su disponibilidad
             //// y por su cantidad horas en listaOcupancia
-            if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0 ) {
+            if (Array.isArray(franjasDeseadas) && franjasDeseadas.length > 0) {
                 respuesta = respuesta.filter(instr =>
                     franjasDeseadas.every(franja =>
                         instr.franjaDisponibilidad.includes(franja) && !instr.listaOcupancia.includes(franja) &&
@@ -54,13 +54,15 @@ const CrudInstructores = ({
         }
     }
 
-    function AnalizarListaOcupancia(idInstructor){
+    function AnalizarListaOcupancia(idInstructor) {
         const listaAux = [];
         listaCompletaGrupos?.forEach(programa => {
             programa?.grupos?.forEach(grupo => {
                 grupo.franjasPersonalizadas.forEach((franja, index) => {
-                    if(franja){
-                        if(franja?.instructor.id === idInstructor) listaAux.push(index);
+                    if (franja) {
+                        if (franja?.instructor && Object.values(franja?.instructor).length > 0) {
+                            if (franja?.instructor?.id === idInstructor) listaAux.push(index);
+                        }
                     }
                 });
             });
@@ -101,7 +103,7 @@ const CrudInstructores = ({
                 objetoAux.id = element.id;
                 objetoAux.nombre = element.nombre;
                 objetoAux.especialidad = element.especialidad;
-                objetoAux.topeHoras = `${element.listaOcupancia.length /2} / ${element.topeHoras}`;
+                objetoAux.topeHoras = `${element.listaOcupancia.length / 2} / ${element.topeHoras}`;
                 if (modoSeleccion) objetoAux.cantidadGruposACargo = element.cantidadGruposACargo;
                 listaAux.push(objetoAux);
             });

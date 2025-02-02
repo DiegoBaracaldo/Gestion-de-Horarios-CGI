@@ -172,14 +172,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('GetAllFranjasJornada', async() => {
+    ipcMain.handle('GetAllFranjasJornada', async () => {
         try {
             return await jornadaRepo.GetAllFranjas();
         } catch (error) {
             console.log("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
-    } );
+    });
     ipcMain.handle('SaveNewJornada', async (event, jornada) => {
         try {
             return await jornadaRepo.SaveNew(jornada);
@@ -445,7 +445,7 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('GetAllByPoolCompetencias', async(event, idGrupo) => {
+    ipcMain.handle('GetAllByPoolCompetencias', async (event, idGrupo) => {
         try {
             return await competenciaRepo.GetByPool(idGrupo);
         } catch (error) {
@@ -505,7 +505,7 @@ function RegistrarIPC() {
     });
 
     //Franjas
-    ipcMain.handle('GetAllFranjas', async() => {
+    ipcMain.handle('GetAllFranjas', async () => {
         try {
             return await franjaRepo.GetAll();
         } catch (error) {
@@ -513,7 +513,7 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('GetBloquesByCompetenciaFranjas', async(event, idGrupo, idCompetencia) => {
+    ipcMain.handle('GetBloquesByCompetenciaFranjas', async (event, idGrupo, idCompetencia) => {
         try {
             return await franjaRepo.GetBloquesByCompetencia(idGrupo, idCompetencia);
         } catch (error) {
@@ -521,7 +521,7 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('DeleteAndSaveFranjas', async(event, agregaciones, modificaciones, eliminaciones) => {
+    ipcMain.handle('DeleteAndSaveFranjas', async (event, agregaciones, modificaciones, eliminaciones) => {
         try {
             return await franjaRepo.DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones);
         } catch (error) {
@@ -529,7 +529,7 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('GetOcupanciaBloquesGrupo', async(event, idGrupo) => {
+    ipcMain.handle('GetOcupanciaBloquesGrupo', async (event, idGrupo) => {
         try {
             return await franjaRepo.GetOcupanciaFranjasGrupo(idGrupo);
         } catch (error) {
@@ -537,11 +537,19 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('GetFranjasByCompetenciaAndGrupo', async(event, idGrupo, idCompetencia) => {
+    ipcMain.handle('GetFranjasByCompetenciaAndGrupo', async (event, idGrupo, idCompetencia) => {
         try {
             return await franjaRepo.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
         } catch (error) {
             console.log("Error en ipcMain  al obtener franjas de competencia por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('ConfirmarHorarioCompleto', async () => {
+        try {
+            return await franjaRepo.ConfirmarHorarioCompleto();
+        } catch (error) {
+            console.log("Error en ipcMain  al confirma horario por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

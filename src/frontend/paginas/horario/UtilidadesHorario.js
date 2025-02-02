@@ -88,7 +88,7 @@ export function FranjasPersonalizadasToBloques(franjasGrupoCompletas, idCompeten
 
     });
     listaBloques.sort((a, b) => a.numBloque - b.numBloque);
-    return listaBloques;
+    return [...listaBloques];
 }
 
 // export function FranjasPersonalizadasToBloques(franjasGrupoCompletas, idCompetencia) {

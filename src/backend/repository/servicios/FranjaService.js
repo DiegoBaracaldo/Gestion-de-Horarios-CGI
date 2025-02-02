@@ -40,9 +40,18 @@ class FranjaServicio {
         }
     }
 
-    async ObtenerFranjasCompetenciaGrupo(idGrupo, idCompetencia){
+    async ObtenerFranjasCompetenciaGrupo(idGrupo, idCompetencia) {
         try {
             return await window.electron.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
+        } catch (error) {
+            console.log("error en servicio franjas por: ", error);
+            throw error;
+        }
+    }
+
+    async ConfirmarHorarioCompleto() {
+        try {
+            return await window.electron.ConfirmarHorarioCompleto();
         } catch (error) {
             console.log("error en servicio franjas por: ", error);
             throw error;

@@ -10,6 +10,7 @@ import './GestionHorario.css';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import PiscinaServicio from '../../../backend/repository/servicios/PiscinaService';
+import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
 
 const GestionHorario = () => {
 
@@ -50,9 +51,10 @@ const GestionHorario = () => {
         setCompetenciasListas(respuesta);
     }
 
-    function VerificarHorario(){
+    async function VerificarHorario(){
         //función para verificar que el horario esté confirmado
-        setHorarioListo(false);
+        const respuesta = await new FranjaServicio().ConfirmarHorarioCompleto();
+        setHorarioListo(respuesta === 0 ? false : true);
     }
 
     return (

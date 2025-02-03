@@ -36,27 +36,37 @@ class ConexionBD {
 
     CrearBaseDatos() {
         console.log("Creando base de datos...")
-        this.db.run("PRAGMA foreign_keys = ON;"); //Permitir restricciones de delete en llave foránea
-        this.CrearTablaTorres();
-        this.CrearTablaJornadas();
-        this.CrearTablaProgramas();
-        this.CrearTablaInstructores();
-        this.CrearTablaAmbientes();
-        this.CrearTablaGrupos();
-        this.CrearTablaCompetencias();
-        this.CrearTablaPiscinaCompetencias();
-        this.CrearTablaFranjas();
-        this.CrearTablaFusiones();
+        this.db.serialize(() => {
+            this.db.run("BEGIN TRANSACTION;");
+            this.db.run("PRAGMA foreign_keys = ON;"); //Permitir restricciones de delete en llave foránea
+            this.CrearTablaTorres();
+            this.CrearTablaJornadas();
+            this.CrearTablaProgramas();
+            this.CrearTablaInstructores();
+            this.CrearTablaAmbientes();
+            this.CrearTablaGrupos();
+            this.CrearTablaCompetencias();
+            this.CrearTablaPiscinaCompetencias();
+            this.CrearTablaFranjas();
+            this.CrearTablaFusiones();
+            this.CrearTablaDatosExtra();
+            this.InsertarDatosIniciales();
+            this.CrearTriggerHorarioCambiadoInsert();
+            this.CrearTriggerHorarioCambiadoUpdate();
+            this.CrearTriggerHorarioCambiadoDelete();
+    
+            this.InsertarTorresMock();
+            this.InsertarJornadasMock();
+            this.InsertarProgramasMock();
+            this.InsertarInstructoresMock();
+            this.InsertarAmbientesMock();
+            this.InsertarGruposMock();
+            this.InsertarCompetenciasMock();
+            this.InsertarPiscinasMock();
 
-        this.InsertarTorresMock();
-        this.InsertarJornadasMock();
-        this.InsertarProgramasMock();
-        this.InsertarInstructoresMock();
-        this.InsertarAmbientesMock();
-        this.InsertarGruposMock();
-        this.InsertarCompetenciasMock();
-        this.InsertarPiscinasMock();
-        // this.InsertarFranjasMock();
+            this.db.run("COMMIT;");
+            // this.InsertarFranjasMock();
+        });
     }
 
     CrearTablaTorres() {
@@ -226,6 +236,51 @@ class ConexionBD {
             );
             `
         );
+    }
+
+    CrearTablaDatosExtra(){
+        this.db.run(`
+            CREATE TABLE IF NOT EXISTS datos (
+                clave VARCHAR(20) PRIMARY KEY,
+                valor VARCHAR(20) NOT NULL
+            )
+            `);
+    }
+
+    InsertarDatosIniciales(){
+        this.db.exec(`
+            INSERT INTO datos (clave, valor) VALUES ('horarioCambiado', 'false');
+            `);
+    }
+
+    CrearTriggerHorarioCambiadoInsert(){
+        this.db.run(`
+            CREATE TRIGGER horario_modificado_insert
+            AFTER INSERT ON franjas
+            BEGIN
+                UPDATE datos SET valor = 'true' WHERE clave = 'horarioCambiado';
+            END;
+            `);
+    }
+
+    CrearTriggerHorarioCambiadoUpdate(){
+        this.db.run(`
+            CREATE TRIGGER horario_modificado_update
+            AFTER UPDATE ON franjas
+            BEGIN
+                UPDATE datos SET valor = 'true' WHERE clave = 'horarioCambiado';
+            END;
+            `);
+    }
+
+    CrearTriggerHorarioCambiadoDelete(){
+        this.db.run(`
+            CREATE TRIGGER horario_modificado_delete
+            AFTER DELETE ON franjas
+            BEGIN
+                UPDATE datos SET valor = 'true' WHERE clave = 'horarioCambiado';
+            END;
+            `);
     }
 
     InsertarTorresMock() {

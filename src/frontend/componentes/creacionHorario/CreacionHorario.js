@@ -510,7 +510,7 @@ const CreacionHorario = ({ competencia, bloque, bloqueNumero,
                                                                 onMouseDown={() => ManejarClickDownFranja(colum.colorCelda)}
                                                                 onMouseMove={arrastrandoBlanco || arrastrandoVerde ?
                                                                     () => ManejarArrastreFranjas(colum.valor) : null}>
-                                                                {colum.valor}
+                                                                {''}
                                                             </td>
                                                         ))}
                                                     </tr>

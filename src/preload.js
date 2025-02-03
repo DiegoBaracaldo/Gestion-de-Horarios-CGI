@@ -68,5 +68,7 @@ contextBridge.exposeInMainWorld('electron', {
 
     GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones'),
     SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion),
-    RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion)
+    RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion),
+
+    GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)
 });

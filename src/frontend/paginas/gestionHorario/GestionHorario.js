@@ -72,7 +72,8 @@ const GestionHorario = () => {
                     ruta={"/fusionGrupos"}/>
                 </div>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="horario PDF" disabledProp={!horarioListo || !competenciasListas} />
+                    <BotonProcesos texto="horario PDF" disabledProp={!horarioListo || !competenciasListas} 
+                    ruta={'/horarioPDF'}/>
                 </div>
                 <div className='contBtnRutaInfo'>
                     <BotonProcesos texto="Exportar copia de seguridad" disabledProp={!horarioListo || !competenciasListas} />

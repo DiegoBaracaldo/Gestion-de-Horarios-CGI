@@ -13,6 +13,7 @@ const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
 const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
 const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
 const FusionesRepo = require('./backend/repository/repositorios/FusionesRepo');
+const HorarioPDFRepo = require('./backend/repository/repositorios/HorarioPDFRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -30,6 +31,7 @@ let competenciaRepo;
 let piscinaRepo;
 let franjaRepo;
 let fusionesRepo;
+let horarioPDFRepo;
 
 function createWindow() {
 
@@ -45,6 +47,7 @@ function createWindow() {
     piscinaRepo = new PiscinaRepo(bd);
     franjaRepo = new FranjaRepo(bd);
     fusionesRepo = new FusionesRepo(bd);
+    horarioPDFRepo = new HorarioPDFRepo(bd);
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -587,6 +590,16 @@ function RegistrarIPC() {
             return await fusionesRepo.Remove(idHuesped, idAnfitrion);
         } catch (error) {
             console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //HORARIO PDF
+    ipcMain.handle('GetByClave', async(event, clave) => {
+        try {
+            return await horarioPDFRepo.GetByClave(clave);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener valor por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });

@@ -1,14 +1,14 @@
 #contTarjetaHuesped {
     background-color: white;
     border: 1px solid black;
-    width: 90%;
+    width: 97%;
     height: fit-content;
-    padding: 5px 10px;
+    padding: 5px 0px 5px 10px;
     margin-top: 30px;
     border-radius: 12px;
     box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.75);
     display: grid;
-    grid-template-columns: 12fr 1fr;
+    grid-template-columns: 8fr 1fr;
     grid-template-rows: auto auto;
     grid-template-areas:
         "codigo boton"
@@ -16,24 +16,41 @@
 
     h3 {
         grid-area: codigo;
-        /* background-color: yellow; */
+        background-image: linear-gradient(to right, var(--colorGrisLectura), transparent);
+        color: var(--colorAzulOscuro);
+        padding-left: 20px;
     }
 
-    contInfoGrupoHuesped {
+    .contInfoGrupoHuesped {
         grid-area: parrafo;
         /* background-color: orange; */
-        min-height: 9svh;
-        /* min-width: 80%;
-        width: 80%; */
+        min-height: 10svh;
+        height: fit-content;
+        display: flex;
+        flex-wrap: wrap;
+        div{
+            /* background-color: aqua; */
+            /* border: 1px solid black; */
+            min-width: fit-content;
+            flex: 0 0 50%;
+            margin-top: 5px;
+        }
+        .etTitulo{
+            text-transform: capitalize;
+            font-size: medium;
+            font-weight: bold;
+        }
+        .etContenido{
+            text-transform: capitalize;
+            font-size: medium;
+        }
     }
 
     .contBtnDestructivo {
         grid-area: boton;
         /* background-color: rebeccapurple;  */
         width: 100%;
-        aspect-ratio: 1;
-        padding: 20% 20%;
-        /* flex-grow: 1;
-        padding: 2% 6%; */
+        height: 40%;
+        padding: 10% 10%;
     }
 }

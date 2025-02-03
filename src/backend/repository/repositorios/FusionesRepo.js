@@ -65,6 +65,18 @@ class FusionesRepo {
         });
     }
 
+    async Remove(idHuesped, idAnfitrion){
+        return new Promise((resolve, reject) => {
+            const query = `
+            DELETE FROM fusiones 
+            WHERE idHuesped = ? AND idAnfitrion = ?;`
+
+            this.db.run(query, [idHuesped, idAnfitrion], function(error){
+                if(error)reject(error.errno);
+                else resolve(200);
+            });
+        });
+    }
 }
 
 module.exports = FusionesRepo;

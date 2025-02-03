@@ -29,6 +29,7 @@ const FusionGrupos = () => {
     const [programasCompletados, setProgramasCompletados] = useState([]);
     const [indexPrograma, setindexPrograma] = useState(-1);
     const [indexGrupo, setIndexGrupo] = useState(-1);
+    const [huespedes, setHuespedes] = useState(new Set());
 
     useEffect(() => {
         GetListas();
@@ -96,8 +97,7 @@ const FusionGrupos = () => {
 
     const AbrirGruposHuesped = async () => {
         const respuesta = await new SWALConfirm().ConfirmAlert(`
-            El grupo que seleccione PEDERÁ todo su horario. ¿Continuar?
-            `);
+            El grupo que seleccione PEDERÁ todo su horario. ¿Continuar?`);
         if (respuesta === 'si') setAbrirGrupos(true);
     }
 
@@ -109,6 +109,7 @@ const FusionGrupos = () => {
         setGrupoAnfi(g);
         setindexPrograma(iP);
         setIndexGrupo(iG);
+        setHuespedes(new Set(g.huespedes.map(grupo => grupo.id)));
     }
 
     async function GuardarFusion(idHuesped) {
@@ -118,14 +119,25 @@ const FusionGrupos = () => {
             idAnfitrion: grupoAnfi.id
         };
         try {
-            const respuesta = await new FusionesServicio().GuardarFusion(fusionObj);
-            if (respuesta === 200) {
-                Swal.fire('Fusión realizada con éxito!');
-                GetListas();
-            }
-            else Swal.fire('Error al fusionar!');
+            await new FusionesServicio().GuardarFusion(fusionObj);
+            GetListas();
+            Swal.fire('Fusión realizada con éxito!');
         } catch (error) {
             Swal.fire(error);
+        }
+    }
+
+    async function EliminarFusion(huesped) {
+        const resp = await new SWALConfirm().ConfirmAlert(`
+            Si elimina el huesped tendrá que asignarle competencias y horario. ¿Continuar?`);
+        if (resp === 'si') {
+            try {
+                await new FusionesServicio().EliminarFusion(huesped.id, grupoAnfi.id);
+                navegar(-1);
+                Swal.fire("Eliminación correcta!");
+            } catch (error) {
+                Swal.fire(error);
+            }
         }
     }
 
@@ -187,10 +199,12 @@ const FusionGrupos = () => {
                             <div className="contHuespedes">
                                 {
                                     indexPrograma >= 0 && indexGrupo >= 0 ?
-                                    listaCombinada[indexPrograma]?.grupos[indexGrupo]?.huespedes?.map(huesped => 
-                                        <TarjetaHuesped grupo={huesped} />
-                                    )
-                                    : null
+                                        listaCombinada[indexPrograma]?.grupos[indexGrupo]?.huespedes?.map(huesped =>
+                                            <TarjetaHuesped
+                                                grupo={huesped}
+                                                onClicDestructivo={(g) => EliminarFusion(g)} />
+                                        )
+                                        : null
                                 }
                             </div>
                         </div>
@@ -214,11 +228,8 @@ const FusionGrupos = () => {
                         onCloseCrud={CerrarGrupos}
                         grupoSeleccionado={(g) => ManejarSeleccHuesped(g)}
                         idPrograma={grupoAnfi?.idPrograma}
-                        idAnfitrion={grupoAnfi?.id} 
-                        yaSonHuespedes={
-                            new Set(listaCombinada[indexGrupo]?.grupos[indexGrupo]?.huespedes?.map(grupo => 
-                                grupo.id
-                             ))}/>
+                        idAnfitrion={grupoAnfi?.id}
+                        yaSonHuespedes={huespedes} />
                     : null
             }
         </div>

@@ -85,7 +85,7 @@ class AmbienteRepo {
             const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
             this.db.serialize(async () => {
                 try {
-                    this.db.run("BEGIN TRANSACTION");
+                    await this.db.run("BEGIN TRANSACTION");
 
                     const query = "UPDATE ambientes SET " +
                         "nombre = ?, " +

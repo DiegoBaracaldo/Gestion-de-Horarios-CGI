@@ -566,7 +566,7 @@ function RegistrarIPC() {
     });
 
     //FUSIONES
-    ipcMain.handle('GetAllFusiones', async() => {
+    ipcMain.handle('GetAllFusiones', async () => {
         try {
             return await fusionesRepo.GetAll();
         } catch (error) {
@@ -574,9 +574,17 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('SaveNewFusion', async(event, fusion) => {
+    ipcMain.handle('SaveNewFusion', async (event, fusion) => {
         try {
             return await fusionesRepo.SaveNew(fusion);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('RemoveFusion', async (event, idHuesped, idAnfitrion) => {
+        try {
+            return await fusionesRepo.Remove(idHuesped, idAnfitrion);
         } catch (error) {
             console.log("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);

@@ -67,5 +67,6 @@ contextBridge.exposeInMainWorld('electron', {
     ConfirmarHorarioCompleto: () => ipcRenderer.invoke('ConfirmarHorarioCompleto'),
 
     GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones'),
-    SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion)
+    SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion),
+    RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion)
 });

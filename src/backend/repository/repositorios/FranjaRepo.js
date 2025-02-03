@@ -80,7 +80,7 @@ class FranjaRepo {
         return new Promise((resolve, reject) => {
             this.bd.serialize(async () => {
                 try {
-                    this.bd.run("BEGIN TRANSACTION");
+                    await this.bd.run("BEGIN TRANSACTION");
 
                     const queryDelete = `DELETE FROM franjas WHERE franja = ? AND idGrupo = ?;`;
                     const querySave = `
@@ -126,7 +126,7 @@ class FranjaRepo {
                     await Promise.all(updatePromesas);
 
                     //Confirmar que todo fue exitoso
-                    this.bd.run("COMMIT", function (error) {
+                    await this.bd.run("COMMIT", function (error) {
                         if (error) {
                             this.bd.run("ROLLBACK");
                             reject(error);
@@ -137,7 +137,7 @@ class FranjaRepo {
                     });
                 } catch (error) {
                     //Error en cualquier parte de las transacciones
-                    this.bd.run("ROLLBACK");
+                    await this.bd.run("ROLLBACK");
                     reject(error);
                 }
             });

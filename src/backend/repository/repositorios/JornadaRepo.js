@@ -71,7 +71,7 @@ class JornadaRepo {
             const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
             this.db.serialize(async () => {
                 try {
-                    this.db.run("BEGIN TRANSACTION");
+                    await this.db.run("BEGIN TRANSACTION");
 
                     const queryGetIdGrupos = `
                         SELECT id AS idGrupo FROM grupos WHERE idJornada = ?`;

@@ -1,0 +1,90 @@
+#contExtFusionGrupos {
+    .ladoHuespedes{
+        /* background-color: yellow; */
+        width: 100%;
+        height: 100%;
+        .presentacionAnfi{
+            height: 25%;
+            width: 100%;
+            background-color: var(--colorGrisLectura);
+            border-bottom: 1px solid black;
+            h3{
+                padding-left: 10px;
+                /* background-color: beige; */
+                height: 25%;
+                background-color: var(--colorAzulOscuro);
+                color: white;
+                justify-content: start;
+                :first-child{
+                    margin-right: 1%;
+                }
+            }
+            .contDescripcionesGrupo{
+                display: flex;
+                flex-wrap: wrap;
+                padding-left: 10px;
+                div{
+                    /* background-color: aqua; */
+                    /* border: 1px solid black; */
+                    min-width: fit-content;
+                    flex: 0 0 50%;
+                    margin-top: 5px;
+                }
+                .etTitulo{
+                    text-transform: capitalize;
+                    font-size: larger;
+                    font-weight: bold;
+                }
+                .etContenido{
+                    text-transform: capitalize;
+                    font-size: larger;
+                }
+            }
+        }
+        .contHuespedes{
+            /* background-color: yellow; */
+            width: 100%;
+            height: 68%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: start;
+            gap: 10px;
+            /* border-top: 1px solid black; */
+        }
+        .contBtnAgregarHuesped{
+            /* background-color: blue; */
+            height: 7%;
+            width: 100%;
+            padding-left: 10px;
+            padding-right: 65%;
+            margin-top: 10px;
+            button{
+                width: 100%;
+                height: 100%;
+                border-radius: 12px;
+                background-color: var(--colorPrincipal);
+                color: white;
+                text-transform: capitalize;
+                font-size: larger;
+                font-weight: bold;
+                letter-spacing: 3px;
+                border: none;
+            }
+        }
+    }
+    .contBotones {
+        /* background-color: yellow; */
+        height: 15svh;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        div{
+            height: 55%;
+            width: 30%;
+        }
+    }
+}

@@ -40,6 +40,36 @@ class GrupoRepo {
         });
     }
 
+    async GetAllByPool() {
+        return new Promise((resolve, reject) => {
+            
+                const query = 
+                `SELECT 
+                    grupos.*, 
+                    jornadas.tipo AS jornada, 
+                    jornadas.franjaDisponibilidad AS franjaJornada, 
+                    instructores.nombre AS nombreResponsable, 
+                    programas.nombre AS nombrePrograma 
+                FROM 
+                    grupos 
+                JOIN 
+                    jornadas ON grupos.idJornada = jornadas.id 
+                JOIN 
+                    instructores ON grupos.idResponsable = instructores.id 
+                JOIN 
+                    programas ON grupos.idPrograma = programas.id 
+                LEFT JOIN 
+                    fusiones ON grupos.id = fusiones.idHuesped 
+                WHERE 
+                    fusiones.idHuesped IS NULL`;
+
+            this.db.all(query, [], (err, filas) => {
+                if (err) reject(err.errno);
+                else resolve(filas);
+            });
+        });
+    }
+
     async GetById(id) {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM grupos WHERE id = ?";

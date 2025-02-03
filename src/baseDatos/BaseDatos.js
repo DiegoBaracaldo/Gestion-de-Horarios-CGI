@@ -46,6 +46,7 @@ class ConexionBD {
         this.CrearTablaCompetencias();
         this.CrearTablaPiscinaCompetencias();
         this.CrearTablaFranjas();
+        this.CrearTablaFusiones();
 
         this.InsertarTorresMock();
         this.InsertarJornadasMock();
@@ -173,7 +174,7 @@ class ConexionBD {
         );
     }
 
-    CrearTablaFranjas(){
+    CrearTablaFranjas() {
         this.db.run(
             `
             CREATE TABLE IF NOT EXISTS franjas (
@@ -196,7 +197,7 @@ class ConexionBD {
         );
     }
 
-    CrearTablaPiscinaCompetencias(){
+    CrearTablaPiscinaCompetencias() {
         this.db.run(
             `
             CREATE TABLE IF NOT EXISTS piscinaCompetencias (
@@ -207,6 +208,22 @@ class ConexionBD {
             FOREIGN KEY (idCompetencia) REFERENCES competencias(id) ON DELETE CASCADE ON UPDATE CASCADE,
             PRIMARY KEY (idGrupo, idCompetencia)
             )
+            `
+        );
+    }
+
+    CrearTablaFusiones() {
+        this.db.run(
+            `
+            CREATE TABLE IF NOT EXISTS fusiones (
+                idAnfitrion INTEGER,
+                idHuesped INTEGER,
+                idPrograma NOT NULL,
+                fechaRegistro TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (idAnfitrion, idHuesped),
+                FOREIGN KEY (idAnfitrion) REFERENCES grupos(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                FOREIGN KEY (idHuesped) REFERENCES grupos(id) ON DELETE CASCADE ON UPDATE CASCADE
+            );
             `
         );
     }
@@ -291,7 +308,7 @@ class ConexionBD {
         );
     }
 
-    InsertarPiscinasMock(){
+    InsertarPiscinasMock() {
         this.db.exec(
             `
             INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (849387, 123456);
@@ -304,7 +321,7 @@ class ConexionBD {
         );
     }
 
-    InsertarFranjasMock(){
+    InsertarFranjasMock() {
         this.db.exec(
             `
             INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia) 

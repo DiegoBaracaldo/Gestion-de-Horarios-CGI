@@ -51,7 +51,7 @@ const ProgramasGrupos = ({
                                                         <span>{`Grupo ${grupo.codigoGrupo}`}</span>
                                                         {Array.isArray(listaParaListaCompletado) &&
                                                             listaParaListaCompletado.length > 0 &&
-                                                                listaParaListaCompletado[i].gruposCompletados[j] ?
+                                                                listaParaListaCompletado[i].gruposCompletados.includes(grupo.id) ?
                                                                 <span>{" ✔️" }</span> 
                                                                 : null
                                                         }

@@ -91,7 +91,7 @@ const Horario = () => {
             };
 
             const programas = new ProgramaServicio().CargarLista();
-            const grupos = new GrupoServicio().CargarLista();
+            const grupos = new GrupoServicio().CargarListaByPool();
             const respuesta = await Promise.all([programas, grupos]);
             const auxProgramas = respuesta[0];
             let auxGrupos = respuesta[1];
@@ -381,6 +381,7 @@ const Horario = () => {
     //CADA QUE SE SELECCIONA UN GRUPO
 
     const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
+        // console.log(grupo);
         setIndexProgramaSelecc(indexPrograma);
         setIndexGrupoSelecc(indexGrupo);
         //Se reinicia selecc competencia

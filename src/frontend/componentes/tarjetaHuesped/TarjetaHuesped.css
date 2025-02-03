@@ -1,0 +1,56 @@
+#contTarjetaHuesped {
+    background-color: white;
+    border: 1px solid black;
+    width: 97%;
+    height: fit-content;
+    padding: 5px 0px 5px 10px;
+    margin-top: 30px;
+    border-radius: 12px;
+    box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.75);
+    display: grid;
+    grid-template-columns: 8fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "codigo boton"
+        "parrafo boton";
+
+    h3 {
+        grid-area: codigo;
+        background-image: linear-gradient(to right, var(--colorGrisLectura), transparent);
+        color: var(--colorAzulOscuro);
+        padding-left: 20px;
+    }
+
+    .contInfoGrupoHuesped {
+        grid-area: parrafo;
+        /* background-color: orange; */
+        min-height: 10svh;
+        height: fit-content;
+        display: flex;
+        flex-wrap: wrap;
+        div{
+            /* background-color: aqua; */
+            /* border: 1px solid black; */
+            min-width: fit-content;
+            flex: 0 0 50%;
+            margin-top: 5px;
+        }
+        .etTitulo{
+            text-transform: capitalize;
+            font-size: medium;
+            font-weight: bold;
+        }
+        .etContenido{
+            text-transform: capitalize;
+            font-size: medium;
+        }
+    }
+
+    .contBtnDestructivo {
+        grid-area: boton;
+        /* background-color: rebeccapurple;  */
+        width: 100%;
+        height: 40%;
+        padding: 10% 10%;
+    }
+}

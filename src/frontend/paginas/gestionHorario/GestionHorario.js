@@ -68,13 +68,14 @@ const GestionHorario = () => {
                     ruta={"/horario"}/>
                 </div>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="fusionar grupos" disabledProp={!horarioListo} />
+                    <BotonProcesos texto="fusionar grupos" disabledProp={!horarioListo || !competenciasListas} 
+                    ruta={"/fusionGrupos"}/>
                 </div>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="horario PDF" disabledProp={!horarioListo} />
+                    <BotonProcesos texto="horario PDF" disabledProp={!horarioListo || !competenciasListas} />
                 </div>
                 <div className='contBtnRutaInfo'>
-                    <BotonProcesos texto="Exportar copia de seguridad" disabledProp={!horarioListo} />
+                    <BotonProcesos texto="Exportar copia de seguridad" disabledProp={!horarioListo || !competenciasListas} />
                 </div>
             </div>
 

@@ -17,6 +17,7 @@ import CrudPrograma from './frontend/paginas/crudProgramas/CrudPrograma';
 import GestionHorario from './frontend/paginas/gestionHorario/GestionHorario';
 import PiscinaCompetencias from './frontend/paginas/horarioCompetencias/PiscinaCompetencias';
 import Horario from './frontend/paginas/horario/horario';
+import FusionGrupos from './frontend/paginas/fusionGrupos/FusionGrupos';
 
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
           <Route path="/crudProgramas" element={<CrudPrograma/>} />
           <Route path="/piscinaCompetencias" element={<PiscinaCompetencias/>} />
           <Route path="/horario" element={<Horario/>} />
+          <Route path="/fusionGrupos" element={<FusionGrupos/>} />
         </Routes>
       </Router>
     </div>

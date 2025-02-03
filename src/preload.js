@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('electron', {
 
     AtLeastOneGrupo: () => ipcRenderer.invoke('AtLeastOneGrupo'),
     GetAllGrupos: () => ipcRenderer.invoke('GetAllGrupos'),
+    GetAllGruposByPool: () => ipcRenderer.invoke('GetAllGruposByPool'),
     GetGrupoByID: (id) => ipcRenderer.invoke('GetGrupoByID', id),
     SaveNewGrupo: (grupo) => ipcRenderer.invoke('SaveNewGrupo', grupo),
     SaveGrupo: (idViejo, grupo) => ipcRenderer.invoke('SaveGrupo', idViejo, grupo),
@@ -63,5 +64,9 @@ contextBridge.exposeInMainWorld('electron', {
     DeleteAndSaveFranjas: (agregaciones, modificaciones, eliminaciones) => ipcRenderer.invoke('DeleteAndSaveFranjas', agregaciones, modificaciones, eliminaciones),
     GetOcupanciaBloquesGrupo: (idGrupo) => ipcRenderer.invoke('GetOcupanciaBloquesGrupo', idGrupo),
     GetFranjasByCompetenciaAndGrupo: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetFranjasByCompetenciaAndGrupo', idGrupo, idCompetencia),
-    ConfirmarHorarioCompleto: () => ipcRenderer.invoke('ConfirmarHorarioCompleto')
+    ConfirmarHorarioCompleto: () => ipcRenderer.invoke('ConfirmarHorarioCompleto'),
+
+    GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones'),
+    SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion),
+    RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion)
 });

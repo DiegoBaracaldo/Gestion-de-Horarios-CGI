@@ -85,7 +85,7 @@ class InstructorRepo {
             const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
             this.db.serialize(async () => {
                 try {
-                    this.db.run("BEGIN TRANSACTION");
+                    await this.db.run("BEGIN TRANSACTION");
 
                     const query = "UPDATE instructores SET " +
                         "id = ?, nombre = ?, " +
@@ -105,7 +105,7 @@ class InstructorRepo {
                         else resolve(this.changes); // Devuelve el número de filas modificadas
                     });
 
-                    this.db.run("COMMIT", function (error) {
+                    await this.db.run("COMMIT", function (error) {
                         if (error) {
                             this.db.run("ROLLBACK");
                             reject(error.errno)
@@ -116,7 +116,7 @@ class InstructorRepo {
 
                 } catch (error) {
                     //Error en cualquier parte de las transacciones
-                    this.db.run("ROLLBACK");
+                    await this.db.run("ROLLBACK");
                     reject(error);
                 }
             });

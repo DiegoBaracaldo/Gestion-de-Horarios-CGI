@@ -66,5 +66,6 @@ contextBridge.exposeInMainWorld('electron', {
     GetFranjasByCompetenciaAndGrupo: (idGrupo, idCompetencia) => ipcRenderer.invoke('GetFranjasByCompetenciaAndGrupo', idGrupo, idCompetencia),
     ConfirmarHorarioCompleto: () => ipcRenderer.invoke('ConfirmarHorarioCompleto'),
 
-    GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones')
+    GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones'),
+    SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion)
 });

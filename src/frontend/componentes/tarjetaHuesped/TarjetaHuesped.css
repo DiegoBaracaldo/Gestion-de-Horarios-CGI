@@ -1,0 +1,39 @@
+#contTarjetaHuesped {
+    background-color: white;
+    border: 1px solid black;
+    width: 90%;
+    height: fit-content;
+    padding: 5px 10px;
+    margin-top: 30px;
+    border-radius: 12px;
+    box-shadow: 5px 5px 5px 0px rgba(0, 0, 0, 0.75);
+    display: grid;
+    grid-template-columns: 12fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+        "codigo boton"
+        "parrafo boton";
+
+    h3 {
+        grid-area: codigo;
+        /* background-color: yellow; */
+    }
+
+    contInfoGrupoHuesped {
+        grid-area: parrafo;
+        /* background-color: orange; */
+        min-height: 9svh;
+        /* min-width: 80%;
+        width: 80%; */
+    }
+
+    .contBtnDestructivo {
+        grid-area: boton;
+        /* background-color: rebeccapurple;  */
+        width: 100%;
+        aspect-ratio: 1;
+        padding: 20% 20%;
+        /* flex-grow: 1;
+        padding: 2% 6%; */
+    }
+}

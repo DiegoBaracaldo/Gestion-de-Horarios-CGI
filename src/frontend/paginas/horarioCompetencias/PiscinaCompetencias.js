@@ -196,10 +196,9 @@ const PiscinaCompetencias = () => {
                 await Promise.all([programas, grupos, piscinaCompetencias, fusiones]);
             listaPiscinasInicial = [...auxPiscinas];
 
-
             //Filtro grupos para que no aparezcan los que están como huéspedes
             auxGrupos = auxGrupos
-                .filter(grupo => !auxFusiones.includes(fusion => fusion.idHuesped === grupo.id));
+                .filter(grupo => !auxFusiones.some(fusion => fusion.idHuesped === grupo.id));
 
             const idProgramasSegunPiscina = new Set();
             //analiza los programas a los cuales traer las competencias teniendo en cuenta

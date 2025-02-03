@@ -17,8 +17,9 @@ const CrudGrupos = (
     { modoSeleccion,
         onCloseCrud,
         grupoSeleccionado,
-        idHuesped,
-        idProgramaHuesped }) => {
+        idAnfitrion,
+        idPrograma,
+        yaSonHuespedes }) => {
 
     const subs = ['Ficha', 'Programa académico', 'jornada',
         'trimestre']
@@ -55,11 +56,13 @@ const CrudGrupos = (
     }, []);
 
     useEffect(() => {
-        if (!idHuesped) {
+        if (!idAnfitrion) {
             setListaFiltrada(listaObjetos);
         } else {
             const listaAux = [...listaObjetos.filter(grupo =>
-                grupo.idPrograma === idProgramaHuesped && grupo.id !== idHuesped
+                grupo.idPrograma === idPrograma 
+                && grupo.id !== idAnfitrion
+                && !yaSonHuespedes.has(grupo.id)
             )];
             setListaFiltrada(listaAux);
         }

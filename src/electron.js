@@ -574,4 +574,12 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('SaveNewFusion', async(event, fusion) => {
+        try {
+            return await fusionesRepo.SaveNew(fusion);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
 }

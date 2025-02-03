@@ -117,29 +117,17 @@ const PiscinaCompetencias = () => {
         //del mismo tamaño de los grupos que contiene, y un false por cada uno de ellos
         //para que coincida con la estructura de la lista
         if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
-            if (Array.isArray(listaCombinada) && listaCombinada.length > 0) {
-                const listaAux = new Array(listaCombinada.length).fill(null).map(() => ({
-                    completado: false,
-                    gruposCompletados: []
-                }));
-                listaCombinada.forEach((programa, index) => {
-                    if (Array.isArray(programa.grupos)) {
-                        listaAux[index].gruposCompletados =
-                            listaCombinada[index]
-                                .grupos.map(grupo => {
-                                    if (grupo.competencias.length > 0) return true;
-                                    else return false;
-                                });
-                    }
-                });
-                //Pintar programas si están completados
-                listaAux.forEach(programa => {
-                    if (programa.gruposCompletados.every(valor => valor === true)) {
-                        programa.completado = true
-                    }
-                });
-                setProgramasGruposCompletados([...listaAux]);
-            }
+            const listaAux = listaCombinada.map(programa => {
+                const gruposCompletados = programa.grupos?.filter(grupo => {
+                    return grupo.competencias?.length > 0
+                }).map(grupo => grupo.id);
+                const programaCompletado = programa.grupos?.length === gruposCompletados.length;
+                return {
+                    completado: programaCompletado,
+                    gruposCompletados: gruposCompletados
+                }
+            });
+            setProgramasGruposCompletados([...listaAux]);
         }
     }, [listaCombinada]);
 

@@ -381,6 +381,7 @@ const Horario = () => {
     //CADA QUE SE SELECCIONA UN GRUPO
 
     const ManejarSeleccGrupo = (grupo, indexPrograma, indexGrupo) => {
+        // console.log(grupo);
         setIndexProgramaSelecc(indexPrograma);
         setIndexGrupoSelecc(indexGrupo);
         //Se reinicia selecc competencia

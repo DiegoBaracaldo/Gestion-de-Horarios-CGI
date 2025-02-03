@@ -12,6 +12,8 @@ class PiscinaRepo {
 
                 const queryInsert = "INSERT INTO piscinaCompetencias (idGrupo, idCompetencia) VALUES (?, ?)";
                 const queryDelete = "DELETE from piscinaCompetencias WHERE idGrupo = ? AND idCompetencia = ?";
+                const queryDeleteFranjas = `
+                    DELETE FROM franjas WHERE idCompetencia = ? AND idGrupo = ?;`;
 
                 const runQuery = (query, params) => {
                     return new Promise((resolve, reject) => {
@@ -33,7 +35,11 @@ class PiscinaRepo {
                     return runQuery(queryDelete, [eliminado.idGrupo, eliminado.idCompetencia]);
                 });
 
-                Promise.all([...insertPromises, ...deletePromises])
+                const deleteFranjasPromises = eliminados.map(eliminado => {
+                    return runQuery(queryDeleteFranjas, [eliminado.idCompetencia, eliminado.idGrupo]);
+                });
+
+                Promise.all([...insertPromises, ...deletePromises, ...deleteFranjasPromises])
                     .then(() => {
                         //Si todo sale bien
                         this.db.run("COMMIT", function (error) {

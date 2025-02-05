@@ -14,6 +14,22 @@ class CompetenciaRepo {
         });
     }
 
+    async GetAllById(arrayIds) {
+        return new Promise((resolve, reject) => {
+            const placeHolders = arrayIds.map(() => '?').join(', ');
+
+            const query = `
+                SELECT * FROM competencias
+                WHERE id IN (${placeHolders});
+            `;
+
+            this.db.all(query, arrayIds, (error, filas) => {
+                if (error) reject(error.errno);
+                else resolve(filas);
+            });
+        });
+    }
+
     GetAllByIdPrograma(idPrograma) {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE idPrograma = ?";

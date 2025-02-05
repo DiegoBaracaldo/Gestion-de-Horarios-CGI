@@ -1,0 +1,46 @@
+#tablaHorarioPDFInstructor {
+    width: 550px;
+    height: fit-content;
+
+    .titulo {
+        text-transform: capitalize;
+        text-align: center;
+        color: var(--colorAzulOscuro);
+        border-top: 2px solid var(--colorAzulOscuro);
+        border-bottom: 3px solid var(--colorAzulOscuro);
+        font-style: italic;
+        font-size: medium;
+        th {
+            padding-bottom: 5px;
+        }
+    }
+
+    .subtitulo {
+        text-align: left;
+        font-size: medium;
+    }
+    .filaSubBloque{
+        font-size: x-small;
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid black;
+        .etDescriComp{
+            width: 250px;
+            height: fit-content;
+        }
+        .hora{
+            width: 80px;
+            font-size: small;
+        }
+    }
+    .filaDia{
+        text-transform: capitalize;
+        font-weight: bold;
+        font-size: small;
+        background-color: var(--colorGrisLectura);
+        padding-bottom: 4px;
+    }
+}

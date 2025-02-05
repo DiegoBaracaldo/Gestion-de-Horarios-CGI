@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('electron', {
 
     AtLeastOneGrupo: () => ipcRenderer.invoke('AtLeastOneGrupo'),
     GetAllGrupos: () => ipcRenderer.invoke('GetAllGrupos'),
+    GetAllByIdGrupo: (arrayIds) => ipcRenderer.invoke('GetAllByIdGrupo', arrayIds),
     GetAllGruposByPool: () => ipcRenderer.invoke('GetAllGruposByPool'),
     GetGrupoByID: (id) => ipcRenderer.invoke('GetGrupoByID', id),
     SaveNewGrupo: (grupo) => ipcRenderer.invoke('SaveNewGrupo', grupo),
@@ -50,6 +51,7 @@ contextBridge.exposeInMainWorld('electron', {
     AtLeastOneCompetencia: () => ipcRenderer.invoke('AtLeastOneCompetencia'),
     GetAllCompetencias: (idPrograma) => ipcRenderer.invoke('GetAllCompetencias', idPrograma),
     GetCompetenciaByID: (id) => ipcRenderer.invoke('GetCompetenciaByID', id),
+    GetAllByIdCompetencia: (arrayIds) => ipcRenderer.invoke('GetAllByIdCompetencia', arrayIds),
     GetAllByPoolCompetencias: (idGrupo) => ipcRenderer.invoke('GetAllByPoolCompetencias', idGrupo),
     SaveNewCompetencia: (competencia) => ipcRenderer.invoke('SaveNewCompetencia', competencia),
     SaveCompetencia: (idViejo, competencia) => ipcRenderer.invoke('SaveCompetencia', idViejo, competencia),
@@ -69,6 +71,8 @@ contextBridge.exposeInMainWorld('electron', {
     GetAllFusiones: () => ipcRenderer.invoke('GetAllFusiones'),
     SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion),
     RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion),
+    SavePDFsInstructores: (arrayPDFs) => ipcRenderer.invoke('SavePDFsInstructores', arrayPDFs),
+    AbrirCarpetaContenedoraPDF: () => ipcRenderer.invoke('AbrirCarpetaContenedoraPDF'),
 
     GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)
 });

@@ -6,17 +6,17 @@ import './HorarioPDF.css';
 import { useEffect, useRef, useState } from 'react';
 import HorarioPDFServicio from '../../../backend/repository/servicios/HorarioPDFServicie';
 import Swal from 'sweetalert2';
-import FranjaServicio from '../../../backend/repository/servicios/FranjaService';
+import CrearHorarioInstructores from './HorarioInstructores';
+import jsPDF from 'jspdf';
+import { renderToString } from 'react-dom/server';
+
 
 const HorarioPDF = () => {
 
     const navegar = useNavigate(-1);
-
     const horarioHaCambiado = useRef(DetectarHorarioAlterado());
-    const franjasInstructores = useRef(new Map());
-    const franjasGrupos = useRef(new Map());
-    const horarioInstructores = useRef(new Map());
-    const horarioGrupos = useRef(new Map());
+
+
     const [arrayHorariosGrupos, setArrayHorariosGrupos] = useState([]);
     const [arrayHorariosInstructores, setArrayHorariosInstructores] = useState([]);
 
@@ -24,35 +24,46 @@ const HorarioPDF = () => {
 
     }, []);
 
-    const GenerarPDFS = () => {
-        GetFranjas();
+    const GenerarPDFS = async () => {
+        //console.log(await GenerarPDFsInstructores());
+        await GenerarPDFsInstructores()
+
     }
 
-    async function GetFranjas() {
+    async function GenerarPDFsInstructores() {
+        const horarioService = new HorarioPDFServicio();
         try {
-            const respuesta = await new FranjaServicio().CargarFranjas();
-            // console.log(respuesta);
-            //Recojo las franjas de cada instructor y grupo de una vez
-            respuesta.forEach(franja => {
-                if (franja) {
-                    const arrayFranjasInstructor = franjasInstructores.current.get(franja.idInstructor);
-                    if (!arrayFranjasInstructor) {
-                        franjasInstructores.current.set(franja.idInstructor, []);
-                    }
-                    arrayFranjasInstructor?.push(franja);
+            const crearHorarioInstructores = new CrearHorarioInstructores();
+            const horarioMapInstructores = await crearHorarioInstructores.ObtenerHorarioInstructores();
+            // console.log(horarioMapInstructores);
+            const PDFsInstructores = [];
+            for (const [clave, horarioInstructor] of horarioMapInstructores) {
+                let pdfHorario = new jsPDF({
+                    unit: 'pt',
+                    format: 'a4',
+                    orientation: 'portrait'
+                });
+                pdfHorario.setFont('helvetica');
+                pdfHorario.text('', 20, 20);
+                await pdfHorario
+                    .html(renderToString(crearHorarioInstructores.GetTablaHorarioInstructor(horarioInstructor)),{
+                        x: 20,
+                        y: 20,
+                        autoPaging: true
+                    });
 
-                    const arrayFranjasGrupo = franjasGrupos.current.get(franja.idGrupo);
-                    if (!arrayFranjasGrupo) {
-                        franjasGrupos.current.set(franja.idGrupo, []);
-                    }
-                    arrayFranjasGrupo?.push(franja);
-                }
-            });
-            console.log(franjasInstructores.current);
-            console.log(franjasGrupos.current);
+                const pdfData = pdfHorario.output('arraybuffer');
+                const uint8Array = new Uint8Array(pdfData);
+
+                PDFsInstructores.push({
+                    nombre: `${horarioInstructor.nombre}.pdf`,
+                    contenido: uint8Array
+                });
+                await horarioService.GuardarPDFsInstructores(PDFsInstructores);
+            }
+            await horarioService.AbrirCarpetaPDFs();
         } catch (error) {
-            console.log(error);
-            Swal.fire(error)
+            Swal.fire(error.toString());
         }
     }
 

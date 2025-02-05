@@ -22,6 +22,15 @@ class CompetenciaServicio {
         }
     }
 
+    async CargarCompetencias(arrayIds){
+      try {
+        return await window.electron.GetAllByIdCompetencia(arrayIds);
+      } catch (error) {
+        console.log("error en servicio competencias por: ", error);
+        throw error.message.split(":")[1].trim();
+      }
+    }
+
     async CargarListaSegunPiscina(idGrupo){
       try {
         return await window.electron.GetAllByPoolCompetencias(idGrupo);

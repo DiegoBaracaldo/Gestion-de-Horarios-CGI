@@ -353,12 +353,12 @@ class ConexionBD {
     InsertarCompetenciasMock() {
         this.db.exec(
             `
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (123456, 123456, 'Estructura sistemas de computación cuántico con facilidad', 12);
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (234567, 123456, 'Configura bases de datos con facilidad sin necesidad de ardillas', 10);
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (345678, 234567, 'Prepara un rissotto muy agradable al paladar de los ratones', 20);
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (456789, 234567, 'Estructura pasteles que son arrojados a la basura con facilidad', 6);
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (567891, 345678, 'Implementa la respiración boca a boca sin mal aliento', 15);
-            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (678912, 345678, 'Llama a emergencias fácilemnte sin poner la canción de daddy yankee', 5);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (123456, 123456, 'Estructura sistemas de computación en la nube con linux', 12);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (234567, 123456, 'Configura bases de datos que trabajan con sql y mongo db', 10);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (345678, 234567, 'Preparación adecuada del lugar del trabajo', 20);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (456789, 234567, 'Conoce los principios fundamentales de la cocina integral', 6);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (567891, 345678, 'Implementa la respiración boca a boca de forma correcta', 15);
+            INSERT INTO competencias (id, idPrograma, descripcion, horasRequeridas) VALUES (678912, 345678, 'Conoce el protocolo de emergencia ante parada cardiaca', 5);
             `
         );
     }

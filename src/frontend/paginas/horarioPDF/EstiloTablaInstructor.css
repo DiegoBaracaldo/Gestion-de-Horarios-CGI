@@ -43,4 +43,18 @@
         background-color: var(--colorGrisLectura);
         padding-bottom: 4px;
     }
+    .pieTabla{
+        text-transform: capitalize;
+        font-size: small;
+        width: 100%;
+        .etTotalHoras{
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        td{
+            width: 100%;
+            display: flex;
+            justify-content: end;
+        }
+    }
 }

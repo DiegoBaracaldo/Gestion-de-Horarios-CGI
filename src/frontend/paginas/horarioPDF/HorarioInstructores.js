@@ -5,7 +5,7 @@ import FranjaServicio from "../../../backend/repository/servicios/FranjaService"
 import GrupoServicio from "../../../backend/repository/servicios/GrupoService";
 import InstructorServicio from "../../../backend/repository/servicios/InstructorService";
 import './EstiloTablaInstructor.css';
-import { FranjasContiguasVerticales, GetDiaCorrespondiente, GetHoraInicioHoraFin } from "./UtilidadesHorarioPDF";
+import { CantidadHorasByDiferenciaMilitar, FranjasContiguasVerticales, GetBloquesPorDia, GetDiaCorrespondiente, GetHoraInicioHoraFin } from "./UtilidadesHorarioPDF";
 
 class CrearHorarioInstructores {
     constructor() {
@@ -31,19 +31,21 @@ class CrearHorarioInstructores {
                     if (!arrayFranjasInstructor) {
                         franjasInstructores.set(franja.idInstructor, []);
                     }
-                    arrayFranjasInstructor?.push(franja);
+                    franjasInstructores.get(franja.idInstructor).push(franja);
 
                     //Se van llenando los id de los instructores y grupos sin repetir
                     auxIdsInstructores.add(franja.idInstructor);
                 }
             });
+            // console.log(franjasInstructores);
 
-            //Ahora crear Map de instructores y grupos con su respectivo objeto usando de clave su id
+            //Ahora crear Map de instructores con su respectivo objeto usando de clave su id
             const promesaInstructores = await new InstructorServicio().CargarInstructores([...auxIdsInstructores]);
 
             promesaInstructores.forEach(instructor => {
                 this.instructores.set(instructor.id, instructor);
             });
+            //    console.log(this.instructores);
 
             //Ahora se Crean los bloques crudos que serán usados para pedir info a BD y armar bloques reales
 
@@ -64,6 +66,7 @@ class CrearHorarioInstructores {
                 });
                 bloquesCrudosInstructores.set(clave, [...auxMap.values()]);
             }
+            // console.log(bloquesCrudosInstructores);
             //Ahora se obtienen los bloques reales que serán convertidos a Horarios
             return this.GetBloquesRealesInstructores(bloquesCrudosInstructores);
         } catch (error) {
@@ -101,7 +104,7 @@ class CrearHorarioInstructores {
                 const listaBloquesReales = listaBloquesCrudos.map(bloqueCrudo => {
                     const objGrupoAux = gruposMap.get(bloqueCrudo.idGrupo);
                     return {
-                        franjas: new Set(bloqueCrudo.franjas),
+                        franjas: [...bloqueCrudo.franjas].sort((a, b) => a - b),
                         descripcionCompetencia: competenciasMap.get(bloqueCrudo.idCompetencia).descripcion,
                         nombreAmbiente: ambientesMap.get(bloqueCrudo?.idAmbiente).nombre,
                         fichaGrupo: objGrupoAux.id,
@@ -112,6 +115,7 @@ class CrearHorarioInstructores {
 
                 mapBloques.set(clave, listaBloquesReales);
             }
+            //console.log(mapBloques);
             return this.GetHorarios(mapBloques);
         } catch (error) {
             console.log(error);
@@ -145,7 +149,7 @@ class CrearHorarioInstructores {
             const objHorario = {
                 nombre: this.instructores.get(idInstructor).nombre,
                 totalHorasSemanales: listaBloques.reduce((acc, bloque) => {
-                    return bloque.franjas.size + acc;
+                    return bloque.franjas.length + acc;
                 }, 0) / 2,
                 lunes: [],
                 martes: [],
@@ -156,24 +160,48 @@ class CrearHorarioInstructores {
                 domingo: []
             };
             for (const bloque of listaBloques) {
-                //Subcategorizar bloques por contiguidad vertical
-                const objetosSubBloque = FranjasContiguasVerticales([...bloque.franjas]);
-                objetosSubBloque.forEach(paqueteFranjas => {
-                    //Enviar objeto completo con las horas militares correspondientes al día que 
-                    const [horaInicio, horaFin] = GetHoraInicioHoraFin(paqueteFranjas);
-                    const diaCorrespondiente = GetDiaCorrespondiente(paqueteFranjas[0]);
-                    const objSubHorario = {
-                        descripcionCompetencia: bloque.descripcionCompetencia,
-                        nombreAmbiente: bloque.nombreAmbiente,
-                        fichaGrupo: bloque.fichaGrupo,
-                        codigoGrupo: bloque.codigoGrupo,
-                        trimestreLectivo: bloque.trimestreLectivo,
-                        horaInicial: horaInicio,
-                        horaFin: horaFin
-                    };
-                    objHorario[diaCorrespondiente].push(objSubHorario);
+                //Primero asigno subbloques reales por día
+                const franjasPorDia = GetBloquesPorDia(bloque.franjas);
+                // console.log(franjasPorDia);
+                Object.keys(franjasPorDia).forEach(dia => {
+                    const franjas = franjasPorDia[String(dia)];
+                    if (franjas.length > 0) {
+                        objHorario[String(dia)].push({
+                            ...bloque,
+                            franjas: [...franjas]
+                        });
+                    }
                 });
             }
+            // console.log(objHorario);
+            //bloques al día por contiguidad vertical
+            Object.keys(objHorario).forEach(clave => {
+                let valor = objHorario[String(clave)];
+                //Si es DÍA y tiene bloques adentro
+                if (Array.isArray(valor) && valor.length > 0) {
+                    const nuevoValor = [];
+                    //Se determina la contiguidad vertical para dividir cada bloque en sub bloques por
+                    ////falta de contiguidad vertical
+                    valor.forEach(bloque => {
+                        const objetosSubBloque = FranjasContiguasVerticales(bloque.franjas);
+                        // console.log(objetosSubBloque);
+                        objetosSubBloque.forEach(arrayFranjas => {
+                            const [horaInicio, horaFin] = GetHoraInicioHoraFin(arrayFranjas);
+                            // console.log(bloque);
+                            nuevoValor.push({
+                                ...bloque,
+                                franjas: arrayFranjas,
+                                horaInicial: horaInicio,
+                                horaFin: horaFin
+                            });
+                        });
+                    });
+                    objHorario[clave] = [...nuevoValor];
+                }
+            });
+            // console.log(objHorario);
+            //--falta ordenar de temprano a tarde x hora incial
+
             //Ordeno los bloques de cada día del más temprano al más tarde
             Object.keys(objHorario).map(key => {
                 //Se detectan los días y que no estén vacíos
@@ -181,7 +209,6 @@ class CrearHorarioInstructores {
                     objHorario[key].sort((a, b) => a.horaInicial - b.horaInicial);
                 }
             });
-            //transformo la hora a texto normal
 
             //Se agrega el horario completo al mapa de horarios de los instructores
             mapHorarios.set(idInstructor, { ...objHorario });
@@ -192,6 +219,20 @@ class CrearHorarioInstructores {
     //Función para convertir la información cruda del objeto horario de cada instructor  a uno 
     //// apto para el pdf
     GetTablaHorarioInstructor(horarioInstructor) {
+
+        const totalHoras = () => {
+            let acumulador = 0;
+            Object.keys(horarioInstructor).forEach(key => {
+                let arrayDia = horarioInstructor[key];
+                if (Array.isArray(arrayDia) && arrayDia.length > 0){
+                    arrayDia.forEach(bloque => {
+                        acumulador += bloque.franjas.length / 2;
+                    });
+                }
+            });
+            return acumulador;
+        }
+
         return (
             <table id="tablaHorarioPDFInstructor">
                 <thead>
@@ -214,15 +255,16 @@ class CrearHorarioInstructores {
                                             {key}
                                         </div>
                                         {
-                                            arrayDia.map(subBloque => 
+                                            arrayDia.map(subBloque =>
                                                 <div className="filaSubBloque">
                                                     <label className="hora">
-                                                        {`${subBloque.horaInicial.substring(0,2)}:${subBloque.horaInicial.substring(2,4)}
+                                                        {`${subBloque.horaInicial.substring(0, 2)}:${subBloque.horaInicial.substring(2, 4)}
                                                          - 
-                                                        ${subBloque.horaFin.substring(0,2)}:${subBloque.horaFin.substring(2,4)}`}
-                                                        </label>
+                                                        ${subBloque.horaFin.substring(0, 2)}:${subBloque.horaFin.substring(2, 4)}`}
+                                                    </label>
                                                     <label className="etDescriComp">{subBloque.descripcionCompetencia}</label>
                                                     <label>{subBloque.ambiente}</label>
+                                                    <label>{subBloque.nombreAmbiente}</label>
                                                     <label>{subBloque.fichaGrupo}</label>
                                                     <label>{subBloque.codigoGrupo}</label>
                                                     <label>{subBloque.trimestreLectivo}</label>
@@ -235,6 +277,14 @@ class CrearHorarioInstructores {
                         }
                     })}
                 </tbody>
+                <tfoot>
+                    <tr className="pieTabla">
+                        <td className="columPieTabla">
+                            <label className="etTotalHoras">total horas semanales :</label>
+                            <label>{totalHoras()}</label>
+                        </td>
+                        </tr>
+                </tfoot>
             </table>
         );
     }

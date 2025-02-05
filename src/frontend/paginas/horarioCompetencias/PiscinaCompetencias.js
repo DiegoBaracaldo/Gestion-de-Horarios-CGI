@@ -208,15 +208,17 @@ const PiscinaCompetencias = () => {
             //aplano la lista de listas de competencias para tener solo una lista completa
             respuestaCompetencias = respuestaCompetencias.flat();
 
+            //Creo un map con las competencias
+            const competenciasMap = new Map();
+            respuestaCompetencias.forEach(comp => competenciasMap.set(comp.id, comp));
+
             //asigno las competencias que le pertenecen al grupo y la lista grupos de una vez
             setListaGrupos([...auxGrupos.map(grupo => {
                 return {
                     ...grupo,
                     competencias: listaPiscinasInicial.map(relacion => {
                         if (grupo.id === relacion.idGrupo) {
-                            const auxRelacion = respuestaCompetencias
-                                .find(comp => comp.id === relacion.idCompetencia);
-                            return auxRelacion;
+                            return competenciasMap.get(relacion.idCompetencia);
                         }
                         return null;
                     }).filter(comp => comp !== null)

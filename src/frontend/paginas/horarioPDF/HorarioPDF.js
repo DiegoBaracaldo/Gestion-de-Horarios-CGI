@@ -16,10 +16,6 @@ const HorarioPDF = () => {
     const navegar = useNavigate(-1);
     const horarioHaCambiado = useRef(DetectarHorarioAlterado());
 
-
-    const [arrayHorariosGrupos, setArrayHorariosGrupos] = useState([]);
-    const [arrayHorariosInstructores, setArrayHorariosInstructores] = useState([]);
-
     useEffect(() => {
 
     }, []);

@@ -1,3 +1,4 @@
+const ObtenerErrorSQLite = require("../../../baseDatos/ErroresSQLite");
 
 class AmbienteRepo {
 
@@ -83,43 +84,73 @@ class AmbienteRepo {
                 .map((_, index) => index + 1)
                 .filter(num => !franjasArray.has(num));
             const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
+
+            const queryDeleteFranjas = `
+            DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idAmbiente = ?; `;
+
+            const query = "UPDATE ambientes SET " +
+                "nombre = ?, " +
+                "idTorre = ?, capacidad = ?, " +
+                "franjaDisponibilidad = ?" +
+                "WHERE id = ?;";
+
             this.db.serialize(async () => {
                 try {
-                    await this.db.run("BEGIN TRANSACTION");
-
-                    const query = "UPDATE ambientes SET " +
-                        "nombre = ?, " +
-                        "idTorre = ?, capacidad = ?, " +
-                        "franjaDisponibilidad = ?" +
-                        "WHERE id = ?";
-                    const queryDeleteFranjas = `
-                        DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idAmbiente = ?; `;
-
-                    await this.db.run(queryDeleteFranjas, [...franjasAEliminar, ambiente.id], (error) => {
-                        if (error) reject(error.errno);
-                        else resolve();
+                    await new Promise((resolve, reject) => {
+                        this.db.run("BEGIN TRANSACTION", [], function (error) {
+                            if (error) reject(error);
+                            else resolve(this);
+                        });
                     });
+                    const modificacionAmbiente =
+                        await new Promise((resolve, reject) => {
+                            this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
+                                if (error) reject(error)
+                                else resolve(this.changes)
+                            });
+                        });
 
-                    await this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad, idViejo], function (error) {
-                        if (error) reject(error.errno);
-                        else resolve(this.changes); // Devuelve el número de filas modificadas
-                    });
-
-                    await this.db.run("COMMIT", function (error) {
-                        if (error) {
-                            this.db.run("ROLLBACK");
-                            reject(error)
+                    if (modificacionAmbiente >= 1) {
+                        //Se ejecuta la eliminación solo si la edición fue correcta
+                        const eliminaciones =
+                            await new Promise((resolve, reject) => {
+                                this.db.run(queryDeleteFranjas, [...franjasAEliminar, ambiente.id], function (error) {
+                                    if (error) reject(error);
+                                    else resolve(this);
+                                });
+                            });
+                        if (eliminaciones) {
+                            //AQUÍ SE LLEGA SI TODO SALIÓ BIEN
+                            await new Promise((resolve, reject) => {
+                                this.db.run('COMMIT', [], function (error) {
+                                    if (error) reject(error);
+                                    else return resolve(this);
+                                });
+                            });
+                            resolve(true);
+                        } else {
+                            //Si faltó al menos una franja se revierte todo
+                            const nuevoError = new Error("No se eliminaron las frnjas completamente!");
+                            nuevoError.errno = 905;
+                            throw nuevoError;
                         }
-                        //Si todo fue exitoso!
-                        else resolve(200);
+                    } else {
+                        //Si no se editó el ambiente
+                            const nuevoError = new Error("No se editó el ambiente!");
+                            nuevoError.errno = 904;
+                            throw nuevoError;
+                    }
+                } catch (errorCatch) {
+                    await new Promise((resolve, reject) => {
+                        this.db.run("ROLLBACK", [], function (error) {
+                            if (error) reject(902);
+                            //Es una resolución, pero de un rollback, se envía entonces el error que lo causó
+                            else resolve();
+                        });
                     });
-                } catch (error) {
-                    //Error en cualquier parte de las transacciones
-                    await this.db.run("ROLLBACK");
-                    reject(error);
+                    reject(errorCatch.errno);
                 }
             });
-
         });
     }
 

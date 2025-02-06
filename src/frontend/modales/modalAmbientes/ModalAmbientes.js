@@ -69,7 +69,7 @@ const ModalAmbientes = ({ abrirConsulta, abrirRegistro, onCloseProp, objConsulta
                 await ambienteServicio.ActualizarAmbiente(idViejo, ambiente) :
                 await ambienteServicio.GuardarAmbiente(ambiente);
             console.log(respuesta);
-            Swal.fire(respuesta === 1 ? ("Se guardó correctamente el ambiente!")
+            Swal.fire(respuesta ? ("Se guardó correctamente el ambiente!")
                 : ("NO se guardó el ambiente"));
         } catch (error) {
             //Este error viene desde el repositorio

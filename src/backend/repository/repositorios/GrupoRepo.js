@@ -5,6 +5,16 @@ class GrupoRepo {
         this.db = db;
     }
 
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
+
     async AtLeastOne() {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM grupos LIMIT 1) AS hasRecords";
@@ -39,7 +49,7 @@ class GrupoRepo {
             });
         });
     }
-    
+
     async GetAllById(arrayIds) {
         return new Promise((resolve, reject) => {
             const placeHolders = arrayIds.map(() => '?').join(', ');
@@ -58,8 +68,8 @@ class GrupoRepo {
 
     async GetAllByPool() {
         return new Promise((resolve, reject) => {
-            
-                const query = 
+
+            const query =
                 `SELECT 
                     grupos.*, 
                     jornadas.tipo AS jornada, 
@@ -131,14 +141,21 @@ class GrupoRepo {
                 cantidadAprendices, esCadenaFormacion, trimestreLectivo, fechaInicioTrimestre,
                 fechaFinTrimestre } = grupo;
 
-            this.db.run(query,
-                [id, idPrograma, idResponsable, codigoGrupo, idJornada,
-                    cantidadAprendices, esCadenaFormacion, trimestreLectivo,
-                    fechaInicioTrimestre, fechaFinTrimestre, idViejo],
-                function (error) {
-                    if (error) reject(error.errno);
-                    else resolve(this.changes); // Devuelve el número de filas modificadas
-                });
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query,
+                        [id, idPrograma, idResponsable, codigoGrupo, idJornada,
+                            cantidadAprendices, esCadenaFormacion, trimestreLectivo,
+                            fechaInicioTrimestre, fechaFinTrimestre, idViejo],
+                        function (error) {
+                            if (error) reject(error.errno);
+                            else resolve(this.changes); // Devuelve el número de filas modificadas
+                        });
+                } catch (error) {
+                    reject(error.errno);
+                }
+            });
         });
     }
 
@@ -150,13 +167,21 @@ class GrupoRepo {
             const placeholders = idArray.map(() => '?').join(', ');
             const query = "DELETE FROM grupos WHERE id IN (" + placeholders + ")";
 
-            this.db.run(query, idArray, function (error) {
-                if (error) {
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, idArray, function (error) {
+                        if (error) {
+                            reject(error.errno);
+                        } else {
+                            resolve(this.changes); // Devuelve el número de filas eliminadas
+                        }
+                    });
+                } catch (error) {
                     reject(error.errno);
-                } else {
-                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
+
         });
     }
 }

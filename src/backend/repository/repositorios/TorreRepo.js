@@ -5,6 +5,15 @@ class TorreRepo {
         this.db = db;
     }
 
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
     async AtLeastOne(){
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM torres LIMIT 1) AS hasRecords";
@@ -54,9 +63,16 @@ class TorreRepo {
             const query = "UPDATE torres SET nombre = ? WHERE id = ?";
             const { nombre } = torre; // Desestructuración del objeto torre
 
-            this.db.run(query, [nombre, idViejo], function (error) {
-                if (error) reject(error.errno);
-                else resolve(this.changes); // Devuelve el número de filas modificadas
+            this.db.serialize(async() => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, [nombre, idViejo], function (error) {
+                        if (error) reject(error.errno);
+                        else resolve(this.changes); // Devuelve el número de filas modificadas
+                    });
+                } catch (error) {
+                    reject(error.errno)
+                }
             });
         });
     }
@@ -69,11 +85,18 @@ class TorreRepo {
             const placeholders = idArray.map(() => '?').join(', ');
             const query = "DELETE FROM torres WHERE id IN (" + placeholders + ")";
 
-            this.db.run(query, idArray, function (error) {
-                if (error) {
-                    reject(error.errno);
-                } else {
-                    resolve(this.changes); // Devuelve el número de filas eliminadas
+            this.db.serialize(async() => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, idArray, function (error) {
+                        if (error) {
+                            reject(error.errno);
+                        } else {
+                            resolve(this.changes); // Devuelve el número de filas eliminadas
+                        }
+                    });
+                } catch (error) {
+                    reject(error.errno)
                 }
             });
         });

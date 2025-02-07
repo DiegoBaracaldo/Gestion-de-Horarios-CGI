@@ -4,12 +4,22 @@ class ProgramaRepo {
     constructor(db) {
         this.db = db;
     }
-    
-    async AtLeastOne(){
+
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
+
+    async AtLeastOne() {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM programas LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err.errno);
+                if (err) reject(err.errno);
                 else resolve(fila.hasRecords);
             });
         });
@@ -54,13 +64,21 @@ class ProgramaRepo {
 
     Save(idViejo, programa) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE programas SET "+
-            "id=?, nombre=?, tipo=?, cantidadTrimestres=?, fechaInicio=?, fechaFin=?  WHERE id = ?";
-            const {id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin} = programa; // Desestructuración del objeto torre
+            const query = "UPDATE programas SET " +
+                "id=?, nombre=?, tipo=?, cantidadTrimestres=?, fechaInicio=?, fechaFin=?  WHERE id = ?";
+            const { id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin } = programa; // Desestructuración del objeto torre
 
-            this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin, idViejo], function (error) {
-                if (error) reject(error.errno);
-                else resolve(this.changes); // Devuelve el número de filas modificadas
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, [id, nombre, tipo, cantidadTrimestres, fechaInicio, fechaFin, idViejo], function (error) {
+                        if (error) reject(error.errno);
+                        else resolve(this.changes); // Devuelve el número de filas modificadas
+                    });
+                } catch (error) {
+                    reject(error.errno);
+                }
+
             });
         });
     }
@@ -68,16 +86,22 @@ class ProgramaRepo {
     //Se trabaja con array de ids a eliminar.
     Remove(idArray) {
         return new Promise((resolve, reject) => {
-
             // Convertir el array de ids en una cadena de ? separada por comas para la consulta SQL
             const placeholders = idArray.map(() => '?').join(', ');
             const query = "DELETE FROM programas WHERE id IN (" + placeholders + ")";
 
-            this.db.run(query, idArray, function (error) {
-                if (error) {
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, idArray, function (error) {
+                        if (error) {
+                            reject(error.errno);
+                        } else {
+                            resolve(this.changes); // Devuelve el número de filas eliminadas
+                        }
+                    });
+                } catch (error) {
                     reject(error.errno);
-                } else {
-                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

@@ -33,6 +33,10 @@ const ERROR_PERSONALIZADO_ROLLBACK_HORARIO = "Error de Rollback en las transacci
 const ERROR_PERSONALIZADO_COMMIT_HORARIO = "Error de Commit, no se completaron los cambios!";
 const ERROR_PERSONALIZADO_ABMIENTE_NO_EDITADO = "No hubo error, pero el ambiente no se editó, revirtiendo...";
 const ERROR_PERSONALIZADO_ELIMINACION_FRANJAS_AMBIENTE = "No se eliminaron todas las franjas editadas en el ambiente, revirtiendo...";
+const ERROR_PERSONALIZADO_PRAGMA_FORANEAS = "Se abortó la operación por falla en activación de llaves foráneas!"
+const ERROR_PERSONALIZADO_INSTRUCTOR_NO_EDITADO = "No hubo error, pero el instructor no se editó, revirtiendo...";
+const ERROR_PERSONALIZADO_ELIMINACION_FRANJAS_INSTRUCTOR = "No se eliminaron todas las franjas editadas en el instructor, revirtiendo...";
+const ERROR_PERSONALIZADO_JORNADA_NO_EDITADA = "No hubo error, pero no se editó la jornada, revirtiendo..."
 
 const ObtenerErrorSQLite = (codigo) => {
     switch (codigo) {
@@ -106,6 +110,14 @@ const ObtenerErrorSQLite = (codigo) => {
             return ERROR_PERSONALIZADO_ABMIENTE_NO_EDITADO;
         case 905:
             return ERROR_PERSONALIZADO_ELIMINACION_FRANJAS_AMBIENTE;
+        case 906:
+            return ERROR_PERSONALIZADO_PRAGMA_FORANEAS;
+        case 907:
+            return ERROR_PERSONALIZADO_INSTRUCTOR_NO_EDITADO;
+        case 908:
+            return ERROR_PERSONALIZADO_ELIMINACION_FRANJAS_INSTRUCTOR;
+        case 909:
+            return ERROR_PERSONALIZADO_JORNADA_NO_EDITADA;
         default:
             return "Código de error desconocido: " + codigo;
     }

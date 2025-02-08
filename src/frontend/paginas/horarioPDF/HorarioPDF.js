@@ -3,7 +3,7 @@ import BotonDestructivo from '../../componentes/botonDestructivo/BotonDestructiv
 import BotonPositivo from '../../componentes/botonPositivo/BotonPositivo';
 import MarcoGralHorario from '../../componentes/marcoGeneralHorario/MarcoGralHorario';
 import './HorarioPDF.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import HorarioPDFServicio from '../../../backend/repository/servicios/HorarioPDFServicie';
 import Swal from 'sweetalert2';
 import CrearHorarioInstructores from './HorarioInstructores';
@@ -15,16 +15,26 @@ import CrearHorarioGrupos from './HorarioGrupos';
 const HorarioPDF = () => {
 
     const navegar = useNavigate(-1);
-    const horarioHaCambiado = useRef(DetectarHorarioAlterado());
-
+    const [horarioHaCambiado, setHorarioHaCambiado] = useState(true);
     useEffect(() => {
+        console.log(horarioHaCambiado);
+    }, [horarioHaCambiado]);
 
+    useLayoutEffect(() => {
+        const VerificarAlteracionHorario = async() => {
+            const detectarHorarioAlterado = await DetectarHorarioAlterado();
+            setHorarioHaCambiado(detectarHorarioAlterado);
+        }
+        VerificarAlteracionHorario();
     }, []);
 
     const GenerarPDFS = async () => {
         try {
             await GenerarPDFsGrupos();
             await GenerarPDFsInstructores();
+            await new HorarioPDFServicio().SetHorarioCambiadoFalse();
+            const detectarHorarioAlterado = await DetectarHorarioAlterado();
+            setHorarioHaCambiado(detectarHorarioAlterado);
             await new HorarioPDFServicio().AbrirCarpetaPDFs();
         } catch (error) {
             console.log(error);
@@ -48,7 +58,7 @@ const HorarioPDF = () => {
                 pdfHorario.setFont('helvetica');
                 pdfHorario.text('', 20, 20);
                 await pdfHorario
-                    .html(renderToString(crearHorarioInstructores.GetTablaHorarioInstructor(horarioInstructor)),{
+                    .html(renderToString(crearHorarioInstructores.GetTablaHorarioInstructor(horarioInstructor)), {
                         x: 20,
                         y: 20,
                         autoPaging: true
@@ -84,7 +94,7 @@ const HorarioPDF = () => {
                 pdfHorario.setFont('helvetica');
                 pdfHorario.text('', 20, 20);
                 await pdfHorario
-                    .html(renderToString(crearHorarioGrupos.GetTablaHorarioGrupo(horarioGrupo)),{
+                    .html(renderToString(crearHorarioGrupos.GetTablaHorarioGrupo(horarioGrupo)), {
                         x: 20,
                         y: 20,
                         autoPaging: true
@@ -108,11 +118,13 @@ const HorarioPDF = () => {
         //lógica para detectar si horario ha cambiado desde la última generación de PDF
         try {
             const respuesta = await new HorarioPDFServicio().EncontrarValor('horarioCambiado');
-            // console.log(respuesta);
-            if (respuesta === 'true') return true;
+            console.log(respuesta);
+            if(respuesta === 'false') return false
+            else if (respuesta === 'true') return true;
             else return false;
         } catch (error) {
             Swal.fire(error);
+            return false;
         }
     }
 
@@ -123,20 +135,20 @@ const HorarioPDF = () => {
                 <div className='contInternoHorarioPDF'>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`generar pdf's`} disabledProp={!horarioHaCambiado.current}
+                            texto={`generar pdf's`} disabledProp={!horarioHaCambiado}
                             onClick={GenerarPDFS} />
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`descargar pdf's instructores`} disabledProp={horarioHaCambiado.current} />
+                            texto={`descargar pdf's instructores`} disabledProp={horarioHaCambiado} />
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`descargar pdf's grupos`} disabledProp={horarioHaCambiado.current} />
+                            texto={`descargar pdf's grupos`} disabledProp={horarioHaCambiado} />
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`enviar pdf's automáticamente `} disabledProp={horarioHaCambiado.current} />
+                            texto={`enviar pdf's automáticamente `} disabledProp={true} />
                     </div>
                 </div>
             </MarcoGralHorario>

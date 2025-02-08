@@ -5,7 +5,7 @@ class FranjaRepo {
 
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
-            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+            this.bd.run("PRAGMA foreign_keys = ON;", function (error) {
                 if (error) reject(error);
                 else resolve();
             });
@@ -99,7 +99,7 @@ class FranjaRepo {
             this.bd.serialize(async () => {
                 try {
                     await new Promise((resolve, reject) => {
-                        this.db.run("BEGIN TRANSACTION", [], function (error) {
+                        this.bd.run("BEGIN TRANSACTION", [], function (error) {
                             if (error) reject(error);
                             else resolve(this);
                         });

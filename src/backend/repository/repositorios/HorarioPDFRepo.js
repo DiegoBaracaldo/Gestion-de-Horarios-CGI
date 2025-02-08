@@ -15,7 +15,19 @@ class HorarioPDFRepo {
 
             this.db.get(query, [clave], function (error, fila) {
                 if (error) reject(error.errno);
-                else resolve(fila.valor);
+                else resolve(fila.valor.toString());
+            });
+        });
+    }
+    
+    async TriggerHorarioFalse(){
+        return new Promise((resolve, reject) => {
+            const query =`
+            UPDATE datos SET valor = 'false' WHERE clave = 'horarioCambiado';
+            `;
+            this.db.run(query, [], function(error){
+                if(error) reject(error.errno);
+                else resolve(true);
             });
         });
     }

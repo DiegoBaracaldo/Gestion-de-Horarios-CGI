@@ -197,7 +197,7 @@ const CrudAmbientes = ({
     }
 
     return (
-        <div id='contCrudAmbientes'>
+        <div id='contCrudAmbientes' style={modoSeleccion && { zIndex: '10' }}>
             <CrudAvanzado listaSeleccionada={(lista) => setListaSelecciones(lista)}
                 disabledDestructivo={listaVacia}
                 titulo="Ambientes"

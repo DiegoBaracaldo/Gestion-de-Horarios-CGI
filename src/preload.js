@@ -74,6 +74,7 @@ contextBridge.exposeInMainWorld('electron', {
     SavePDFsInstructores: (arrayPDFs) => ipcRenderer.invoke('SavePDFsInstructores', arrayPDFs),
     SavePDFsGrupos: (arrayPDFs) => ipcRenderer.invoke('SavePDFsGrupos', arrayPDFs),
     AbrirCarpetaContenedoraPDF: () => ipcRenderer.invoke('AbrirCarpetaContenedoraPDF'),
+    TriggerHorarioFalse: () =>  ipcRenderer.invoke('TriggerHorarioFalse'),
 
     GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)
 });

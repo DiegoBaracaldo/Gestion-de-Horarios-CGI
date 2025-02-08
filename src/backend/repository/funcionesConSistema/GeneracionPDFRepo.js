@@ -19,8 +19,20 @@ class GeneracionPDF {
         }
     }
 
+    async vaciarCarpeta(carpeta) {
+        try {
+            await fs.promises.rm(carpeta, { recursive: true, force: true });
+            // Volver a crear la carpeta vacía
+            await fs.promises.mkdir(carpeta, { recursive: true });
+        } catch (error) {
+            console.error('Error al vaciar la carpeta:', error);
+            throw new Error('No se pudo vaciar la carpeta');
+        }
+    }
+
     async SavePDFsInstructores(arrayPDF) {
         try {
+            await this.vaciarCarpeta(this.directorioInstructores);
             const archivosGuardados = await Promise.all(
                 arrayPDF.map(async ({ nombre, contenido }) => {
                     const filePath = path.join(this.directorioInstructores, nombre);
@@ -31,12 +43,13 @@ class GeneracionPDF {
             return archivosGuardados;
         } catch (error) {
             console.error('Error al guardar PDFs:', error);
-            throw new Error('No se pudieron guardar los archivos PDF');
+            throw new Error('No se pudieron guardar los archivos PDF.', error);
         }
     }
 
     async SavePDFsGrupos(arrayPDF) {
         try {
+            await this.vaciarCarpeta(this.directorioGrupos);
             const archivosGuardados = await Promise.all(
                 arrayPDF.map(async ({ nombre, contenido }) => {
                     const filePath = path.join(this.directorioGrupos, nombre);
@@ -47,7 +60,7 @@ class GeneracionPDF {
             return archivosGuardados;
         } catch (error) {
             console.error('Error al guardar PDFs:', error);
-            throw new Error('No se pudieron guardar los archivos PDF');
+            throw new Error('No se pudieron guardar los archivos PDF', error);
         }
     }
 

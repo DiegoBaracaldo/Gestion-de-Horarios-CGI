@@ -38,5 +38,14 @@ class HorarioPDFServicio{
             throw error;
         }
     }
+
+    async SetHorarioCambiadoFalse(){
+        try {
+            return await window.electron.TriggerHorarioFalse();
+        } catch (error) {
+            console.log("Error en servicio de horarioPDF por:", error);
+            throw error;
+        }
+    }
 }
 export default HorarioPDFServicio;

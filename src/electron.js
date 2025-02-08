@@ -641,4 +641,12 @@ function RegistrarIPC() {
     ipcMain.handle('AbrirCarpetaContenedoraPDF', async() => {
         generacionPDFRepo.AbrirCarpetaContenedoraPDF();
     });
+    ipcMain.handle('TriggerHorarioFalse', async() => {
+        try {
+            return await horarioPDFRepo.TriggerHorarioFalse();
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
 }

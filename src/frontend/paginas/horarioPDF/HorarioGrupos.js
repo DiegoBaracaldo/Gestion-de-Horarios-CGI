@@ -7,10 +7,13 @@ import GrupoServicio from "../../../backend/repository/servicios/GrupoService";
 import InstructorServicio from "../../../backend/repository/servicios/InstructorService";
 import ProgramaServicio from "../../../backend/repository/servicios/ProgramaService";
 import { FranjasContiguasVerticales, GetBloquesPorDia, GetHoraInicioHoraFin } from "./UtilidadesHorarioPDF";
+import FusionesServicio from '../../../backend/repository/servicios/FusionesService';
 
 class CrearHorarioGrupos {
     constructor() {
         this.grupos = new Map();
+        this.gruposHuespedes = new Map();
+        this.fusiones = new Map();
     }
 
     ObtenerHorarioGrupos() {
@@ -40,10 +43,12 @@ class CrearHorarioGrupos {
             });
 
             //Ahora crear Map de grupos con su respectivo objeto usando de clave su id
-            const promesaGrupos = await new GrupoServicio().CargarGrupos([...auxIdsGrupos]);
+            const promesaGrupos = await new GrupoServicio().CargarLista();
 
             promesaGrupos.forEach(grupo => {
-                this.grupos.set(grupo.id, grupo);
+                if(auxIdsGrupos.has(grupo.id)) this.grupos.set(grupo.id, grupo);
+                //Se supone que si no están ahí, entonces son huéspedes
+                else this.gruposHuespedes.set(grupo.id, grupo);
             });
 
             //Ahora se Crean los bloques crudos que serán usados para pedir info a BD y armar bloques reales
@@ -83,9 +88,10 @@ class CrearHorarioGrupos {
             const promesaAmbientes = new AmbienteServicio().CargarAmbientes(ambientesId);
             const promesaInstructores = new InstructorServicio().CargarInstructores(instructoresId);
             const promesaProgramas = new ProgramaServicio().CargarLista();
+            const promesaFusiones = new FusionesServicio().CargarLista();
 
-            const [arrayCompetencias, arrayAmbientes, arrayInstructores, arrayProgramas] =
-                await Promise.all([promesaCompetencias, promesaAmbientes, promesaInstructores, promesaProgramas]);
+            const [arrayCompetencias, arrayAmbientes, arrayInstructores, arrayProgramas, arrayFusiones] =
+                await Promise.all([promesaCompetencias, promesaAmbientes, promesaInstructores, promesaProgramas, promesaFusiones]);
 
             const competenciasMap = new Map();
             arrayCompetencias.forEach(competencia => {
@@ -105,6 +111,14 @@ class CrearHorarioGrupos {
             const programasMap = new Map();
             arrayProgramas.forEach(programa => {
                 programasMap.set(programa.id, programa);
+            });
+
+            //Se hace map de fusiones basados en el anfitrion
+            arrayFusiones.forEach(fusion => {
+                if(!this.fusiones.has(fusion.idAnfitrion)){
+                    this.fusiones.set(fusion.idAnfitrion, []);
+                }
+                this.fusiones.get(fusion.idAnfitrion).push(fusion.idHuesped);
             });
 
             for (const [clave, listaBloquesCrudos] of mapaCrudos) {
@@ -150,6 +164,7 @@ class CrearHorarioGrupos {
 
     GetHorarios(mapBloquesReales) {
         const mapHorarios = new Map();
+
         for (const [idGrupo, listaBloques] of mapBloquesReales) {
             const objGrupo = this.grupos.get(idGrupo);
             const objHorario = {
@@ -218,6 +233,19 @@ class CrearHorarioGrupos {
 
             //Se agrega el horario completo al mapa de horarios de los instructores
             mapHorarios.set(idGrupo, { ...objHorario });
+            
+            //Para los grupos fusionados
+            if(this.fusiones.has(idGrupo)){
+                this.fusiones.get(idGrupo).forEach(idHuesped => {
+                    const objGrupoHuesped = this.gruposHuespedes.get(idHuesped);
+                    mapHorarios.set(idHuesped, {
+                        ...objHorario,
+                        codigoGrupo: objGrupoHuesped.codigoGrupo,
+                        codigoFicha: objGrupoHuesped.id,
+                        trimestreLectivo: objGrupoHuesped.trimestreLectivo
+                    });
+                });
+            }
         }
         return mapHorarios;
     }

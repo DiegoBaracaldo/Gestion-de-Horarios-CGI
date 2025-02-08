@@ -3,6 +3,15 @@ class FranjaRepo {
         this.bd = bd;
     }
 
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.bd.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
     GetAll() {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM franjas";
@@ -78,25 +87,29 @@ class FranjaRepo {
 
     DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones) {
         return new Promise((resolve, reject) => {
+            const queryDelete = `DELETE FROM franjas WHERE franja = ? AND idGrupo = ?;`;
+            const querySave = `
+                INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque)
+                VALUES (?, ?, ?, ? ,?, ?);
+            `;
+            const queryUpdate = `
+                UPDATE franjas SET idInstructor = ?, idAmbiente = ?, idCompetencia = ?, numBloque = ?
+                WHERE franja = ? AND idGrupo = ?;
+            `;
             this.bd.serialize(async () => {
                 try {
-                    await this.bd.run("BEGIN TRANSACTION");
-
-                    const queryDelete = `DELETE FROM franjas WHERE franja = ? AND idGrupo = ?;`;
-                    const querySave = `
-                        INSERT INTO franjas (franja, idGrupo, idInstructor, idAmbiente, idCompetencia, numBloque)
-                        VALUES (?, ?, ?, ? ,?, ?);
-                    `;
-                    const queryUpdate = `
-                        UPDATE franjas SET idInstructor = ?, idAmbiente = ?, idCompetencia = ?, numBloque = ?
-                        WHERE franja = ? AND idGrupo = ?;
-                    `;
+                    await new Promise((resolve, reject) => {
+                        this.bd.run("BEGIN TRANSACTION", [], function (error) {
+                            if (error) reject(error);
+                            else resolve(this);
+                        });
+                    });
 
                     const runQuery = (query, params) => {
                         return new Promise((resolve, reject) => {
                             this.bd.run(query, params, function (error) {
                                 if (error) {
-                                    throw error;
+                                    reject(error);
                                 } else {
                                     resolve();
                                 }
@@ -125,20 +138,19 @@ class FranjaRepo {
                     });
                     await Promise.all(updatePromesas);
 
-                    //Confirmar que todo fue exitoso
-                    await this.bd.run("COMMIT", function (error) {
-                        if (error) {
-                            this.bd.run("ROLLBACK");
-                            reject(error);
-                        } else {
-                            //200 Significa guardado correcto, debe interpretarse en el render
-                            resolve(200);
-                        }
-                    });
-                } catch (error) {
+                    await runQuery("COMMIT;", []);
+
+                    resolve(200);
+                } catch (errorCatch) {
                     //Error en cualquier parte de las transacciones
-                    await this.bd.run("ROLLBACK");
-                    reject(error);
+                    const respuestaRollback =
+                        await new Promise((resolve, reject) => {
+                            this.bd.run("ROLLBACK", function (error) {
+                                if (error) reject(902);
+                                else resolve(errorCatch.errno)
+                            });
+                        });
+                    reject(respuestaRollback);
                 }
             });
         });

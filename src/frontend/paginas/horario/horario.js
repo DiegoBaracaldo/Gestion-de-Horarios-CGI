@@ -92,9 +92,7 @@ const Horario = () => {
 
             const programas = new ProgramaServicio().CargarLista();
             const grupos = new GrupoServicio().CargarListaByPool();
-            const respuesta = await Promise.all([programas, grupos]);
-            const auxProgramas = respuesta[0];
-            let auxGrupos = respuesta[1];
+            let [auxProgramas, auxGrupos] = await Promise.all([programas, grupos]);
             auxGrupos = await Promise.all(
                 auxGrupos.map(async (grupo) => {
                     const auxCompetenciasLista = await CargarCompetencias(grupo);
@@ -113,6 +111,15 @@ const Horario = () => {
                 new AmbienteServicio().CargarAmbientes([...idsAmbientesUnicos])
             ]);
 
+            const instructoresMap = new Map();
+            instructoresUnicos.forEach(instructor => {
+                instructoresMap.set(instructor.id, instructor);
+            });
+            const ambientesMap = new Map();
+            ambientesUnicos.forEach(ambiente => {
+                ambientesMap.set(ambiente.id, ambiente);
+            });
+
             //Ahora se forman los objetos franja Personalizados cuyo index es la franja
             //// y el dato es un objeto con el instructor y el ambiente y el idCompetencia
             auxGrupos = auxGrupos.map(grupo => {
@@ -124,10 +131,8 @@ const Horario = () => {
                             numBloque: franja.numBloque,
                             idCompetencia: comp.id,
                             //La búsqueda de instructor y ambiente se realiza con ayuda de los sets en los array
-                            instructor: franja.idInstructor === null ? {} :
-                                instructoresUnicos[[...idsInstructoresUnicos].indexOf(franja.idInstructor)],
-                            ambiente: franja.idAmbiente === null ? {} :
-                                ambientesUnicos[[...idsAmbientesUnicos].indexOf(franja.idAmbiente)]
+                            instructor: franja?.idInstructor === null ? {} : instructoresMap.get(franja.idInstructor),
+                            ambiente: franja?.idAmbiente === null ? {} : ambientesMap.get(franja.idAmbiente)
                         }
                         //Aquí se forma el array de franjas personalizado donde la franja es el index
                         //// y los objetos estánd entro de un objeto en ese índice, y los índices que
@@ -231,6 +236,7 @@ const Horario = () => {
 
     //Modificación Directa completa
     useEffect(() => {
+        // console.log(listaCombinada);
         if (listaCombinada.length > 0
             && indexProgramaSelecc >= 0
             && indexGrupoSelecc >= 0
@@ -278,6 +284,7 @@ const Horario = () => {
     const pintandoCelda = useRef(false);
     const [bloques, setBloques] = useState([]);
     useLayoutEffect(() => {
+        // console.log(bloques);
         //Primero esto
         setOcupanciaBloques(ObtenerOcupanciaBloques());
         setTotalHorasTomadasComp(ObtenerHorasTomadasInstruc());

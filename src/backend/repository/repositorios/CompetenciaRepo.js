@@ -4,12 +4,37 @@ class CompetenciaRepo {
         this.db = db;
     }
 
-    async AtLeastOne(){
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
+    async AtLeastOne() {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM competencias LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err.errno);
+                if (err) reject(err.errno);
                 else resolve(fila.hasRecords);
+            });
+        });
+    }
+
+    async GetAllById(arrayIds) {
+        return new Promise((resolve, reject) => {
+            const placeHolders = arrayIds.map(() => '?').join(', ');
+
+            const query = `
+                SELECT * FROM competencias
+                WHERE id IN (${placeHolders});
+            `;
+
+            this.db.all(query, arrayIds, (error, filas) => {
+                if (error) reject(error.errno);
+                else resolve(filas);
             });
         });
     }
@@ -18,7 +43,7 @@ class CompetenciaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE idPrograma = ?";
             this.db.all(query, [idPrograma], (err, filas) => {
-                if(err) reject(err.errno);
+                if (err) reject(err.errno);
                 else resolve(filas);
             });
         });
@@ -34,7 +59,7 @@ class CompetenciaRepo {
         });
     }
 
-    async GetByPool(idGrupo){
+    async GetByPool(idGrupo) {
         return new Promise((resolve, reject) => {
             const query = `
                 SELECT c.* FROM competencias c
@@ -42,24 +67,24 @@ class CompetenciaRepo {
                 WHERE p.idGrupo = ?
             `;
             this.db.all(query, [idGrupo], (error, competencias) => {
-                if(error) reject(error.errno);
+                if (error) reject(error.errno);
                 else resolve(competencias);
             });
         });
     }
 
     async SaveNew(competencia) {
-        const {id, idPrograma, descripcion, horasRequeridas} = competencia;
+        const { id, idPrograma, descripcion, horasRequeridas } = competencia;
         return new Promise((resolve, reject) => {
-            const query = "INSERT INTO competencias "+
-            "(id, idPrograma, descripcion, horasRequeridas) "+
-            "VALUES (?, ?, ?, ?)";
+            const query = "INSERT INTO competencias " +
+                "(id, idPrograma, descripcion, horasRequeridas) " +
+                "VALUES (?, ?, ?, ?)";
 
             this.db.run(query, [id, idPrograma, descripcion, horasRequeridas], function (error) {
                 if (error) {
                     reject(error.errno);
                 } else {
-                    resolve(this.changes); 
+                    resolve(this.changes);
                 }
             });
         });
@@ -67,16 +92,23 @@ class CompetenciaRepo {
 
     async Save(idViejo, competencia) {
         return new Promise((resolve, reject) => {
-            const query = "UPDATE competencias SET "+
-            "id = ?, "+
-            "idPrograma = ?, descripcion = ?, " +
-            "horasRequeridas = ?"+
-            "WHERE id = ?";
-            const {id, idPrograma, descripcion, horasRequeridas} = competencia; // Desestructuración del objeto torre
+            const query = "UPDATE competencias SET " +
+                "id = ?, " +
+                "idPrograma = ?, descripcion = ?, " +
+                "horasRequeridas = ?" +
+                "WHERE id = ?";
+            const { id, idPrograma, descripcion, horasRequeridas } = competencia; // Desestructuración del objeto torre
 
-            this.db.run(query, [id, idPrograma, descripcion, horasRequeridas, idViejo], function (error) {
-                if (error) reject(error.errno);
-                else resolve(this.changes); // Devuelve el número de filas modificadas
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, [id, idPrograma, descripcion, horasRequeridas, idViejo], function (error) {
+                        if (error) reject(error.errno);
+                        else resolve(this.changes); // Devuelve el número de filas modificadas
+                    });
+                } catch (error) {
+                    reject(error);
+                }
             });
         });
     }
@@ -89,11 +121,18 @@ class CompetenciaRepo {
             const placeholders = idArray.map(() => '?').join(', ');
             const query = "DELETE FROM competencias WHERE id IN (" + placeholders + ")";
 
-            this.db.run(query, idArray, function (error) {
-                if (error) {
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, idArray, function (error) {
+                        if (error) {
+                            reject(error.errno);
+                        } else {
+                            resolve(this.changes); // Devuelve el número de filas eliminadas
+                        }
+                    });
+                } catch (error) {
                     reject(error.errno);
-                } else {
-                    resolve(this.changes); // Devuelve el número de filas eliminadas
                 }
             });
         });

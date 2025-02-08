@@ -13,6 +13,8 @@ const ObtenerErrorSQLite = require('./baseDatos/ErroresSQLite');
 const PiscinaRepo = require('./backend/repository/repositorios/PiscinaRepo');
 const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
 const FusionesRepo = require('./backend/repository/repositorios/FusionesRepo');
+const HorarioPDFRepo = require('./backend/repository/repositorios/HorarioPDFRepo');
+const GeneracionPDF = require('./backend/repository/funcionesConSistema/GeneracionPDFRepo');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -30,6 +32,8 @@ let competenciaRepo;
 let piscinaRepo;
 let franjaRepo;
 let fusionesRepo;
+let horarioPDFRepo;
+let generacionPDFRepo;
 
 function createWindow() {
 
@@ -45,6 +49,8 @@ function createWindow() {
     piscinaRepo = new PiscinaRepo(bd);
     franjaRepo = new FranjaRepo(bd);
     fusionesRepo = new FusionesRepo(bd);
+    horarioPDFRepo = new HorarioPDFRepo(bd);
+    generacionPDFRepo = new GeneracionPDF();
 
     mainWindow = new BrowserWindow({
         width: 1024,
@@ -333,6 +339,14 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
+    ipcMain.handle('GetAllByIdGrupo', async (event, arrayIds) => {
+        try {
+            return await grupoRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain grupos  getAllById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
     ipcMain.handle('GetAllGruposByPool', async () => {
         try {
             return await grupoRepo.GetAllByPool();
@@ -453,6 +467,14 @@ function RegistrarIPC() {
             return await competenciaRepo.GetById(id);
         } catch (error) {
             console.log("Error en ipcMain  getById por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('GetAllByIdCompetencia', async (event, arrayIds) => {
+        try {
+            return await competenciaRepo.GetAllById(arrayIds);
+        } catch (error) {
+            console.log("Error en ipcMain competencias  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -588,6 +610,43 @@ function RegistrarIPC() {
         } catch (error) {
             console.log("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);
+        }
+    });
+
+    //HORARIO PDF
+    ipcMain.handle('GetByClave', async(event, clave) => {
+        try {
+            return await horarioPDFRepo.GetByClave(clave);
+        } catch (error) {
+            console.log("Error en ipcMain  al obtener valor por:   " + error);
+            throw ObtenerErrorSQLite(error);
+        }
+    });
+    ipcMain.handle('SavePDFsInstructores', async(evento, arrayPDF) => {
+        try {
+            return generacionPDFRepo.SavePDFsInstructores(arrayPDF);
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
+    ipcMain.handle('SavePDFsGrupos', async(evento, arrayPDF) => {
+        try {
+            return generacionPDFRepo.SavePDFsGrupos(arrayPDF);
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
+    ipcMain.handle('AbrirCarpetaContenedoraPDF', async() => {
+        generacionPDFRepo.AbrirCarpetaContenedoraPDF();
+    });
+    ipcMain.handle('TriggerHorarioFalse', async() => {
+        try {
+            return await horarioPDFRepo.TriggerHorarioFalse();
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
         }
     });
 }

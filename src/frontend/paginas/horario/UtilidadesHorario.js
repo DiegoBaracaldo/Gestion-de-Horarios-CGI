@@ -57,6 +57,7 @@ import InstructorServicio from "../../../backend/repository/servicios/Instructor
 // // // }
 
 export function FranjasPersonalizadasToBloques(franjasGrupoCompletas, idCompetencia) {
+    // console.log(franjasGrupoCompletas);
     //Se necesitan las franjas completas del grupo para no perder el índice
     const listaBloques = [];
     franjasGrupoCompletas.forEach((franja, index) => {

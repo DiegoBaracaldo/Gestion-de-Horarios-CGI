@@ -1,0 +1,72 @@
+#tablaHorarioPDFGrupo {
+    width: 550px;
+    height: fit-content;
+
+    .titulo {
+        text-transform: capitalize;
+        text-align: center;
+        color: var(--colorAzulOscuro);
+        border-top: 2px solid var(--colorAzulOscuro);
+        border-bottom: 3px solid var(--colorAzulOscuro);
+        font-style: italic;
+        font-size: medium;
+        th {
+            padding-bottom: 5px;
+        }
+    }
+
+    .subtitulo {
+        text-align: left;
+        font-size: medium;
+        .tituloFicha{
+            text-transform: capitalize;
+            color: var(--colorAzulOscuro);
+        }
+    }
+    .thInfoGrupo{
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+    }
+    .filaSubBloque{
+        font-size: x-small;
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px solid black;
+        .etDescriComp{
+            width: 200px;
+            height: fit-content;
+        }
+        .hora{
+            width: 80px;
+            font-size: small;
+        }
+        .nombreInstructor{
+            width: 170px;
+        }
+    }
+    .filaDia{
+        text-transform: capitalize;
+        font-weight: bold;
+        font-size: small;
+        background-color: var(--colorGrisLectura);
+        padding-bottom: 4px;
+    }
+    .pieTabla{
+        text-transform: capitalize;
+        font-size: small;
+        width: 100%;
+        .etTotalHoras{
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        td{
+            width: 100%;
+            display: flex;
+            justify-content: end;
+        }
+    }
+}

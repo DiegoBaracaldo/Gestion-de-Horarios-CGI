@@ -1,0 +1,21 @@
+#contHorarioPDF{
+    .contInternoHorarioPDF{
+        /* background-color: yellow; */
+        width: 100%;
+        height: 100%;
+        .contBtnPositivo{
+            height: calc(100% / 4);
+            padding: 4%  30px;
+        }
+    }
+    .contBotones{
+        height: 15svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        :first-child{
+            height: 55%;
+            width: 30%;
+        }
+    }
+}

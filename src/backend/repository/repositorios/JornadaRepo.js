@@ -4,6 +4,15 @@ class JornadaRepo {
         this.db = db;
     }
 
+    async ActivarLlavesForaneas() {
+        return new Promise((resolve, reject) => {
+            this.db.run("PRAGMA foreign_keys = ON;", function (error) {
+                if (error) reject(error);
+                else resolve();
+            });
+        });
+    }
+
     //En  la función de registro múltiple, se debe verificar que no se crucen los horarios aquí en repo
 
     async AtLeastOne() {
@@ -69,12 +78,35 @@ class JornadaRepo {
                 .map((_, index) => index + 1)
                 .filter(num => !franjasArray.has(num));
             const placeholderFranjas = franjasAEliminar.map(() => '?').join(', ');
+
+            const queryGetIdGrupos = `
+                SELECT id AS idGrupo FROM grupos WHERE idJornada = ?`;
+
+            const query = "UPDATE jornadas SET tipo = ?, franjaDisponibilidad = ? WHERE id = ?";
+
+            const queryDeleteFranjas = `
+            DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idGrupo = ?; `;
+
             this.db.serialize(async () => {
                 try {
+                    await this.ActivarLlavesForaneas();
                     await this.db.run("BEGIN TRANSACTION");
 
-                    const queryGetIdGrupos = `
-                        SELECT id AS idGrupo FROM grupos WHERE idJornada = ?`;
+                    //Primero se modifica la jornada
+                    const modificacionesJornada =
+                        await this.db.run(query, [tipo, franjaDisponibilidad, idViejo], function (error) {
+                            if (error) reject(error);
+                            else resolve(this.changes);
+                        });
+
+                    if (modificacionesJornada <= 0) {
+                        const nuevoError = new Error("No se modificó la jornada");
+                        nuevoError.errno = 909;
+                        throw nuevoError;
+                    }
+
+                    //Eliminación de las franjas asociadas a los grupos asociados a la jornada
+                    //// que se eliminaron de la disponibilidad
                     let arrayIdGrupos = await new Promise((resolve, reject) => {
                         this.db.all(queryGetIdGrupos, [jornada.id], function (error, filas) {
                             if (error) {
@@ -86,13 +118,13 @@ class JornadaRepo {
                             }
                         });
                     });
-                    if (arrayIdGrupos !== null && arrayIdGrupos.length > 0) {
-                        const queryDeleteFranjas = `
-                            DELETE FROM franjas WHERE franja IN (${placeholderFranjas}) AND idGrupo = ?; `;
+
+
+                    if (arrayIdGrupos.length > 0) {
                         const arrayPromesas = arrayIdGrupos.map(idGrupo =>
                             new Promise((resolve, reject) => {
                                 this.db.run(queryDeleteFranjas, [...franjasAEliminar, idGrupo], function (err) {
-                                    if (err) reject(err.errno);
+                                    if (err) reject(err);
                                     else resolve();
                                 });
                             })
@@ -100,27 +132,25 @@ class JornadaRepo {
                         await Promise.all(arrayPromesas);
                     }
 
-                    const query = "UPDATE jornadas SET tipo = ?, franjaDisponibilidad = ? WHERE id = ?";
-                    await this.db.run(query, [tipo, franjaDisponibilidad, idViejo], function (error) {
-                        if (error) reject(error.errno);
-                        else resolve(this.changes);
-                    });
-
+                    //AQUÍ SE LLEGA SI TODO SALIÓ BIEN
                     await new Promise((resolve, reject) => {
-                        this.db.run("COMMIT", function (error) {
-                            if (error) {
-                                this.db.run("ROLLBACK");
-                                reject(error.errno);
-                            } else {
-                                resolve(200);
-                            }
+                        this.db.run('COMMIT', [], function (error) {
+                            if (error) reject(error);
+                            else return resolve(this);
                         });
                     });
-
-                } catch (error) {
+                    resolve(200);
+                } catch (errorCatch) {
                     //Error en cualquier parte de las transacciones
-                    await this.db.run("ROLLBACK");
-                    reject(error);
+                    const respuestaRollback =
+                        await new Promise((resolve, reject) => {
+                            this.db.run("ROLLBACK", [], function (error) {
+                                if (error) reject(902);
+                                //Es una resolución, pero de un rollback, se envía entonces el error que lo causó
+                                else resolve(errorCatch.errno);
+                            });
+                        });
+                    reject(respuestaRollback);
                 }
             });
         });
@@ -134,11 +164,18 @@ class JornadaRepo {
             const placeholders = idArray.map(() => '?').join(', ');
             const query = "DELETE FROM jornadas WHERE id IN (" + placeholders + ")";
 
-            this.db.run(query, idArray, function (error) {
-                if (error) {
-                    reject(error.errno);
-                } else {
-                    resolve(this.changes); // Devuelve el número de filas eliminadas
+            this.db.serialize(async () => {
+                try {
+                    await this.ActivarLlavesForaneas();
+                    this.db.run(query, idArray, function (error) {
+                        if (error) {
+                            reject(error.errno);
+                        } else {
+                            resolve(this.changes); // Devuelve el número de filas eliminadas
+                        }
+                    });
+                } catch (error) {
+                    reject(error.errno)
                 }
             });
         });

@@ -18,6 +18,7 @@ import GestionHorario from './frontend/paginas/gestionHorario/GestionHorario';
 import PiscinaCompetencias from './frontend/paginas/horarioCompetencias/PiscinaCompetencias';
 import Horario from './frontend/paginas/horario/horario';
 import FusionGrupos from './frontend/paginas/fusionGrupos/FusionGrupos';
+import HorarioPDF from './frontend/paginas/horarioPDF/HorarioPDF';
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/piscinaCompetencias" element={<PiscinaCompetencias/>} />
           <Route path="/horario" element={<Horario/>} />
           <Route path="/fusionGrupos" element={<FusionGrupos/>} />
+          <Route path="/horarioPDF" element={<HorarioPDF/>} />
         </Routes>
       </Router>
     </div>

@@ -1,10 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import BotonDispHoraria from '../botonDIspHoraria/BotonDispHoraria';
 import './CreacionHorario.css';
-import Swal from 'sweetalert2';
-import InstructorServicio from '../../../backend/repository/servicios/InstructorService';
-import AmbienteServicio from '../../../backend/repository/servicios/AmbienteService';
-import FranjaHoraria from '../franjaHoraria/FranjaHoraria';
 import CrudInstructores from '../../paginas/crudInstructores/CrudInstructores';
 import CrudAmbientes from '../../paginas/crudAmbientes/CrudAmbientes';
 

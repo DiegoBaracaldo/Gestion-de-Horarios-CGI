@@ -23,6 +23,15 @@ class GrupoServicio {
         }
     }
 
+    async CargarGrupos(arrayIds){
+      try {
+        return await window.electron.GetAllByIdGrupo(arrayIds);
+      } catch (error) {
+        console.log("error en servicio grupo por: ", error);
+        throw error.message.split(":")[1].trim();
+      }
+    }
+
     async CargarListaByPool() {
         try {
             return await window.electron.GetAllGruposByPool();

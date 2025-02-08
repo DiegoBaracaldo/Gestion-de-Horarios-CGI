@@ -1,5 +1,4 @@
 export function FranjasContiguasVerticales(franjas) {
-    console.log(franjas);
     const arraySubBloques = [];
     let acumuladorAux = [];
 
@@ -29,7 +28,7 @@ export function FranjasContiguasVerticales(franjas) {
             }
         });
     }
-    console.log(arraySubBloques);
+    // console.log(arraySubBloques);
     return arraySubBloques;
 }
 

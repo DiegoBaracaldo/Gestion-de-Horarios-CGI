@@ -21,6 +21,15 @@ class HorarioPDFServicio{
         }
     }
 
+    async GuardarPDFsGrupos(arrayPDF){
+        try {
+            return await window.electron.SavePDFsGrupos(arrayPDF);
+        } catch (error) {
+            console.log("Error en servicio de horarioPDF por:", error);
+            throw error;
+        }
+    }
+
     async AbrirCarpetaPDFs(){
         try {
             return await window.electron.AbrirCarpetaContenedoraPDF();

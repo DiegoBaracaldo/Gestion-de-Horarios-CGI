@@ -81,9 +81,12 @@ class CrearHorarioInstructores {
             const mapBloques = new Map();
 
             const { competenciasId, gruposId, ambientesId } = this.GetUniqueIdsInstructores(mapaCrudos);
-            const arrayCompetencias = await new CompetenciaServicio().CargarCompetencias(competenciasId);
-            const arrayAmbientes = await new AmbienteServicio().CargarAmbientes(ambientesId);
-            const arrayGrupos = await new GrupoServicio().CargarGrupos(gruposId);
+            const promesaCompetencias = new CompetenciaServicio().CargarCompetencias(competenciasId);
+            const promesaAmbientes = new AmbienteServicio().CargarAmbientes(ambientesId);
+            const promesaGrupos = new GrupoServicio().CargarGrupos(gruposId);
+
+            const [arrayCompetencias, arrayAmbientes, arrayGrupos] =
+                await Promise.all([promesaCompetencias, promesaAmbientes, promesaGrupos]);
 
             const competenciasMap = new Map();
             arrayCompetencias.forEach(competencia => {
@@ -224,7 +227,7 @@ class CrearHorarioInstructores {
             let acumulador = 0;
             Object.keys(horarioInstructor).forEach(key => {
                 let arrayDia = horarioInstructor[key];
-                if (Array.isArray(arrayDia) && arrayDia.length > 0){
+                if (Array.isArray(arrayDia) && arrayDia.length > 0) {
                     arrayDia.forEach(bloque => {
                         acumulador += bloque.franjas.length / 2;
                     });
@@ -249,14 +252,14 @@ class CrearHorarioInstructores {
                         //Se detectan los días y que no estén vacíos
                         if (Array.isArray(arrayDia) && arrayDia.length > 0) {
                             return (
-                                <tr>
+                                <tr key={`filasTablaHorarioPDFInstructores${key}`}>
                                     <td>
                                         <div className="filaDia">
                                             {key}
                                         </div>
                                         {
-                                            arrayDia.map(subBloque =>
-                                                <div className="filaSubBloque">
+                                            arrayDia.map((subBloque, index) =>
+                                                <div className="filaSubBloque" key={`subBloquesFilasPDFTablaInstr${index}`}>
                                                     <label className="hora">
                                                         {`${subBloque.horaInicial.substring(0, 2)}:${subBloque.horaInicial.substring(2, 4)}
                                                          - 
@@ -283,7 +286,7 @@ class CrearHorarioInstructores {
                             <label className="etTotalHoras">total horas semanales :</label>
                             <label>{totalHoras()}</label>
                         </td>
-                        </tr>
+                    </tr>
                 </tfoot>
             </table>
         );

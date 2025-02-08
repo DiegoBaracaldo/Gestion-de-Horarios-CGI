@@ -630,6 +630,14 @@ function RegistrarIPC() {
             throw error;
         }
     });
+    ipcMain.handle('SavePDFsGrupos', async(evento, arrayPDF) => {
+        try {
+            return generacionPDFRepo.SavePDFsGrupos(arrayPDF);
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
     ipcMain.handle('AbrirCarpetaContenedoraPDF', async() => {
         generacionPDFRepo.AbrirCarpetaContenedoraPDF();
     });

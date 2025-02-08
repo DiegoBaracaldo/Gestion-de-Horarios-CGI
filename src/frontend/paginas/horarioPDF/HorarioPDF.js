@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import CrearHorarioInstructores from './HorarioInstructores';
 import jsPDF from 'jspdf';
 import { renderToString } from 'react-dom/server';
+import CrearHorarioGrupos from './HorarioGrupos';
 
 
 const HorarioPDF = () => {
@@ -21,9 +22,14 @@ const HorarioPDF = () => {
     }, []);
 
     const GenerarPDFS = async () => {
-        //console.log(await GenerarPDFsInstructores());
-        await GenerarPDFsInstructores()
-
+        try {
+            await GenerarPDFsGrupos();
+            await GenerarPDFsInstructores();
+            await new HorarioPDFServicio().AbrirCarpetaPDFs();
+        } catch (error) {
+            console.log(error);
+            Swal.fire("Error al construir PDF's!");
+        }
     }
 
     async function GenerarPDFsInstructores() {
@@ -57,7 +63,42 @@ const HorarioPDF = () => {
                 });
                 await horarioService.GuardarPDFsInstructores(PDFsInstructores);
             }
-            await horarioService.AbrirCarpetaPDFs();
+        } catch (error) {
+            Swal.fire(error.toString());
+        }
+    }
+
+    async function GenerarPDFsGrupos() {
+        const horarioService = new HorarioPDFServicio();
+        try {
+            const crearHorarioGrupos = new CrearHorarioGrupos();
+            const horarioMapGrupos = await crearHorarioGrupos.ObtenerHorarioGrupos();
+            // console.log(horarioMapInstructores);
+            const PDFsInstructores = [];
+            for (const [clave, horarioGrupo] of horarioMapGrupos) {
+                let pdfHorario = new jsPDF({
+                    unit: 'pt',
+                    format: 'a4',
+                    orientation: 'portrait'
+                });
+                pdfHorario.setFont('helvetica');
+                pdfHorario.text('', 20, 20);
+                await pdfHorario
+                    .html(renderToString(crearHorarioGrupos.GetTablaHorarioGrupo(horarioGrupo)),{
+                        x: 20,
+                        y: 20,
+                        autoPaging: true
+                    });
+
+                const pdfData = pdfHorario.output('arraybuffer');
+                const uint8Array = new Uint8Array(pdfData);
+
+                PDFsInstructores.push({
+                    nombre: `${horarioGrupo.codigoGrupo}.pdf`,
+                    contenido: uint8Array
+                });
+                await horarioService.GuardarPDFsGrupos(PDFsInstructores);
+            }
         } catch (error) {
             Swal.fire(error.toString());
         }

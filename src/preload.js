@@ -72,6 +72,7 @@ contextBridge.exposeInMainWorld('electron', {
     SaveNewFusion: (fusion) => ipcRenderer.invoke('SaveNewFusion', fusion),
     RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion),
     SavePDFsInstructores: (arrayPDFs) => ipcRenderer.invoke('SavePDFsInstructores', arrayPDFs),
+    SavePDFsGrupos: (arrayPDFs) => ipcRenderer.invoke('SavePDFsGrupos', arrayPDFs),
     AbrirCarpetaContenedoraPDF: () => ipcRenderer.invoke('AbrirCarpetaContenedoraPDF'),
 
     GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)

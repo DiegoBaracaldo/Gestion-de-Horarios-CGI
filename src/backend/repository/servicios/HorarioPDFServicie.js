@@ -30,9 +30,9 @@ class HorarioPDFServicio{
         }
     }
 
-    async AbrirCarpetaPDFs(){
+    async AbrirCarpetaPDFs(directorio){
         try {
-            return await window.electron.AbrirCarpetaContenedoraPDF();
+            return await window.electron.AbrirCarpetaContenedoraPDF(directorio);
         } catch (error) {
             console.log("Error en servicio de horarioPDF por:", error);
             throw error;
@@ -42,6 +42,24 @@ class HorarioPDFServicio{
     async SetHorarioCambiadoFalse(){
         try {
             return await window.electron.TriggerHorarioFalse();
+        } catch (error) {
+            console.log("Error en servicio de horarioPDF por:", error);
+            throw error;
+        }
+    }
+
+    async DescargarPDFGrupos(){
+        try {
+            return await window.electron.DescargarPDFGrupos();
+        } catch (error) {
+            console.log("Error en servicio de horarioPDF por:", error);
+            throw error;
+        }
+    }
+
+    async DescargarPDFInstructores(){
+        try {
+            return await window.electron.DescargarPDFInstructores();
         } catch (error) {
             console.log("Error en servicio de horarioPDF por:", error);
             throw error;

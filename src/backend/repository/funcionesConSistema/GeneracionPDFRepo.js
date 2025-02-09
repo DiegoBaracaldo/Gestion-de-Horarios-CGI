@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { app, shell } = require('electron');
+const { app, shell, dialog } = require('electron');
 
 class GeneracionPDF {
     constructor() {
@@ -14,8 +14,8 @@ class GeneracionPDF {
         if (!fs.existsSync(this.directorioInstructores)) {
             fs.mkdirSync(this.directorioInstructores, { recursive: true })
         }
-        if(!fs.existsSync(this.directorioGrupos)){
-            fs.mkdirSync(this.directorioGrupos, {recursive: true});
+        if (!fs.existsSync(this.directorioGrupos)) {
+            fs.mkdirSync(this.directorioGrupos, { recursive: true });
         }
     }
 
@@ -27,6 +27,61 @@ class GeneracionPDF {
         } catch (error) {
             console.error('Error al vaciar la carpeta:', error);
             throw new Error('No se pudo vaciar la carpeta');
+        }
+    }
+
+    async SeleccionarCarpetaDestino() {
+        const result = await dialog.showOpenDialog({
+            properties: ['openDirectory'], // Permite seleccionar solo una carpeta
+        });
+
+        if (result.canceled) {
+            console.log('El usuario canceló la selección de carpeta');
+            return null;
+        }
+        return result.filePaths[0]; // Retorna la ruta de la carpeta seleccionada
+    }
+
+
+    async CopiarArchivosPDF(carpetaOrigen, carpetaDestino) {
+        try {
+            const archivos = await fs.promises.readdir(carpetaOrigen); // Lista los archivos en la carpeta origen
+
+            // Asegúrate de que la carpeta destino exista
+            await fs.promises.mkdir(carpetaDestino, { recursive: true });
+
+            // Copia cada archivo al destino
+            await Promise.all(
+                archivos.map(async (archivo) => {
+                    const origen = path.join(carpetaOrigen, archivo);
+                    const destino = path.join(carpetaDestino, archivo);
+                    await fs.promises.copyFile(origen, destino); // Copia el archivo
+                })
+            );
+            return carpetaDestino;
+        } catch (error) {
+            console.error('Error al descargar los archivos:', error);
+            throw new Error('No se pudieron descargar los archivos.');
+        }
+    }
+
+    async DescargarPDFGrupos(){
+        try {
+            const ruta = await this.SeleccionarCarpetaDestino();
+            if(!ruta) return null;
+            else return await this.CopiarArchivosPDF(this.directorioGrupos, ruta);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async DescargarPDFInstructores(){
+        try {
+            const ruta = await this.SeleccionarCarpetaDestino();
+            if(!ruta) return null;
+            else return await this.CopiarArchivosPDF(this.directorioInstructores, ruta);
+        } catch (error) {
+            throw error;
         }
     }
 
@@ -47,6 +102,10 @@ class GeneracionPDF {
         }
     }
 
+    AbrirCarpetaEspecifica(directorio){
+        shell.openPath(directorio);
+    }
+
     async SavePDFsGrupos(arrayPDF) {
         try {
             await this.vaciarCarpeta(this.directorioGrupos);
@@ -64,8 +123,8 @@ class GeneracionPDF {
         }
     }
 
-    AbrirCarpetaContenedoraPDF() {
-        shell.openPath(this.directorioGeneral);
+    AbrirCarpetaContenedoraPDF(directorio) {
+        shell.openPath(directorio);
     }
 }
 module.exports = GeneracionPDF;

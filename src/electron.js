@@ -638,12 +638,28 @@ function RegistrarIPC() {
             throw error;
         }
     });
-    ipcMain.handle('AbrirCarpetaContenedoraPDF', async() => {
-        generacionPDFRepo.AbrirCarpetaContenedoraPDF();
+    ipcMain.handle('AbrirCarpetaContenedoraPDF', async(event, directorio) => {
+        generacionPDFRepo.AbrirCarpetaContenedoraPDF(directorio);
     });
     ipcMain.handle('TriggerHorarioFalse', async() => {
         try {
             return await horarioPDFRepo.TriggerHorarioFalse();
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
+    ipcMain.handle('DescargarPDFGrupos', async()=> {
+        try {
+            return await generacionPDFRepo.DescargarPDFGrupos();
+        } catch (error) {
+            console.log('Error en ipcMain handler PDF por: ', error);
+            throw error;
+        }
+    });
+    ipcMain.handle('DescargarPDFInstructores', async()=> {
+        try {
+            return await generacionPDFRepo.DescargarPDFInstructores();
         } catch (error) {
             console.log('Error en ipcMain handler PDF por: ', error);
             throw error;

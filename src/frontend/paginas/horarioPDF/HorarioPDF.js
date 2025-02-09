@@ -10,15 +10,15 @@ import CrearHorarioInstructores from './HorarioInstructores';
 import jsPDF from 'jspdf';
 import { renderToString } from 'react-dom/server';
 import CrearHorarioGrupos from './HorarioGrupos';
+import SWALDescarga from '../../alertas/SWALDescarga';
+import CreandoPDFLoading from './CreandoPDFLoading';
 
 
 const HorarioPDF = () => {
 
     const navegar = useNavigate(-1);
     const [horarioHaCambiado, setHorarioHaCambiado] = useState(true);
-    useEffect(() => {
-        console.log(horarioHaCambiado);
-    }, [horarioHaCambiado]);
+    const [creandoPDFS, setCreandoPDFS] = useState(false);
 
     useLayoutEffect(() => {
         const VerificarAlteracionHorario = async() => {
@@ -30,15 +30,43 @@ const HorarioPDF = () => {
 
     const GenerarPDFS = async () => {
         try {
+            setCreandoPDFS(true);
             await GenerarPDFsGrupos();
             await GenerarPDFsInstructores();
             await new HorarioPDFServicio().SetHorarioCambiadoFalse();
             const detectarHorarioAlterado = await DetectarHorarioAlterado();
             setHorarioHaCambiado(detectarHorarioAlterado);
-            await new HorarioPDFServicio().AbrirCarpetaPDFs();
+            setCreandoPDFS(false);
+            Swal.fire("Archivos generados correctamente!");
         } catch (error) {
             console.log(error);
             Swal.fire("Error al construir PDF's!");
+        }
+    }
+
+    const DescargarPDFInstructores = async () => {
+        const servicioHorarioPDF = new HorarioPDFServicio();
+        try {
+            const rutaDevuelta = await servicioHorarioPDF.DescargarPDFInstructores();
+            if(rutaDevuelta){
+                const respuesta = await new SWALDescarga().descargaAlert();
+                if(respuesta === 'si') await servicioHorarioPDF.AbrirCarpetaPDFs(rutaDevuelta);
+            }
+        } catch (error) {
+            Swal.fire(error.toString());
+        }
+    }
+
+    const DescargarPDGrupos = async () => {
+        const servicioHorarioPDF = new HorarioPDFServicio();
+        try {
+            const rutaDevuelta = await servicioHorarioPDF.DescargarPDFGrupos();
+            if(rutaDevuelta){
+                const respuesta = await new SWALDescarga().descargaAlert();
+                if(respuesta === 'si') await servicioHorarioPDF.AbrirCarpetaPDFs(rutaDevuelta);
+            }
+        } catch (error) {
+            Swal.fire(error);
         }
     }
 
@@ -118,7 +146,6 @@ const HorarioPDF = () => {
         //lógica para detectar si horario ha cambiado desde la última generación de PDF
         try {
             const respuesta = await new HorarioPDFServicio().EncontrarValor('horarioCambiado');
-            console.log(respuesta);
             if(respuesta === 'false') return false
             else if (respuesta === 'true') return true;
             else return false;
@@ -140,11 +167,13 @@ const HorarioPDF = () => {
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`descargar pdf's instructores`} disabledProp={horarioHaCambiado} />
+                            texto={`descargar pdf's instructores`} disabledProp={horarioHaCambiado} 
+                            onClick={DescargarPDFInstructores}/>
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
-                            texto={`descargar pdf's grupos`} disabledProp={horarioHaCambiado} />
+                            texto={`descargar pdf's grupos`} disabledProp={horarioHaCambiado} 
+                            onClick={DescargarPDGrupos}/>
                     </div>
                     <div className='contBtnPositivo'>
                         <BotonPositivo
@@ -157,6 +186,10 @@ const HorarioPDF = () => {
                     texto={`atrás`}
                     onClick={() => navegar(-1)} />
             </div>
+            {
+                creandoPDFS ? <CreandoPDFLoading/> : null
+            }
+            
         </div>
     );
 }

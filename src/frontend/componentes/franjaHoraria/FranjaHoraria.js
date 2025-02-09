@@ -38,7 +38,10 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                 let celdaVerde = false;
                 if (Array.isArray(franjasOcupadasIniciales)) {
                     if (esConsulta) {
-                        celdaOcupada = franjasOcupadasIniciales.includes(contadorAlgoritmo);
+                        const verificarColor = franjasOcupadasIniciales.includes(contadorAlgoritmo);
+                        if (verificarColor) celdaVerde = true;
+                        else celdaOcupada = true;
+
                     } else {
                         //Si es registro o edición se prohiben las franjas ya usadas
                         //pero se pintan de verde las que le pertenecen al horario en cuestión
@@ -237,31 +240,38 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                     <td className={`celdaFranja ${matrizCeldasFranja[i][0].pintadoVerde && ' celdaFranjaPintada'} ${matrizCeldasFranja[i][0].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`lunes${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][1].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][1].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`martes${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][2].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][2].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`miercoles${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][3].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][3].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`jueves${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][4].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][4].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`viernes${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][5].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][5].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`sabado${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                     <td className={`celdaFranja ${matrizCeldasFranja[i][6].pintadoVerde && 'celdaFranjaPintada'} ${matrizCeldasFranja[i][6].pintadoRojo && 'franjaOcupada'}`}
                         onMouseDown={(e) => ClicCeldaMatriz(i, e)} key={`domingo${i + 1}`}
                         onMouseUp={TerminarArrastre}
-                        onMouseMove={(e) => ManejarArrastre(i, e)}></td>
+                        onMouseMove={(e) => ManejarArrastre(i, e)}
+                        style={{cursor: esConsulta ? 'default' : 'cell'}}></td>
                 </tr>
             );
             contadorMinutos = contadorMinutos + 30;
@@ -311,8 +321,8 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
                             </tr>
                         </thead>
                         <tbody
-                        onMouseLeave={TerminarArrastre}
-                        onMouseUp={TerminarArrastre}>
+                            onMouseLeave={TerminarArrastre}
+                            onMouseUp={TerminarArrastre}>
                             {listaHora}
                         </tbody>
                     </table>
@@ -321,19 +331,19 @@ const FranjaHoraria = ({ onClickPositivo, onClickDestructivo, franjaProp, franja
             <div className='botones'>
                 <div className='contMapaColores'>
                     <div className='muestraColor muestraColorRojo'></div>
-                    <label> : Franja NO disponible</label>
-                </div>
-                <div className='contMapaColores'>
-                    <div className='muestraColor muestraColorBlanco'></div>
-                    <label> : Franja disponible</label>
+                    <label>{esConsulta ? 'Franja NO asignada' : 'Franja NO disponible'}</label>
                 </div>
                 {
                     esConsulta ? null :
                         <div className='contMapaColores'>
-                            <div className='muestraColor muestraColorVerde'></div>
-                            <label> : Franja seleccionada</label>
+                            <div className='muestraColor muestraColorBlanco'></div>
+                            <label>Franja disponible</label>
                         </div>
                 }
+                <div className='contMapaColores'>
+                    <div className='muestraColor muestraColorVerde'></div>
+                    <label>{esConsulta ? 'Disponibilidad Asignada' : 'Franja seleccionada'}</label>
+                </div>
                 <div className='contBtnPositivo contBtn'>
                     {
                         esConsulta ? null :

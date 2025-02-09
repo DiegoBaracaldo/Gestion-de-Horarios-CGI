@@ -15,6 +15,7 @@ const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
 const FusionesRepo = require('./backend/repository/repositorios/FusionesRepo');
 const HorarioPDFRepo = require('./backend/repository/repositorios/HorarioPDFRepo');
 const GeneracionPDF = require('./backend/repository/funcionesConSistema/GeneracionPDFRepo');
+const { default: Swal } = require('sweetalert2');
 const isDev = import('electron-is-dev');
 
 let mainWindow;
@@ -77,20 +78,35 @@ function createWindow() {
     RegistrarIPC();
 }
 
-app.on('ready', createWindow);
+///// Evitar que se abra más de una instancia del programa //////////////////
+if (!app.requestSingleInstanceLock()) {
+    app.quit();
+} else {
+    // Si no hay otra instancia, continuar con la ejecución
+    app.on('second-instance', (event, commandLine, workingDirectory) => {
+        // Si la ventana ya está abierta, solo darle foco
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+        }
+    });
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        conexionBD.CerrarBaseDatos();
-        app.quit();
-    }
-});
+    app.on('ready', createWindow);
 
-app.on('activate', () => {
-    if (mainWindow === null) {
-        createWindow();
-    }
-});
+    app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+            conexionBD.CerrarBaseDatos();
+            app.quit();
+        }
+    });
+
+    app.on('activate', () => {
+        if (mainWindow === null) {
+            createWindow();
+        }
+    });
+}
+////////////////////////////////////////////////////
 
 async function IniciarBaseDatos() {
     conexionBD.VerificarTablas()
@@ -614,7 +630,7 @@ function RegistrarIPC() {
     });
 
     //HORARIO PDF
-    ipcMain.handle('GetByClave', async(event, clave) => {
+    ipcMain.handle('GetByClave', async (event, clave) => {
         try {
             return await horarioPDFRepo.GetByClave(clave);
         } catch (error) {
@@ -622,7 +638,7 @@ function RegistrarIPC() {
             throw ObtenerErrorSQLite(error);
         }
     });
-    ipcMain.handle('SavePDFsInstructores', async(evento, arrayPDF) => {
+    ipcMain.handle('SavePDFsInstructores', async (evento, arrayPDF) => {
         try {
             return generacionPDFRepo.SavePDFsInstructores(arrayPDF);
         } catch (error) {
@@ -630,7 +646,7 @@ function RegistrarIPC() {
             throw error;
         }
     });
-    ipcMain.handle('SavePDFsGrupos', async(evento, arrayPDF) => {
+    ipcMain.handle('SavePDFsGrupos', async (evento, arrayPDF) => {
         try {
             return generacionPDFRepo.SavePDFsGrupos(arrayPDF);
         } catch (error) {
@@ -638,10 +654,10 @@ function RegistrarIPC() {
             throw error;
         }
     });
-    ipcMain.handle('AbrirCarpetaContenedoraPDF', async(event, directorio) => {
+    ipcMain.handle('AbrirCarpetaContenedoraPDF', async (event, directorio) => {
         generacionPDFRepo.AbrirCarpetaContenedoraPDF(directorio);
     });
-    ipcMain.handle('TriggerHorarioFalse', async() => {
+    ipcMain.handle('TriggerHorarioFalse', async () => {
         try {
             return await horarioPDFRepo.TriggerHorarioFalse();
         } catch (error) {
@@ -649,7 +665,7 @@ function RegistrarIPC() {
             throw error;
         }
     });
-    ipcMain.handle('DescargarPDFGrupos', async()=> {
+    ipcMain.handle('DescargarPDFGrupos', async () => {
         try {
             return await generacionPDFRepo.DescargarPDFGrupos();
         } catch (error) {
@@ -657,7 +673,7 @@ function RegistrarIPC() {
             throw error;
         }
     });
-    ipcMain.handle('DescargarPDFInstructores', async()=> {
+    ipcMain.handle('DescargarPDFInstructores', async () => {
         try {
             return await generacionPDFRepo.DescargarPDFInstructores();
         } catch (error) {

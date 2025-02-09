@@ -73,8 +73,10 @@ contextBridge.exposeInMainWorld('electron', {
     RemoveFusion: (idHuesped, idAnfitrion) => ipcRenderer.invoke('RemoveFusion', idHuesped, idAnfitrion),
     SavePDFsInstructores: (arrayPDFs) => ipcRenderer.invoke('SavePDFsInstructores', arrayPDFs),
     SavePDFsGrupos: (arrayPDFs) => ipcRenderer.invoke('SavePDFsGrupos', arrayPDFs),
-    AbrirCarpetaContenedoraPDF: () => ipcRenderer.invoke('AbrirCarpetaContenedoraPDF'),
+    AbrirCarpetaContenedoraPDF: (directorio) => ipcRenderer.invoke('AbrirCarpetaContenedoraPDF', directorio),
     TriggerHorarioFalse: () =>  ipcRenderer.invoke('TriggerHorarioFalse'),
+    DescargarPDFGrupos: () => ipcRenderer.invoke('DescargarPDFGrupos'),
+    DescargarPDFInstructores: () => ipcRenderer.invoke('DescargarPDFInstructores'),
 
     GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)
 });

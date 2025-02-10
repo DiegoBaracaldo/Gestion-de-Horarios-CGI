@@ -1,7 +1,3 @@
-const AmbienteRepo = require("./AmbienteRepo");
-const CompetenciaRepo = require("./CompetenciaRepo");
-const GrupoRepo = require("./GrupoRepo");
-
 class HorarioPDFRepo {
 
     constructor(db) {
@@ -14,7 +10,9 @@ class HorarioPDFRepo {
             SELECT valor FROM datos WHERE clave = ?;`;
 
             this.db.get(query, [clave], function (error, fila) {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(fila.valor.toString());
             });
         });
@@ -26,7 +24,9 @@ class HorarioPDFRepo {
             UPDATE datos SET valor = 'false' WHERE clave = 'horarioCambiado';
             `;
             this.db.run(query, [], function(error){
-                if(error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(true);
             });
         });

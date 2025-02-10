@@ -1,5 +1,5 @@
 //electron.js
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification } = require('electron');
 const path = require('path');
 const ConexionBD = require('./baseDatos/BaseDatos');
 const TorreRepo = require('./backend/repository/repositorios/TorreRepo');
@@ -15,8 +15,9 @@ const FranjaRepo = require('./backend/repository/repositorios/FranjaRepo');
 const FusionesRepo = require('./backend/repository/repositorios/FusionesRepo');
 const HorarioPDFRepo = require('./backend/repository/repositorios/HorarioPDFRepo');
 const GeneracionPDF = require('./backend/repository/funcionesConSistema/GeneracionPDFRepo');
-const { default: Swal } = require('sweetalert2');
 const isDev = import('electron-is-dev');
+const fs = require('fs');
+const winston = require('winston');
 
 let mainWindow;
 
@@ -36,6 +37,40 @@ let fusionesRepo;
 let horarioPDFRepo;
 let generacionPDFRepo;
 
+
+//Creación de carpeta para registro de errores en producción
+const userDocumentsPath = app.getPath('documents');
+const carpetaLoggerDocuments = path.join(userDocumentsPath, 'GestorHorarioInfo', 'logger');
+
+if (!fs.existsSync(carpetaLoggerDocuments)) {
+    try {
+        fs.mkdirSync(carpetaLoggerDocuments, {recursive: true});
+    } catch (error) {
+        console.error(`Error al crear carpeta de logs: `, error);
+        process.exit(1);
+    }
+}
+
+const rutaFileLogger =  path.join(carpetaLoggerDocuments, 'horarioLog.log');
+
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        winston.format.simple()
+    ),
+    transports: [
+        new winston.transports
+            .Console({ format: winston.format.combine(winston.format.colorize(), winston.format.simple()) }),
+        new winston.transports.File({
+            filename: rutaFileLogger,
+            handleExceptions: true
+        })
+    ]
+});
+
+//Crear ventana
 function createWindow() {
 
     conexionBD = new ConexionBD();
@@ -78,6 +113,18 @@ function createWindow() {
     RegistrarIPC();
 }
 
+//Manejor de errores 
+process.on('uncaughtException', (err) => {
+    logger.error(`Error no capturado: ${err.message}`);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error(`Promesa no manejada: ${reason}`);
+});
+
+//////////////////////////
+
 ///// Evitar que se abra más de una instancia del programa //////////////////
 if (!app.requestSingleInstanceLock()) {
     app.quit();
@@ -109,12 +156,12 @@ if (!app.requestSingleInstanceLock()) {
 ////////////////////////////////////////////////////
 
 async function IniciarBaseDatos() {
-    conexionBD.VerificarTablas()
+     await conexionBD.VerificarTablas()
         .then(existe => {
             return existe;
         })
         .catch(err => {
-            console.log(err);
+            logger.error(err);
             return false;
         })
 }
@@ -125,7 +172,7 @@ function RegistrarIPC() {
         try {
             return await torreRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainTorres por: " + error);
+            logger.error("error en electron ipcMainTorres por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -134,7 +181,7 @@ function RegistrarIPC() {
             //aquí se devuelven o las filas encontradas en resolve o el array vacío de reject
             return await torreRepo.GetAll();
         } catch (error) {
-            console.log("error en electron ipcMainTorres por: " + error);
+            logger.error("error en electron ipcMainTorres por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -142,7 +189,7 @@ function RegistrarIPC() {
         try {
             return await torreRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -150,7 +197,7 @@ function RegistrarIPC() {
         try {
             return await torreRepo.SaveNew(nombre);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -158,7 +205,7 @@ function RegistrarIPC() {
         try {
             return await torreRepo.Save(idViejo, torre);
         } catch (error) {
-            console.log("Error en ipcMain  SaveTorre por:   " + error);
+            logger.error("Error en ipcMain  SaveTorre por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -166,7 +213,7 @@ function RegistrarIPC() {
         try {
             return await torreRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveTorre por:   " + error);
+            logger.error("Error en ipcMain  RemoveTorre por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -177,7 +224,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainJornadas por: " + error);
+            logger.error("error en electron ipcMainJornadas por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -185,7 +232,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.GetAll();
         } catch (error) {
-            console.log("error en electron ipcMainJornadas por: " + error);
+            logger.error("error en electron ipcMainJornadas por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -193,7 +240,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -201,7 +248,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.GetAllFranjas();
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -209,7 +256,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.SaveNew(jornada);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -217,7 +264,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.Save(idViejo, jornada);
         } catch (error) {
-            console.log("Error en ipcMain  SaveJornada por:   " + error);
+            logger.error("Error en ipcMain  SaveJornada por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -225,7 +272,7 @@ function RegistrarIPC() {
         try {
             return await jornadaRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveJornada por:   " + error);
+            logger.error("Error en ipcMain  RemoveJornada por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -235,7 +282,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainProgramas por: " + error);
+            logger.error("error en electron ipcMainProgramas por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -243,7 +290,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.GetAll();
         } catch (error) {
-            console.log("error en electron ipcMainProgramas por: " + error);
+            logger.error("error en electron ipcMainProgramas por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -251,7 +298,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -259,7 +306,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.SaveNew(programa);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -267,7 +314,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.Save(idViejo, programa);
         } catch (error) {
-            console.log("Error en ipcMain  SavePrograma por:   " + error);
+            logger.error("Error en ipcMain  SavePrograma por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -275,7 +322,7 @@ function RegistrarIPC() {
         try {
             return await programaRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemovePrograma por:   " + error);
+            logger.error("Error en ipcMain  RemovePrograma por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -285,7 +332,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainInstructores por: " + error);
+            logger.error("error en electron ipcMainInstructores por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -293,7 +340,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.GetAll();
         } catch (error) {
-            console.log("Error en electron ipcMain Instructores  por: " + error);
+            logger.error("Error en electron ipcMain Instructores  por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -301,7 +348,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -309,7 +356,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.GetAllById(arrayIds);
         } catch (error) {
-            console.log("Error en ipcMain instructores  getAllById por:   " + error);
+            logger.error("Error en ipcMain instructores  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -317,7 +364,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.SaveNew(instructor);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -325,7 +372,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.Save(idViejo, instructor);
         } catch (error) {
-            console.log("Error en ipcMain  SaveInstructor por:   " + error);
+            logger.error("Error en ipcMain  SaveInstructor por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -333,7 +380,7 @@ function RegistrarIPC() {
         try {
             return await instructorRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveInstructor por:   " + error);
+            logger.error("Error en ipcMain  RemoveInstructor por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -343,7 +390,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainGrupos por: " + error);
+            logger.error("error en electron ipcMainGrupos por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -351,7 +398,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.GetAll();
         } catch (error) {
-            console.log("Error en electron ipcMain Grupos  por: " + error);
+            logger.error("Error en electron ipcMain Grupos  por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -359,7 +406,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.GetAllById(arrayIds);
         } catch (error) {
-            console.log("Error en ipcMain grupos  getAllById por:   " + error);
+            logger.error("Error en ipcMain grupos  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -367,7 +414,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.GetAllByPool();
         } catch (error) {
-            console.log("Error en electron ipcMain Grupos  por: " + error);
+            logger.error("Error en electron ipcMain Grupos  por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -375,7 +422,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -383,7 +430,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.SaveNew(grupo);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -391,7 +438,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.Save(idViejo, grupo);
         } catch (error) {
-            console.log("Error en ipcMain  SaveGrupo por:   " + error);
+            logger.error("Error en ipcMain  SaveGrupo por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -399,7 +446,7 @@ function RegistrarIPC() {
         try {
             return await grupoRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveGrupo por:   " + error);
+            logger.error("Error en ipcMain  RemoveGrupo por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -409,7 +456,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainAmbientes por: " + error);
+            logger.error("error en electron ipcMainAmbientes por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -424,7 +471,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -432,7 +479,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.GetAllById(arrayIds);
         } catch (error) {
-            console.log("Error en ipcMain ambientes  getAllById por:   " + error);
+            logger.error("Error en ipcMain ambientes  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -440,7 +487,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.SaveNew(ambiente);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -448,7 +495,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.Save(idViejo, ambiente);
         } catch (error) {
-            console.log("Error en ipcMain  SaveAmbiente por:   " + error);
+            logger.error("Error en ipcMain  SaveAmbiente por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -456,7 +503,7 @@ function RegistrarIPC() {
         try {
             return await ambienteRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveAmbiente por:   " + error);
+            logger.error("Error en ipcMain  RemoveAmbiente por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -466,7 +513,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.AtLeastOne();
         } catch (error) {
-            console.log("error en electron ipcMainCompetencias por: " + error);
+            logger.error("error en electron ipcMainCompetencias por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -474,7 +521,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.GetAllByIdPrograma(idPrograma);
         } catch (error) {
-            console.log("Error en electron ipcMain Competencias  por: " + error);
+            logger.error("Error en electron ipcMain Competencias  por: " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -482,7 +529,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.GetById(id);
         } catch (error) {
-            console.log("Error en ipcMain  getById por:   " + error);
+            logger.error("Error en ipcMain  getById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -490,7 +537,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.GetAllById(arrayIds);
         } catch (error) {
-            console.log("Error en ipcMain competencias  getAllById por:   " + error);
+            logger.error("Error en ipcMain competencias  getAllById por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -498,7 +545,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.GetByPool(idGrupo);
         } catch (error) {
-            console.log("Error en ipcMain  GetAllByPoolCompetencias por:   " + error);
+            logger.error("Error en ipcMain  GetAllByPoolCompetencias por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -506,7 +553,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.SaveNew(competencia);
         } catch (error) {
-            console.log("Error en ipcMain  SaveNew por:   " + error);
+            logger.error("Error en ipcMain  SaveNew por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -514,7 +561,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.Save(idViejo, competencia);
         } catch (error) {
-            console.log("Error en ipcMain  SaveCompetencia por:   " + error);
+            logger.error("Error en ipcMain  SaveCompetencia por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -522,7 +569,7 @@ function RegistrarIPC() {
         try {
             return await competenciaRepo.Remove(idArray);
         } catch (error) {
-            console.log("Error en ipcMain  RemoveCompetencia por:   " + error);
+            logger.error("Error en ipcMain  RemoveCompetencia por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -532,7 +579,7 @@ function RegistrarIPC() {
         try {
             return await piscinaRepo.SavePool(agregados, eliminados);
         } catch (error) {
-            console.log("Error en ipcMain  Guardar Piscinas por:   " + error);
+            logger.error("Error en ipcMain  Guardar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -540,7 +587,7 @@ function RegistrarIPC() {
         try {
             return await piscinaRepo.GetAll();
         } catch (error) {
-            console.log("Error en ipcMain  Cargar Piscinas por:   " + error);
+            logger.error("Error en ipcMain  Cargar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -548,7 +595,7 @@ function RegistrarIPC() {
         try {
             return await piscinaRepo.ConfirmPool();
         } catch (error) {
-            console.log("Error en ipcMain  al confirmar Piscinas por:   " + error);
+            logger.error("Error en ipcMain  al confirmar Piscinas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -558,7 +605,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.GetAll();
         } catch (error) {
-            console.log("Error en ipcMain  al obtener franjas por:   " + error);
+            logger.error("Error en ipcMain  al obtener franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -566,7 +613,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.GetBloquesByCompetencia(idGrupo, idCompetencia);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener bloques en franjas por:   " + error);
+            logger.error("Error en ipcMain  al obtener bloques en franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -574,7 +621,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.DeleteAndSaveFranjas(agregaciones, modificaciones, eliminaciones);
         } catch (error) {
-            console.log("Error en ipcMain  al guardar franjas en franjas por:   " + error);
+            logger.error("Error en ipcMain  al guardar franjas en franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -582,7 +629,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.GetOcupanciaFranjasGrupo(idGrupo);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener ocupancia franjas en franjas por:   " + error);
+            logger.error("Error en ipcMain  al obtener ocupancia franjas en franjas por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -590,7 +637,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.GetFranjasByCompetenciaAndGrupo(idGrupo, idCompetencia);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener franjas de competencia por:   " + error);
+            logger.error("Error en ipcMain  al obtener franjas de competencia por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -598,7 +645,7 @@ function RegistrarIPC() {
         try {
             return await franjaRepo.ConfirmarHorarioCompleto();
         } catch (error) {
-            console.log("Error en ipcMain  al confirma horario por:   " + error);
+            logger.error("Error en ipcMain  al confirma horario por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -608,7 +655,7 @@ function RegistrarIPC() {
         try {
             return await fusionesRepo.GetAll();
         } catch (error) {
-            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            logger.error("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -616,7 +663,7 @@ function RegistrarIPC() {
         try {
             return await fusionesRepo.SaveNew(fusion);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            logger.error("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -624,7 +671,7 @@ function RegistrarIPC() {
         try {
             return await fusionesRepo.Remove(idHuesped, idAnfitrion);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener fusiones por:   " + error);
+            logger.error("Error en ipcMain  al obtener fusiones por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -634,7 +681,7 @@ function RegistrarIPC() {
         try {
             return await horarioPDFRepo.GetByClave(clave);
         } catch (error) {
-            console.log("Error en ipcMain  al obtener valor por:   " + error);
+            logger.error("Error en ipcMain  al obtener valor por:   " + error);
             throw ObtenerErrorSQLite(error);
         }
     });
@@ -642,7 +689,7 @@ function RegistrarIPC() {
         try {
             return generacionPDFRepo.SavePDFsInstructores(arrayPDF);
         } catch (error) {
-            console.log('Error en ipcMain handler PDF por: ', error);
+            logger.error('Error en ipcMain handler PDF por: ', error);
             throw error;
         }
     });
@@ -650,7 +697,7 @@ function RegistrarIPC() {
         try {
             return generacionPDFRepo.SavePDFsGrupos(arrayPDF);
         } catch (error) {
-            console.log('Error en ipcMain handler PDF por: ', error);
+            logger.error('Error en ipcMain handler PDF por: ', error);
             throw error;
         }
     });
@@ -661,7 +708,7 @@ function RegistrarIPC() {
         try {
             return await horarioPDFRepo.TriggerHorarioFalse();
         } catch (error) {
-            console.log('Error en ipcMain handler PDF por: ', error);
+            logger.error('Error en ipcMain handler PDF por: ', error);
             throw error;
         }
     });
@@ -669,7 +716,7 @@ function RegistrarIPC() {
         try {
             return await generacionPDFRepo.DescargarPDFGrupos();
         } catch (error) {
-            console.log('Error en ipcMain handler PDF por: ', error);
+            logger.error('Error en ipcMain handler PDF por: ', error);
             throw error;
         }
     });
@@ -677,8 +724,15 @@ function RegistrarIPC() {
         try {
             return await generacionPDFRepo.DescargarPDFInstructores();
         } catch (error) {
-            console.log('Error en ipcMain handler PDF por: ', error);
+            logger.error('Error en ipcMain handler PDF por: ', error);
             throw error;
         }
     });
+
+    //Manejo de errores
+    ipcMain.handle('logErrores', (event, mensaje) => {
+        logger.error(`Error en el render por: ${mensaje}`);
+    });
 }
+
+module.exports = logger;

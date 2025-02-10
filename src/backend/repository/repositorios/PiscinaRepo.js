@@ -1,3 +1,4 @@
+
 class PiscinaRepo {
 
     constructor(db) {
@@ -7,7 +8,9 @@ class PiscinaRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error) {
+                    reject(error);
+                }
                 else resolve();
             });
         });
@@ -64,7 +67,7 @@ class PiscinaRepo {
                     });
                     resolve("Cambios Guardados Correctamente!");
 
-                } catch (error) {
+                } catch (errorCatch) {
                     // Si error en alguna de las operaciones
                     const respuestaRollback =
                         await new Promise((resolve, reject) => {
@@ -84,7 +87,9 @@ class PiscinaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM piscinaCompetencias";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });

@@ -8,7 +8,9 @@ class InstructorRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error) {
+                    reject(error);
+                }
                 else resolve();
             });
         });
@@ -19,7 +21,9 @@ class InstructorRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM instructores LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if (err) reject(err.errno);
+                if (err) {
+                    reject(err.errno);
+                }
                 else resolve(fila.hasRecords);
             });
         });
@@ -35,7 +39,9 @@ class InstructorRepo {
                 FROM  instructores i;
             `;
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -45,7 +51,9 @@ class InstructorRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM instructores WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -61,7 +69,9 @@ class InstructorRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });

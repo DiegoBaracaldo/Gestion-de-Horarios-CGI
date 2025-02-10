@@ -25,7 +25,6 @@ class GeneracionPDF {
             // Volver a crear la carpeta vacía
             await fs.promises.mkdir(carpeta, { recursive: true });
         } catch (error) {
-            console.error('Error al vaciar la carpeta:', error);
             throw new Error('No se pudo vaciar la carpeta');
         }
     }
@@ -60,7 +59,6 @@ class GeneracionPDF {
             );
             return carpetaDestino;
         } catch (error) {
-            console.error('Error al descargar los archivos:', error);
             throw new Error('No se pudieron descargar los archivos.');
         }
     }
@@ -97,7 +95,6 @@ class GeneracionPDF {
             );
             return archivosGuardados;
         } catch (error) {
-            console.error('Error al guardar PDFs:', error);
             throw new Error('No se pudieron guardar los archivos PDF.', error);
         }
     }
@@ -118,7 +115,6 @@ class GeneracionPDF {
             );
             return archivosGuardados;
         } catch (error) {
-            console.error('Error al guardar PDFs:', error);
             throw new Error('No se pudieron guardar los archivos PDF', error);
         }
     }

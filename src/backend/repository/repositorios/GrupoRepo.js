@@ -8,7 +8,9 @@ class GrupoRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error){
+                    reject(error);
+                } 
                 else resolve();
             });
         });
@@ -19,7 +21,9 @@ class GrupoRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM grupos LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if (err) reject(err.errno);
+                if (err){
+                    reject(err.errno);
+                } 
                 else resolve(fila.hasRecords);
             });
         });
@@ -44,7 +48,9 @@ class GrupoRepo {
                 "programas ON grupos.idPrograma = programas.id ";
 
             this.db.all(query, [], (err, filas) => {
-                if (err) reject(err.errno);
+                if (err){
+                    reject(err.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -60,7 +66,9 @@ class GrupoRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -89,8 +97,10 @@ class GrupoRepo {
                 WHERE 
                     fusiones.idHuesped IS NULL`;
 
-            this.db.all(query, [], (err, filas) => {
-                if (err) reject(err.errno);
+            this.db.all(query, [], (error, filas) => {
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -100,7 +110,9 @@ class GrupoRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM grupos WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -149,7 +161,9 @@ class GrupoRepo {
                             cantidadAprendices, esCadenaFormacion, trimestreLectivo,
                             fechaInicioTrimestre, fechaFinTrimestre, idViejo],
                         function (error) {
-                            if (error) reject(error.errno);
+                            if (error){
+                                reject(error.errno);
+                            }
                             else resolve(this.changes); // Devuelve el número de filas modificadas
                         });
                 } catch (error) {

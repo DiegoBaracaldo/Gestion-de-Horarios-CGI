@@ -1,3 +1,4 @@
+
 class AmbienteRepo {
 
     constructor(db) {
@@ -7,7 +8,9 @@ class AmbienteRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error){
+                    reject(error);
+                } 
                 else resolve();
             });
         });
@@ -17,7 +20,9 @@ class AmbienteRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM ambientes LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if (err) reject({ errno: 906 });
+                if (err){
+                    reject({ errno: 906 });
+                } 
                 else resolve(fila.hasRecords);
             });
         });
@@ -35,7 +40,9 @@ class AmbienteRepo {
                 torres ON ambientes.idTorre = torres.id ;
             `;
             this.db.all(query, [], (err, filas) => {
-                if (err) reject(err.errno);
+                if (err){
+                    reject(err.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -45,7 +52,9 @@ class AmbienteRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM ambientes WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -61,7 +70,9 @@ class AmbienteRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -76,7 +87,9 @@ class AmbienteRepo {
                 "VALUES (?, ?, ?, ?)";
 
             this.db.run(query, [nombre, idTorre, capacidad, franjaDisponibilidad], function (error) {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(this.changes);
             });
         });

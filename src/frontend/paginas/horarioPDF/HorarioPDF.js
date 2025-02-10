@@ -11,7 +11,7 @@ import jsPDF from 'jspdf';
 import { renderToString } from 'react-dom/server';
 import CrearHorarioGrupos from './HorarioGrupos';
 import SWALDescarga from '../../alertas/SWALDescarga';
-import CreandoPDFLoading from './CreandoPDFLoading';
+import LoadingNoStop from '../../componentes/loadingNoStop/LoadingNoStop';
 
 
 const HorarioPDF = () => {
@@ -187,7 +187,7 @@ const HorarioPDF = () => {
                     onClick={() => navegar(-1)} />
             </div>
             {
-                creandoPDFS ? <CreandoPDFLoading/> : null
+                creandoPDFS ? <LoadingNoStop texto={'cargando archivos pdf'}/> : null
             }
             
         </div>

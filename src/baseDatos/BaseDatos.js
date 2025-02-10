@@ -9,17 +9,16 @@ class ConexionBD {
         //es buena práctica para almacenar una base de datos local embebida, se toma en cuenta
         //tanto desarrollo como producción
         this.db = new sqlite.Database(path.join(app.getPath('userData'), 'database.db'), (error) => {
-            if (error) console.error("Error al conectar con SQLite", error);
+            if (error) window.electron.logErrores().error(`Error al conectar con SQLite: ${error}`);
             else console.log("Conectado a SQLite");
         });
 
     }
 
-    VerificarTablas() {
+    async VerificarTablas() {
         return new Promise((resolve, reject) => {
             this.db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='programas'", (err, fila) => {
                 if (err) {
-                    console.error("Error al verificar tablas!", err);
                     reject(err);
                 } else {
                     if (fila) {

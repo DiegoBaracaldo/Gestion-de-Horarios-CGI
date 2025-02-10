@@ -8,7 +8,9 @@ class TorreRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error){
+                    reject(error);
+                } 
                 else resolve();
             });
         });
@@ -18,7 +20,9 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM torres LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if(err) reject(err.errno);
+                if (err){
+                    reject(err.errno);
+                } 
                 else resolve(fila.hasRecords);
             });
         });
@@ -28,7 +32,9 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM torres";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -38,7 +44,9 @@ class TorreRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM torres WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -67,7 +75,9 @@ class TorreRepo {
                 try {
                     await this.ActivarLlavesForaneas();
                     this.db.run(query, [nombre, idViejo], function (error) {
-                        if (error) reject(error.errno);
+                        if (error){
+                            reject(error.errno);
+                        }
                         else resolve(this.changes); // Devuelve el número de filas modificadas
                     });
                 } catch (error) {

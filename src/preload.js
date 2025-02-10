@@ -78,5 +78,7 @@ contextBridge.exposeInMainWorld('electron', {
     DescargarPDFGrupos: () => ipcRenderer.invoke('DescargarPDFGrupos'),
     DescargarPDFInstructores: () => ipcRenderer.invoke('DescargarPDFInstructores'),
 
-    GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave)
+    GetByClave: (clave) => ipcRenderer.invoke('GetByClave', clave),
+
+    logErrores: (msg) => ipcRenderer.invoke('logErrores', msg)
 });

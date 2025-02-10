@@ -1,3 +1,4 @@
+
 class CompetenciaRepo {
 
     constructor(db) {
@@ -7,7 +8,9 @@ class CompetenciaRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error){
+                    reject(error);
+                } 
                 else resolve();
             });
         });
@@ -17,7 +20,9 @@ class CompetenciaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM competencias LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if (err) reject(err.errno);
+                if (err){
+                    reject(err.errno);
+                } 
                 else resolve(fila.hasRecords);
             });
         });
@@ -33,7 +38,9 @@ class CompetenciaRepo {
             `;
 
             this.db.all(query, arrayIds, (error, filas) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                } 
                 else resolve(filas);
             });
         });
@@ -42,8 +49,10 @@ class CompetenciaRepo {
     GetAllByIdPrograma(idPrograma) {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE idPrograma = ?";
-            this.db.all(query, [idPrograma], (err, filas) => {
-                if (err) reject(err.errno);
+            this.db.all(query, [idPrograma], (error, filas) => {
+                if (error){
+                    reject(error.errno);
+                } 
                 else resolve(filas);
             });
         });
@@ -53,7 +62,9 @@ class CompetenciaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM competencias WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -67,7 +78,9 @@ class CompetenciaRepo {
                 WHERE p.idGrupo = ?
             `;
             this.db.all(query, [idGrupo], (error, competencias) => {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                } 
                 else resolve(competencias);
             });
         });
@@ -103,11 +116,13 @@ class CompetenciaRepo {
                 try {
                     await this.ActivarLlavesForaneas();
                     this.db.run(query, [id, idPrograma, descripcion, horasRequeridas, idViejo], function (error) {
-                        if (error) reject(error.errno);
+                        if (error){
+                            reject(error.errno);
+                        } 
                         else resolve(this.changes); // Devuelve el número de filas modificadas
                     });
                 } catch (error) {
-                    reject(error);
+                    reject(error.errno);
                 }
             });
         });

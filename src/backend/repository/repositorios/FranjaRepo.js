@@ -1,3 +1,4 @@
+
 class FranjaRepo {
     constructor(bd) {
         this.bd = bd;
@@ -6,7 +7,9 @@ class FranjaRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.bd.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error) {
+                    reject(error);
+                }
                 else resolve();
             });
         });
@@ -16,7 +19,9 @@ class FranjaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM franjas";
             this.bd.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(err.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -40,7 +45,9 @@ class FranjaRepo {
                 WHERE f.idGrupo = ? AND f.idCompetencia = ?;
             `;
             this.bd.all(query, [idGrupo, idCompetencia], (error, filas) => {
-                if (error) reject(error.errno)
+                if (error) {
+                    reject(error.errno);
+                }
                 else {
                     const listaBloques = [];
                     filas.forEach(fila => {
@@ -164,7 +171,9 @@ class FranjaRepo {
             `;
 
             this.bd.all(query, [idGrupo], function (error, filas) {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -177,7 +186,9 @@ class FranjaRepo {
                 WHERE idGrupo = ? AND idCompetencia = ?;
             `;
             this.bd.all(query, [idGrupo, idCompetencia], function (error, filas) {
-                if (error) reject(error.errno);
+                if (error){
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });

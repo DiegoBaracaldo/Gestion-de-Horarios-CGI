@@ -1,3 +1,4 @@
+
 class FusionesRepo {
 
     constructor(db) {
@@ -7,7 +8,9 @@ class FusionesRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error) {
+                    reject(error);
+                }
                 else resolve();
             });
         });
@@ -18,7 +21,9 @@ class FusionesRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM fusiones";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -90,7 +95,9 @@ class FusionesRepo {
                 try {
                     await this.ActivarLlavesForaneas();
                     this.db.run(query, [idHuesped, idAnfitrion], function (error) {
-                        if (error) reject(error.errno);
+                        if (error){
+                            reject(error.errno);
+                        }
                         else resolve(200);
                     });
                 } catch (error) {

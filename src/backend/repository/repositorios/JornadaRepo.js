@@ -1,3 +1,4 @@
+
 class JornadaRepo {
 
     constructor(db) {
@@ -7,7 +8,9 @@ class JornadaRepo {
     async ActivarLlavesForaneas() {
         return new Promise((resolve, reject) => {
             this.db.run("PRAGMA foreign_keys = ON;", function (error) {
-                if (error) reject(error);
+                if (error) {
+                    reject(error);
+                }
                 else resolve();
             });
         });
@@ -19,7 +22,9 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT EXISTS(SELECT 1 FROM jornadas LIMIT 1) AS hasRecords";
             this.db.get(query, [], (err, fila) => {
-                if (err) reject(err.errno);
+                if (err) {
+                    reject(err.errno);
+                }
                 else resolve(fila.hasRecords);
             });
         });
@@ -29,7 +34,9 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM jornadas";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });
@@ -39,7 +46,9 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT * FROM jornadas WHERE id = ?";
             this.db.get(query, [id], (error, fila) => {
-                if (error) reject(error.errno);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(fila);
             });
         });
@@ -49,7 +58,9 @@ class JornadaRepo {
         return new Promise((resolve, reject) => {
             const query = "SELECT franjaDisponibilidad from jornadas";
             this.db.all(query, [], (error, filas) => {
-                if (error) reject(error);
+                if (error) {
+                    reject(error.errno);
+                }
                 else resolve(filas);
             });
         });

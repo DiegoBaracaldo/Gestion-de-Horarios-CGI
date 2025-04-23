@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import CrudAvanzado from '../../componentes/crudAvanzado/CrudAvanzado';
-import { datosJsonDos, datosJsonTres, datosJsonUno, listaMenuFiltro, tituloAux } from '../../mocks/MockCrudAvanzado';
 import './CrudCompetencias.css';
 import { listaMenuCompetencias } from '../ListasMenuFiltro';
 import ModalCompetencias from '../../modales/modalCompetencias/ModalCompetencias';

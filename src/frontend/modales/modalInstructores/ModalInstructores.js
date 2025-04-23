@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import ModalGeneral from '../../componentes/modalGeneral/ModalGeneral'
 import BotonDispHoraria from '../../componentes/botonDIspHoraria/BotonDispHoraria';
 import FranjaHoraria from '../../componentes/franjaHoraria/FranjaHoraria';
-import { ocupanciaUno } from '../../mocks/MockFranjaHoraria';
 import { CamposVacios, EsCorreo, EsTelefono, SoloNumeros, TextoConEspacio } from '../../../backend/validacion/ValidacionFormato';
 import { HastaCien, HastaCincuenta, HastaDos } from '../../../backend/validacion/ValidacionCantidadCaracteres';
 import { FormatearNombre } from '../../../backend/formato/FormatoDatos';

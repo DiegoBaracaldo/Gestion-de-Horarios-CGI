@@ -1,70 +1,33 @@
-# Getting Started with Create React App
+  Descripción del proyecto
+Este proyecto fue desarrollado en colaboración con el objetivo de ofrecer una solución de escritorio accesible desde un solo equipo, orientada a facilitar procesos específicos dentro de un entorno local. Para lograrlo, se emplearon tecnologías modernas como Electron, que permite construir aplicaciones de escritorio con tecnologías web, y React, una biblioteca de JavaScript enfocada en la creación de interfaces de usuario dinámicas e interactivas.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Asimismo, se utilizó SQLite como sistema de gestión de bases de datos, el cual se integra fácilmente en aplicaciones locales sin necesidad de servidores externos, permitiendo una manipulación eficiente y segura de los datos.
 
-## Available Scripts
+La aplicación fue diseñada para ser ligera, intuitiva y funcional, garantizando una experiencia de usuario fluida y un desempeño óptimo en entornos donde no se dispone de conexión a internet o infraestructura en la nube.
 
-In the project directory, you can run:
+  Propiedad intelectual
+Este proyecto se encuentra protegido por derechos de autor. Queda estrictamente prohibida su reproducción, distribución, modificación o uso con fines comerciales sin la autorización expresa de sus autores. Todos los derechos reservados.
 
-### `npm start`
+  Cómo clonar, instalar y ejecutar el proyecto
+Clonar el repositorio
+Abre una terminal y ejecuta el siguiente comando para clonar el repositorio:
+git clone https://github.com/DiegoBaracaldo/Gestion-de-Horarios-CGI.git
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+  Ingresar al directorio del proyecto
+Una vez clonado el repositorio, entra al directorio con el siguiente comando:
+cd tu-repositorio
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+  Instalar dependencias
+Asegúrate de tener Node.js instalado (versión recomendada: LTS). Luego instala las dependencias ejecutando:
+npm install
 
-### `npm test`
+  Ejecutar el proyecto
+Una vez instaladas todas las dependencias, puedes correr el proyecto de la siguiente manera:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+  En una primera terminal, ejecuta:
+npm start
 
-### `npm run build`
+  En una segunda terminal, ejecuta:
+npm run electron
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Esto iniciará la aplicación en el navegador y posteriormente como aplicación de escritorio con Electron.
